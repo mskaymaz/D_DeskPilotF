@@ -39,7 +39,7 @@ DeskPilotC must reach the intended Desktop V1 product scope while rebuilding the
 - Future web reference: TypeScript + React + Next.js
 - Future sync: separate optional account/synchronization layer
 
-These choices remain subject to explicit architectural review where required, especially Qt licensing and exact toolchain versions.
+Qt licensing baseline: use Qt Community/Open Source with LGPL-compatible modules where possible; avoid paid/commercial-only dependencies and review licenses before adding new Qt modules.
 
 ## Important Product Rule
 The frozen Python implementation defines intended behavior, not implementation architecture.
@@ -89,5 +89,6 @@ Communicate with the user in Turkish unless explicitly requested otherwise.
 
 ## Last Updated
 2026-07-17 — Initial DeskPilotC foundation and migration planning stage.
+
 
 

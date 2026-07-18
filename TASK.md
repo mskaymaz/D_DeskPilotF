@@ -21,7 +21,7 @@
 - [x] Create `TASK.md`.
 - [x] Create `STATE.md`.
 - [x] Create initial `README.md`.
-- [ ] Define Qt licensing baseline for Desktop V1.
+- [x] Define Qt licensing baseline for Desktop V1.
 - [x] Verify Windows C++ / Qt 6 / CMake development toolchain.
 - [x] Define minimum supported Qt and compiler versions.
 - [x] Create initial `.gitignore`.
@@ -30,7 +30,7 @@
 - [x] Create minimal C++ application bootstrap.
 - [x] Create minimal Qt Quick/QML application shell.
 - [x] Configure QML resources/modules cleanly.
-- [ ] Configure initial logging.
+- [x] Configure initial logging.
 - [x] Build from a clean state.
 - [x] Launch and verify the minimal application.
 - [ ] Verify Git working tree.
@@ -43,5 +43,7 @@ Work on one verified task at a time. Do not begin later phases early. Do not mec
 
 ## Next Immediate Task
 Create the initial `README.md`, then verify the local Qt/C++ toolchain before creating production code.
+
+
 
 
