@@ -1,4 +1,4 @@
-# DESKPILOTC TASK
+﻿# DESKPILOTC TASK
 
 ## Status Legend
 - `[x]` Completed
@@ -7,7 +7,7 @@
 - `[!]` Blocked / decision required
 
 ## Active Phase
-**Phase 0 — Project Foundation and Specification**
+**Phase 0 â€” Project Foundation and Specification**
 
 ## Active Tasks
 - [x] Freeze Python DeskPilot reference repository.
@@ -20,26 +20,28 @@
 - [x] Add `ROADMAP.md`.
 - [x] Create `TASK.md`.
 - [x] Create `STATE.md`.
-- [ ] Create initial `README.md`.
+- [x] Create initial `README.md`.
 - [ ] Define Qt licensing baseline for Desktop V1.
-- [ ] Verify Windows C++ / Qt 6 / CMake development toolchain.
-- [ ] Define minimum supported Qt and compiler versions.
-- [ ] Create initial `.gitignore`.
-- [ ] Create only the repository directories needed for the first implementation.
-- [ ] Create root `CMakeLists.txt`.
-- [ ] Create minimal C++ application bootstrap.
-- [ ] Create minimal Qt Quick/QML application shell.
-- [ ] Configure QML resources/modules cleanly.
+- [x] Verify Windows C++ / Qt 6 / CMake development toolchain.
+- [x] Define minimum supported Qt and compiler versions.
+- [x] Create initial `.gitignore`.
+- [x] Create only the repository directories needed for the first implementation.
+- [x] Create root `CMakeLists.txt`.
+- [x] Create minimal C++ application bootstrap.
+- [x] Create minimal Qt Quick/QML application shell.
+- [x] Configure QML resources/modules cleanly.
 - [ ] Configure initial logging.
-- [ ] Build from a clean state.
-- [ ] Launch and verify the minimal application.
+- [x] Build from a clean state.
+- [x] Launch and verify the minimal application.
 - [ ] Verify Git working tree.
 - [ ] Commit and push verified Phase 0 foundation.
 - [ ] Mark Phase 0 complete in `ROADMAP.md`.
-- [ ] Start Phase 1 — Design System and Desktop Window Foundation.
+- [ ] Start Phase 1 â€” Design System and Desktop Window Foundation.
 
 ## Current Working Rule
 Work on one verified task at a time. Do not begin later phases early. Do not mechanically port Python/PyQt code. Use the frozen Python project only as a behavioral reference.
 
 ## Next Immediate Task
 Create the initial `README.md`, then verify the local Qt/C++ toolchain before creating production code.
+
+

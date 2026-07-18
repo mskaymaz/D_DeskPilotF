@@ -1,4 +1,4 @@
-# DESKPILOTC ROADMAP
+﻿# DESKPILOTC ROADMAP
 
 ## Status Legend
 
@@ -11,7 +11,7 @@
 
 # MASTER ROADMAP
 
-## [~] Phase 0 — Project Foundation and Specification
+## [~] Phase 0 â€” Project Foundation and Specification
 
 **Goal:** Establish the new DeskPilotC project on a clean, documented foundation before production implementation begins.
 
@@ -34,8 +34,8 @@
 - [ ] Create initial repository structure.
 - [ ] Create initial `.gitignore`.
 - [ ] Create root `CMakeLists.txt`.
-- [ ] Create minimal Qt 6 / Qt Quick / QML application.
-- [ ] Confirm clean configure/build/run cycle.
+- [x] Create minimal Qt 6 / Qt Quick / QML application.
+- [x] Confirm clean configure/build/run cycle.
 - [ ] Commit and push the verified project foundation.
 
 ### Completion Criteria
@@ -50,7 +50,7 @@ Phase 0 is complete when:
 
 ---
 
-## [ ] Phase 1 — Design System and Desktop Window Foundation
+## [ ] Phase 1 â€” Design System and Desktop Window Foundation
 
 **Goal:** Build the visual and native window foundation before implementing product modules.
 
@@ -92,7 +92,7 @@ Phase 0 is complete when:
 
 ---
 
-## [ ] Phase 2 — Clock Module
+## [ ] Phase 2 â€” Clock Module
 
 **Goal:** Rebuild the primary DeskPilot clock experience with higher visual quality than the Python reference.
 
@@ -124,7 +124,7 @@ Phase 0 is complete when:
 
 ---
 
-## [ ] Phase 3 — Date Module
+## [ ] Phase 3 â€” Date Module
 
 **Goal:** Implement the complete Turkish-first date experience.
 
@@ -155,7 +155,7 @@ Phase 0 is complete when:
 
 ---
 
-## [ ] Phase 4 — Battery Module
+## [ ] Phase 4 â€” Battery Module
 
 **Goal:** Implement efficient battery status and alert foundations.
 
@@ -187,7 +187,7 @@ Phase 0 is complete when:
 
 ---
 
-## [ ] Phase 5 — Layout System and Quick Actions
+## [ ] Phase 5 â€” Layout System and Quick Actions
 
 **Goal:** Complete the primary DeskPilot desktop interaction model.
 
@@ -224,7 +224,7 @@ Phase 0 is complete when:
 
 ---
 
-## [ ] Phase 6 — Settings System
+## [ ] Phase 6 â€” Settings System
 
 **Goal:** Build a professional, versioned settings architecture and polished settings UI.
 
@@ -259,7 +259,7 @@ Phase 0 is complete when:
 
 ---
 
-## [ ] Phase 7 — Todo V1
+## [ ] Phase 7 â€” Todo V1
 
 **Goal:** Rebuild the Todo module as a lightweight professional task manager.
 
@@ -306,7 +306,7 @@ Phase 0 is complete when:
 
 ---
 
-## [ ] Phase 8 — Reminder V1 Completion
+## [ ] Phase 8 â€” Reminder V1 Completion
 
 **Goal:** Complete the major unfinished functional area inherited from the frozen Python project.
 
@@ -326,7 +326,7 @@ Phase 0 is complete when:
 - [ ] Snooze 10 minutes.
 - [ ] Snooze 60 minutes.
 - [ ] Remaining-time formatting.
-- [ ] `Zamanı geldi` state.
+- [ ] `ZamanÄ± geldi` state.
 - [ ] Safe malformed-data handling.
 
 ### UI
@@ -359,7 +359,7 @@ Phase 0 is complete when:
 
 ---
 
-## [ ] Phase 9 — Alarm Module
+## [ ] Phase 9 â€” Alarm Module
 
 **Goal:** Finalize the Alarm capability without conflating it with Reminder.
 
@@ -383,7 +383,7 @@ Phase 0 is complete when:
 
 ---
 
-## [ ] Phase 10 — Unified Notifications, Tray, and Lifecycle
+## [ ] Phase 10 â€” Unified Notifications, Tray, and Lifecycle
 
 **Goal:** Complete core desktop integration.
 
@@ -428,7 +428,7 @@ Phase 0 is complete when:
 
 ---
 
-## [ ] Phase 11 — Localization Foundation and Turkish V1 Polish
+## [ ] Phase 11 â€” Localization Foundation and Turkish V1 Polish
 
 **Goal:** Finalize Turkish-first Desktop V1 while keeping future localization clean.
 
@@ -450,7 +450,7 @@ Phase 0 is complete when:
 
 ---
 
-## [ ] Phase 12 — Performance, Stability, and Quality Gate
+## [ ] Phase 12 â€” Performance, Stability, and Quality Gate
 
 **Goal:** Prove that DeskPilotC is suitable for continuous daily desktop use.
 
@@ -497,7 +497,7 @@ Phase 0 is complete when:
 
 ---
 
-## [ ] Phase 13 — Desktop V1 Release
+## [ ] Phase 13 â€” Desktop V1 Release
 
 **Goal:** Produce the first production-ready DeskPilotC desktop release.
 
@@ -530,7 +530,7 @@ These phases must not block Desktop V1.
 
 ---
 
-## [ ] Phase 14 — Shared Account and Sync Architecture
+## [ ] Phase 14 â€” Shared Account and Sync Architecture
 
 **Goal:** Define and implement optional multi-device synchronization.
 
@@ -563,7 +563,7 @@ These phases must not block Desktop V1.
 
 ---
 
-## [ ] Phase 15 — Mobile Client
+## [ ] Phase 15 â€” Mobile Client
 
 **Current reference candidate:** Flutter + Dart.
 
@@ -582,7 +582,7 @@ These phases must not block Desktop V1.
 
 ---
 
-## [ ] Phase 16 — Web Client
+## [ ] Phase 16 â€” Web Client
 
 **Current reference candidate:** TypeScript + React + Next.js.
 
@@ -600,7 +600,7 @@ These phases must not block Desktop V1.
 
 ---
 
-## [ ] Phase 17 — Cross-Platform Product Maturity
+## [ ] Phase 17 â€” Cross-Platform Product Maturity
 
 **Goal:** Evolve DeskPilot into a coherent multi-device ecosystem.
 
@@ -622,7 +622,7 @@ Potential areas:
 
 # CURRENT POSITION
 
-**Current phase:** Phase 0 — Project Foundation and Specification
+**Current phase:** Phase 0 â€” Project Foundation and Specification
 
 **Completed so far:**
 
@@ -642,3 +642,4 @@ Potential areas:
 4. Verify Qt/C++ development environment.
 5. Decide Qt licensing baseline.
 6. Build the first minimal Qt Quick/QML application.
+

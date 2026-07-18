@@ -1,4 +1,4 @@
-# DESKPILOTC STATE
+﻿# DESKPILOTC STATE
 
 ## Project
 **D_DeskPilotC**
@@ -10,7 +10,7 @@ Private GitHub repository: `mskaymaz/D_DeskPilotC`
 **Phase 0 — Project Foundation and Specification**
 
 ## Current Status
-Project documentation and architectural foundation are being established. No production C++/QML implementation has started yet.
+Project documentation and architectural foundation are being established. Minimal C++ + Qt 6 + Qt Quick/QML application foundation has been created, built, and launched successfully.
 
 ## Completed
 - Existing Python/PyQt DeskPilot repository was frozen.
@@ -75,12 +75,13 @@ Commands and patches should be concise and fail-fast. When working interactively
 ## AI Agent Continuation Instruction
 Before modifying this repository, read in this order:
 
-1. `STATE.md`
-2. `TASK.md`
-3. `ROADMAP.md`
-4. `DESKPILOT_PRODUCT_SPEC.md`
-5. `ARCHITECTURE.md`
-6. `PRODUCT_ARCHITECTURE_PRINCIPLES_AI_EN.md`
+1. `AGENTS.md`
+2. `STATE.md`
+3. `TASK.md`
+4. `ROADMAP.md`
+5. `DESKPILOT_PRODUCT_SPEC.md`
+6. `ARCHITECTURE.md`
+7. `PRODUCT_ARCHITECTURE_PRINCIPLES_AI_EN.md`
 
 Continue from the current state. Do not restart architectural interpretation unless a real conflict or new requirement requires a decision.
 
@@ -88,3 +89,5 @@ Communicate with the user in Turkish unless explicitly requested otherwise.
 
 ## Last Updated
 2026-07-17 — Initial DeskPilotC foundation and migration planning stage.
+
+

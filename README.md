@@ -1,4 +1,4 @@
-# D_DeskPilotC
+﻿# D_DeskPilotC
 
 DeskPilotC is the next-generation desktop implementation of DeskPilot, rebuilt on a clean **C++ + Qt 6 + Qt Quick/QML** architecture.
 
@@ -91,12 +91,13 @@ The project does not prioritize a single shared codebase at the expense of produ
 
 Before modifying the project, read these files in order:
 
-1. `STATE.md`
-2. `TASK.md`
-3. `ROADMAP.md`
-4. `DESKPILOT_PRODUCT_SPEC.md`
-5. `ARCHITECTURE.md`
-6. `PRODUCT_ARCHITECTURE_PRINCIPLES_AI_EN.md`
+1. `AGENTS.md`
+2. `STATE.md`
+3. `TASK.md`
+4. `ROADMAP.md`
+5. `DESKPILOT_PRODUCT_SPEC.md`
+6. `ARCHITECTURE.md`
+7. `PRODUCT_ARCHITECTURE_PRINCIPLES_AI_EN.md`
 
 ### Document Roles
 
@@ -180,3 +181,4 @@ https://github.com/mskaymaz/D_DeskPilotC
 Not yet finalized.
 
 Qt licensing and the project's own distribution/license strategy must be reviewed before Desktop V1 distribution decisions are made.
+
