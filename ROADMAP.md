@@ -11,7 +11,7 @@
 
 # MASTER ROADMAP
 
-## [~] Phase 0 â€” Project Foundation and Specification
+## [x] Phase 0 â€” Project Foundation and Specification
 
 **Goal:** Establish the new DeskPilotC project on a clean, documented foundation before production implementation begins.
 
@@ -26,17 +26,17 @@
 - [x] Create and add `DESKPILOT_PRODUCT_SPEC.md`.
 - [x] Create and add `ARCHITECTURE.md`.
 - [x] Create `ROADMAP.md`.
-- [ ] Create `TASK.md`.
-- [ ] Create `STATE.md`.
-- [ ] Create initial `README.md`.
-- [ ] Define Qt licensing strategy for Desktop V1.
-- [ ] Verify required development toolchain.
-- [ ] Create initial repository structure.
-- [ ] Create initial `.gitignore`.
-- [ ] Create root `CMakeLists.txt`.
+- [x] Create `TASK.md`.
+- [x] Create `STATE.md`.
+- [x] Create initial `README.md`.
+- [x] Define Qt licensing strategy for Desktop V1.
+- [x] Verify required development toolchain.
+- [x] Create initial repository structure.
+- [x] Create initial `.gitignore`.
+- [x] Create root `CMakeLists.txt`.
 - [x] Create minimal Qt 6 / Qt Quick / QML application.
 - [x] Confirm clean configure/build/run cycle.
-- [ ] Commit and push the verified project foundation.
+- [x] Commit and push the verified project foundation.
 
 ### Completion Criteria
 
@@ -56,31 +56,31 @@ Phase 0 is complete when:
 
 ### Design System
 
-- [ ] Define color tokens.
-- [ ] Define typography tokens.
-- [ ] Define spacing tokens.
-- [ ] Define radius tokens.
-- [ ] Define sizing tokens.
-- [ ] Define z-layer tokens.
-- [ ] Define motion/animation tokens.
-- [ ] Establish high-DPI strategy.
-- [ ] Establish global scaling architecture.
-- [ ] Create reusable base QML components.
+- [x] Define color tokens.
+- [x] Define typography tokens.
+- [x] Define spacing tokens.
+- [x] Define radius tokens.
+- [x] Define sizing tokens.
+- [x] Define z-layer tokens.
+- [x] Define motion/animation tokens.
+- [x] Establish high-DPI strategy.
+- [x] Establish global scaling architecture.
+- [x] Create reusable base QML components.
 
 ### Window Foundation
 
-- [ ] Frameless desktop window.
-- [ ] Transparent background/window support.
-- [ ] Stable drag behavior.
-- [ ] Always-on-top support.
-- [ ] Window position persistence.
-- [ ] Multi-monitor detection.
-- [ ] Safe recovery from unavailable monitors.
-- [ ] Grouped-layout foundation.
-- [ ] Free-layout foundation.
-- [ ] Reusable independent module-window behavior.
-- [ ] Stable focus/show/hide lifecycle.
-- [ ] Verify idle resource behavior.
+- [x] Frameless desktop window.
+- [x] Transparent background/window support.
+- [x] Stable drag behavior.
+- [x] Always-on-top support.
+- [x] Window position persistence.
+- [x] Multi-monitor detection.
+- [x] Safe recovery from unavailable monitors.
+- [x] Grouped-layout foundation.
+- [x] Free-layout foundation.
+- [x] Reusable independent module-window behavior.
+- [x] Stable focus/show/hide lifecycle.
+- [x] Verify idle resource behavior.
 
 ### Completion Criteria
 
@@ -642,4 +642,5 @@ Potential areas:
 4. Verify Qt/C++ development environment.
 5. Decide Qt licensing baseline.
 6. Build the first minimal Qt Quick/QML application.
+
 

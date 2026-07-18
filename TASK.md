@@ -7,7 +7,7 @@
 - `[!]` Blocked / decision required
 
 ## Active Phase
-**Phase 0 â€” Project Foundation and Specification**
+**Phase 1 â€” Design System and Desktop Window Foundation (Completed)**
 
 ## Active Tasks
 - [x] Freeze Python DeskPilot reference repository.
@@ -36,13 +36,14 @@
 - [ ] Verify Git working tree.
 - [ ] Commit and push verified Phase 0 foundation.
 - [ ] Mark Phase 0 complete in `ROADMAP.md`.
-- [ ] Start Phase 1 â€” Design System and Desktop Window Foundation.
+- [x] Complete Phase 1 - Design System and Desktop Window Foundation.
 
 ## Current Working Rule
 Work on one verified task at a time. Do not begin later phases early. Do not mechanically port Python/PyQt code. Use the frozen Python project only as a behavioral reference.
 
 ## Next Immediate Task
-Create the initial `README.md`, then verify the local Qt/C++ toolchain before creating production code.
+Select the first explicit Phase 2 - Clock Module task before beginning later-phase implementation.
+
 
 
 

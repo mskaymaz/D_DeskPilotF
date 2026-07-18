@@ -1,19 +1,42 @@
 ﻿import QtQuick
 import QtQuick.Controls
 
-ApplicationWindow {
-    width: 900
-    height: 560
+ModuleWindow {
+    id: rootWindow
+    width: DesignTokens.windowWidth
+    height: DesignTokens.windowHeight
     visible: true
     title: "DeskPilotC"
 
-    Rectangle {
+    BasePanel {
         anchors.fill: parent
+        anchors.margins: DesignTokens.space4
 
-        Text {
+        GroupedLayout {
             anchors.centerIn: parent
-            text: "DeskPilotC"
-            font.pixelSize: 42
+            width: parent.width
+
+            BaseText {
+                width: parent.width
+                horizontalAlignment: Text.AlignHCenter
+                text: "DeskPilotC"
+                font.pixelSize: DesignTokens.headingPixelSize
+                font.weight: DesignTokens.headingWeight
+                color: DesignTokens.primaryText
+            }
+        }
+
+        MouseArea {
+            anchors.fill: parent
+            acceptedButtons: Qt.LeftButton
+            cursorShape: Qt.OpenHandCursor
+
+            onPressed: {
+                cursorShape = Qt.ClosedHandCursor
+                rootWindow.startSystemMove()
+            }
+
+            onReleased: cursorShape = Qt.OpenHandCursor
         }
     }
 }
