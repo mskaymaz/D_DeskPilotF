@@ -13,6 +13,23 @@ qt_add_executable(DeskPilotC
     src/main.cpp
 )
 
+target_sources(DeskPilotC
+    PRIVATE
+        src/clock_model.cpp
+        src/clock_model.h
+        src/clock_service.cpp
+        src/clock_service.h
+)
+
+set_source_files_properties(qml/DesignTokens.qml
+    PROPERTIES QT_QML_SINGLETON_TYPE TRUE
+)
+
+file(GLOB DESKPILOT_FONT_FILES CONFIGURE_DEPENDS
+    RELATIVE "${CMAKE_CURRENT_SOURCE_DIR}"
+    "${CMAKE_CURRENT_SOURCE_DIR}/assets/fonts/*"
+)
+
 qt_add_qml_module(DeskPilotC
     URI DeskPilot
     VERSION 1.0
@@ -24,6 +41,8 @@ qt_add_qml_module(DeskPilotC
         qml/GroupedLayout.qml
         qml/Main.qml
         qml/ModuleWindow.qml
+    RESOURCES
+        ${DESKPILOT_FONT_FILES}
 )
 
 set_target_properties(DeskPilotC PROPERTIES

@@ -10,6 +10,7 @@ ApplicationWindow {
         | Qt.Window
         | (alwaysOnTop ? Qt.WindowStaysOnTopHint : 0)
     color: "transparent"
+    background: null
 
     function showModule() {
         visible = true

@@ -1,9 +1,14 @@
 ﻿#include <QGuiApplication>
 #include <QQmlApplicationEngine>
+#include <QQmlContext>
 #include <QDebug>
 #include <QScreen>
 #include <QSettings>
 #include <QWindow>
+#include <qqml.h>
+
+#include "clock_model.h"
+#include "clock_service.h"
 
 int main(int argc, char *argv[])
 {
@@ -11,6 +16,17 @@ int main(int argc, char *argv[])
         Qt::HighDpiScaleFactorRoundingPolicy::PassThrough);
 
     QGuiApplication app(argc, argv);
+
+    qmlRegisterType<DeskPilot::ClockModel>("DeskPilot.Clock", 1, 0, "ClockModel");
+    DeskPilot::ClockService clockService;
+    DeskPilot::ClockModel clockModel;
+    QObject::connect(
+        &clockService,
+        &DeskPilot::ClockService::currentDateTimeChanged,
+        [&clockModel, &clockService]() {
+            clockModel.setCurrentDateTime(clockService.currentDateTime());
+        });
+    clockModel.setCurrentDateTime(clockService.currentDateTime());
 
     qInfo() << "DeskPilotC starting...";
     qInfo() << "Detected screens:" << QGuiApplication::screens().size();
@@ -20,6 +36,8 @@ int main(int argc, char *argv[])
     }
 
     QQmlApplicationEngine engine;
+    engine.rootContext()->setContextProperty("clockService", &clockService);
+    engine.rootContext()->setContextProperty("clockModel", &clockModel);
     engine.loadFromModule("DeskPilot", "Main");
 
     if (engine.rootObjects().isEmpty()) {

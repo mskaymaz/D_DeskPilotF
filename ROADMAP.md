@@ -50,7 +50,7 @@ Phase 0 is complete when:
 
 ---
 
-## [ ] Phase 1 â€” Design System and Desktop Window Foundation
+## [x] Phase 1 â€” Design System and Desktop Window Foundation
 
 **Goal:** Build the visual and native window foundation before implementing product modules.
 
@@ -98,20 +98,20 @@ Phase 0 is complete when:
 
 ### Tasks
 
-- [ ] Clock domain/presentation model.
-- [ ] Time service.
-- [ ] 24-hour/time-format behavior.
-- [ ] Optional seconds.
-- [ ] Independent seconds scaling.
-- [ ] Embedded font loading.
-- [ ] System font support where appropriate.
-- [ ] Font selection.
-- [ ] Font color.
-- [ ] Bold behavior.
-- [ ] Clock visibility.
-- [ ] Independent clock scaling.
-- [ ] Stable rendering without visible width jitter.
-- [ ] Grouped-layout integration.
+- [x] Clock domain/presentation model.
+- [x] Time service.
+- [x] 24-hour/time-format behavior.
+- [x] Optional seconds.
+- [x] Independent seconds scaling.
+- [x] Embedded font loading.
+- [x] System font support where appropriate.
+- [x] Font selection.
+- [x] Font color.
+- [x] Bold behavior.
+- [x] Clock visibility.
+- [x] Independent clock scaling.
+- [x] Stable rendering without visible width jitter.
+- [x] Grouped-layout integration.
 - [ ] Free-layout integration.
 - [ ] Persistent clock settings.
 - [ ] Performance verification.
@@ -622,7 +622,7 @@ Potential areas:
 
 # CURRENT POSITION
 
-**Current phase:** Phase 0 â€” Project Foundation and Specification
+**Current phase:** Phase 2 â€” Clock Module
 
 **Completed so far:**
 
@@ -642,5 +642,4 @@ Potential areas:
 4. Verify Qt/C++ development environment.
 5. Decide Qt licensing baseline.
 6. Build the first minimal Qt Quick/QML application.
-
 

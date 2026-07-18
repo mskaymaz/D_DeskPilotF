@@ -7,7 +7,7 @@
 - `[!]` Blocked / decision required
 
 ## Active Phase
-**Phase 1 â€” Design System and Desktop Window Foundation (Completed)**
+**Phase 2 â€” Clock Module (In Progress)**
 
 ## Active Tasks
 - [x] Freeze Python DeskPilot reference repository.
@@ -37,12 +37,29 @@
 - [ ] Commit and push verified Phase 0 foundation.
 - [ ] Mark Phase 0 complete in `ROADMAP.md`.
 - [x] Complete Phase 1 - Design System and Desktop Window Foundation.
+- [x] Clock domain/presentation model.
+- [x] Time service.
+- [x] 24-hour/time-format behavior.
+- [x] Optional seconds.
+- [x] Independent seconds scaling.
+- [x] Embedded font loading.
+- [x] System font support where appropriate.
+- [x] Font selection.
+- [x] Font color.
+- [x] Bold behavior.
+- [x] Clock visibility.
+- [x] Independent clock scaling.
+- [x] Stable rendering without visible width jitter.
+- [x] Grouped-layout integration.
+- [ ] Free-layout integration.
+- [ ] Persistent clock settings.
+- [ ] Performance verification.
 
 ## Current Working Rule
 Work on one verified task at a time. Do not begin later phases early. Do not mechanically port Python/PyQt code. Use the frozen Python project only as a behavioral reference.
 
 ## Next Immediate Task
-Select the first explicit Phase 2 - Clock Module task before beginning later-phase implementation.
+Complete the remaining Phase 2 Clock Module tasks, starting with free-layout integration.
 
 
 
