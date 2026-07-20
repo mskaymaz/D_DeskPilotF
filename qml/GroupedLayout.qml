@@ -1,9 +1,14 @@
 import QtQuick
 
-Column {
+Item {
     id: root
 
     property int layoutSpacing: DesignTokens.space4
+    default property alias contentData: stack.data
 
-    spacing: layoutSpacing
+    Column {
+        id: stack
+        anchors.centerIn: parent
+        spacing: root.layoutSpacing
+    }
 }

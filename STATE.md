@@ -7,10 +7,10 @@
 Private GitHub repository: `mskaymaz/D_DeskPilotC`
 
 ## Current Phase
-**Phase 2 — Clock Module (In Progress)**
+**Phase 3 — Date Module (Visual Verification Pending)**
 
 ## Current Status
-The Clock domain/presentation model, time service, time-format behavior, optional seconds, font system, scaling, stable rendering, and grouped-layout integration are implemented and build-verified.
+The Clock domain/presentation model, time service, time-format behavior, optional seconds, font system, scaling, stable rendering, grouped/free-layout integration, persistent settings, and performance verification are implemented and build-verified.
 
 ## Completed
 - Existing Python/PyQt DeskPilot repository was frozen.
@@ -24,7 +24,29 @@ The Clock domain/presentation model, time service, time-format behavior, optiona
 - `TASK.md` created.
 - `STATE.md` created.
 - Phase 1 design tokens, reusable QML components, grouped/free layout foundations, and desktop window foundation completed.
-- Phase 2 Clock Module tasks through grouped-layout integration completed.
+- Phase 2 Clock Module tasks through performance verification completed.
+- Phase 3 Date service implemented and build-verified.
+- Gregorian date model implemented and build-verified.
+- Hijri date output implemented with Qt IslamicCivil calendar and build-verified.
+- Combined Gregorian/Hijri display added to the Clock surface and build-verified.
+- Gregorian-first/Hijri-first date ordering added and build-verified.
+- Date format choices added: dotted, slash, and ISO; build-verified.
+- Optional ISO week number added to the combined date display and build-verified.
+- Independent date font selection added and build-verified.
+- Independent date font color added and build-verified.
+- Independent date bold behavior added and build-verified.
+- Date visibility toggle added and build-verified.
+- Independent date scaling added and build-verified.
+- Date grouped-layout integration added and build-verified.
+- Date free-layout integration added and build-verified.
+- Persistent Date Module settings added and build-verified.
+- Turkish locale correctness verified for the Date Module and build-verified.
+- Phase 3 Date Module completed.
+- Clock and date context-menu options grouped into dedicated settings submenus.
+
+## Clock Performance Verification
+- Debug build completed successfully.
+- Short idle sample: approximately 2.76 MB working-set memory and 0% CPU of one core.
 
 ## Frozen Python Reference Point
 The Python DeskPilot was frozen near the end of Desktop V1 development. Core desktop functionality, Clock, Date, Battery, layout behavior, Quick Actions, Settings, Todo, tray, and related infrastructure were substantially developed. Reminder development had just entered its final major implementation/polish stage.
@@ -65,9 +87,7 @@ Use the SPP-style workflow:
 Commands and patches should be concise and fail-fast. When working interactively with the user, provide one implementation step at a time and wait for the result when later steps depend on it.
 
 ## Immediate Next Steps
-1. Complete Phase 2 free-layout integration.
-2. Add persistent clock settings.
-3. Perform clock performance verification.
+1. Perform the Phase 3 visual application check; remind before starting Phase 4, and begin Phase 4 only after this check is complete.
 
 ## AI Agent Continuation Instruction
 Before modifying this repository, read in this order:
@@ -85,7 +105,7 @@ Continue from the current state. Do not restart architectural interpretation unl
 Communicate with the user in Turkish unless explicitly requested otherwise.
 
 ## Last Updated
-2026-07-18 — Phase 2 Clock Module progress through grouped-layout integration.
+2026-07-20 — Phase 3 Date Module completed; Turkish locale correctness verified and build-verified.
 
 
 

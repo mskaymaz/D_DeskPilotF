@@ -7,7 +7,7 @@
 - `[!]` Blocked / decision required
 
 ## Active Phase
-**Phase 2 â€” Clock Module (In Progress)**
+**Phase 3 â€” Date Module (Visual Verification Pending)**
 
 ## Active Tasks
 - [x] Freeze Python DeskPilot reference repository.
@@ -51,15 +51,31 @@
 - [x] Independent clock scaling.
 - [x] Stable rendering without visible width jitter.
 - [x] Grouped-layout integration.
-- [ ] Free-layout integration.
-- [ ] Persistent clock settings.
-- [ ] Performance verification.
+- [x] Free-layout integration.
+- [x] Turkish locale correctness.
+- [x] Persistent settings.
+- [x] Persistent clock settings.
+- [x] Performance verification.
+- [x] Date service.
+- [x] Gregorian date.
+- [x] Hijri date.
+- [x] Combined display.
+- [x] Date ordering options.
+- [x] Date formatting options.
+- [x] Optional week number.
+- [x] Font selection.
+- [x] Font color.
+- [x] Bold behavior.
+- [x] Date visibility.
+- [x] Independent date scaling.
+- [x] Grouped-layout integration.
+- [x] Free-layout integration.
 
 ## Current Working Rule
 Work on one verified task at a time. Do not begin later phases early. Do not mechanically port Python/PyQt code. Use the frozen Python project only as a behavioral reference.
 
 ## Next Immediate Task
-Complete the remaining Phase 2 Clock Module tasks, starting with free-layout integration.
+Perform the Phase 3 visual application check first; remind before starting Phase 4, then begin Phase 4 with the platform-independent battery abstraction.
 
 
 

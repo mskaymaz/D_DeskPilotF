@@ -19,6 +19,10 @@ target_sources(DeskPilotC
         src/clock_model.h
         src/clock_service.cpp
         src/clock_service.h
+        src/date_service.cpp
+        src/date_service.h
+        src/date_model.cpp
+        src/date_model.h
 )
 
 set_source_files_properties(qml/DesignTokens.qml

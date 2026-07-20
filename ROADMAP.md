@@ -92,7 +92,7 @@ Phase 0 is complete when:
 
 ---
 
-## [ ] Phase 2 â€” Clock Module
+## [x] Phase 2 â€” Clock Module
 
 **Goal:** Rebuild the primary DeskPilot clock experience with higher visual quality than the Python reference.
 
@@ -112,9 +112,9 @@ Phase 0 is complete when:
 - [x] Independent clock scaling.
 - [x] Stable rendering without visible width jitter.
 - [x] Grouped-layout integration.
-- [ ] Free-layout integration.
-- [ ] Persistent clock settings.
-- [ ] Performance verification.
+- [x] Free-layout integration.
+- [x] Persistent clock settings.
+- [x] Performance verification.
 
 ### Completion Criteria
 
@@ -124,28 +124,28 @@ Phase 0 is complete when:
 
 ---
 
-## [ ] Phase 3 â€” Date Module
+## [x] Phase 3 â€” Date Module
 
 **Goal:** Implement the complete Turkish-first date experience.
 
 ### Tasks
 
-- [ ] Date service.
-- [ ] Gregorian date.
-- [ ] Hijri date.
-- [ ] Combined display.
-- [ ] Date ordering options.
-- [ ] Date formatting options.
-- [ ] Optional week number.
-- [ ] Font selection.
-- [ ] Font color.
-- [ ] Bold behavior.
-- [ ] Date visibility.
-- [ ] Independent date scaling.
-- [ ] Grouped-layout integration.
-- [ ] Free-layout integration.
-- [ ] Persistent settings.
-- [ ] Turkish locale correctness.
+- [x] Date service.
+- [x] Gregorian date.
+- [x] Hijri date.
+- [x] Combined display.
+- [x] Date ordering options.
+- [x] Date formatting options.
+- [x] Optional week number.
+- [x] Font selection.
+- [x] Font color.
+- [x] Bold behavior.
+- [x] Date visibility.
+- [x] Independent date scaling.
+- [x] Grouped-layout integration.
+- [x] Free-layout integration.
+- [x] Persistent settings.
+- [x] Turkish locale correctness.
 
 ### Completion Criteria
 
@@ -622,7 +622,7 @@ Potential areas:
 
 # CURRENT POSITION
 
-**Current phase:** Phase 2 â€” Clock Module
+**Current phase:** Phase 3 â€” Date Module (Implementation complete; visual verification pending)
 
 **Completed so far:**
 
@@ -634,12 +634,7 @@ Potential areas:
 - DeskPilotC architecture document added.
 - Master roadmap created.
 
-**Immediate next steps:**
+**Immediate next step:**
 
-1. Create `TASK.md`.
-2. Create `STATE.md`.
-3. Create initial `README.md`.
-4. Verify Qt/C++ development environment.
-5. Decide Qt licensing baseline.
-6. Build the first minimal Qt Quick/QML application.
+1. Perform the Phase 3 visual application check; start Phase 4 only after the check is complete.
 
