@@ -23,7 +23,19 @@ target_sources(DeskPilotC
         src/date_service.h
         src/date_model.cpp
         src/date_model.h
+        src/battery_state.h
+        src/battery_service.h
+        src/battery_model.cpp
+        src/battery_model.h
 )
+
+if(WIN32)
+    target_sources(DeskPilotC
+        PRIVATE
+            src/windows_battery_service.cpp
+            src/windows_battery_service.h
+    )
+endif()
 
 set_source_files_properties(qml/DesignTokens.qml
     PROPERTIES QT_QML_SINGLETON_TYPE TRUE
@@ -40,6 +52,7 @@ qt_add_qml_module(DeskPilotC
     QML_FILES
         qml/BasePanel.qml
         qml/BaseText.qml
+        qml/BatteryIcon.qml
         qml/DesignTokens.qml
         qml/FreeLayout.qml
         qml/GroupedLayout.qml
@@ -56,3 +69,19 @@ set_target_properties(DeskPilotC PROPERTIES
 target_link_libraries(DeskPilotC
     PRIVATE Qt6::Quick
 )
+
+if(WIN32)
+    find_program(QT_DEPLOY_TOOL
+        NAMES windeployqt
+        HINTS "${CMAKE_PREFIX_PATH}/bin"
+        REQUIRED
+    )
+
+    add_custom_command(TARGET DeskPilotC POST_BUILD
+        COMMAND "${QT_DEPLOY_TOOL}"
+                --qmldir "${CMAKE_CURRENT_SOURCE_DIR}/qml"
+                "$<TARGET_FILE:DeskPilotC>"
+        COMMENT "Deploying Qt runtime"
+        VERBATIM
+    )
+endif()

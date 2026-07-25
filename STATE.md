@@ -7,10 +7,10 @@
 Private GitHub repository: `mskaymaz/D_DeskPilotC`
 
 ## Current Phase
-**Phase 3 — Date Module (Visual Verification Pending)**
+**Phase 4 — Battery Module**
 
 ## Current Status
-The Clock domain/presentation model, time service, time-format behavior, optional seconds, font system, scaling, stable rendering, grouped/free-layout integration, persistent settings, and performance verification are implemented and build-verified.
+The Clock and Date modules are implemented and build-verified. Phase 4 battery abstraction, Windows adapter, percentage/status presentation, charging/plugged-in detection, optional icon, visibility, font/color/bold settings, and independent scaling are implemented and build-verified.
 
 ## Completed
 - Existing Python/PyQt DeskPilot repository was frozen.
@@ -42,6 +42,14 @@ The Clock domain/presentation model, time service, time-format behavior, optiona
 - Persistent Date Module settings added and build-verified.
 - Turkish locale correctness verified for the Date Module and build-verified.
 - Phase 3 Date Module completed.
+- Phase 4 platform-independent battery abstraction implemented and build-verified.
+- Windows battery adapter implemented and build-verified.
+- Battery percentage/status presentation implemented and build-verified.
+- Charging/plugged-in detection implemented and build-verified.
+- Optional battery icon implemented and build-verified.
+- Battery visibility implemented and build-verified.
+- Battery font/color/bold settings implemented and build-verified.
+- Independent battery scaling implemented and build-verified.
 - Clock and date context-menu options grouped into dedicated settings submenus.
 
 ## Clock Performance Verification
@@ -87,7 +95,7 @@ Use the SPP-style workflow:
 Commands and patches should be concise and fail-fast. When working interactively with the user, provide one implementation step at a time and wait for the result when later steps depend on it.
 
 ## Immediate Next Steps
-1. Perform the Phase 3 visual application check; remind before starting Phase 4, and begin Phase 4 only after this check is complete.
+1. Implement and verify grouped-layout battery integration.
 
 ## AI Agent Continuation Instruction
 Before modifying this repository, read in this order:
@@ -105,7 +113,7 @@ Continue from the current state. Do not restart architectural interpretation unl
 Communicate with the user in Turkish unless explicitly requested otherwise.
 
 ## Last Updated
-2026-07-20 — Phase 3 Date Module completed; Turkish locale correctness verified and build-verified.
+2026-07-25 — Phase 4 independent battery scaling implemented and build-verified; grouped-layout integration is next.
 
 
 

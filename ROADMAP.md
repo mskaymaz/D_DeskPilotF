@@ -155,20 +155,20 @@ Phase 0 is complete when:
 
 ---
 
-## [ ] Phase 4 â€” Battery Module
+## [~] Phase 4 â€” Battery Module
 
 **Goal:** Implement efficient battery status and alert foundations.
 
 ### Tasks
 
-- [ ] Platform-independent battery abstraction.
-- [ ] Windows battery implementation.
-- [ ] Battery percentage/status.
-- [ ] Charging/plugged-in detection.
-- [ ] Optional battery icon.
-- [ ] Battery visibility.
-- [ ] Font/color/bold settings.
-- [ ] Independent scaling.
+- [x] Platform-independent battery abstraction.
+- [x] Windows battery implementation.
+- [x] Battery percentage/status.
+- [x] Charging/plugged-in detection.
+- [x] Optional battery icon.
+- [x] Battery visibility.
+- [x] Font/color/bold settings.
+- [x] Independent scaling.
 - [ ] Low-battery threshold.
 - [ ] Full-charge threshold.
 - [ ] Alert interval.
@@ -622,7 +622,7 @@ Potential areas:
 
 # CURRENT POSITION
 
-**Current phase:** Phase 3 â€” Date Module (Implementation complete; visual verification pending)
+**Current phase:** Phase 4 â€” Battery Module (Platform-independent abstraction complete)
 
 **Completed so far:**
 
@@ -633,8 +633,10 @@ Potential areas:
 - DeskPilot product specification added.
 - DeskPilotC architecture document added.
 - Master roadmap created.
+- Phase 4 platform-independent battery abstraction implemented and build-verified.
+- Windows battery adapter implemented and build-verified.
 
 **Immediate next step:**
 
-1. Perform the Phase 3 visual application check; start Phase 4 only after the check is complete.
+1. Implement and verify grouped-layout battery integration.
 

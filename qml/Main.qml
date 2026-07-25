@@ -66,7 +66,7 @@ ModuleWindow {
             id: primaryMetrics
             font.family: rootWindow.selectedFontFamily()
             font.pixelSize: DesignTokens.headingPixelSize * clockModel.scale
-            font.bold: dateModel.bold
+            font.bold: clockModel.bold
             text: clockModel.use24HourFormat ? "00:00" : "00:00 PM"
         }
 
@@ -82,7 +82,7 @@ ModuleWindow {
             id: dateMetrics
             font.family: rootWindow.selectedDateFontFamily()
             font.pixelSize: DesignTokens.bodyPixelSize * dateModel.scale
-            font.bold: clockModel.bold
+            font.bold: dateModel.bold
             text: "88.88.8888 / 88.88.8888 · Hafta 88"
         }
 
@@ -112,9 +112,9 @@ ModuleWindow {
                     width: primaryMetrics.width
                     text: clockModel.primaryTimeText
                     horizontalAlignment: Text.AlignRight
-                    font.family: rootWindow.selectedDateFontFamily()
+                    font.family: rootWindow.selectedFontFamily()
                     font.pixelSize: DesignTokens.headingPixelSize * clockModel.scale
-                    font.bold: dateModel.bold
+                    font.bold: clockModel.bold
                     color: clockModel.fontColor
                 }
 
@@ -153,9 +153,9 @@ ModuleWindow {
                         + (dateModel.showWeekNumber ? " · Hafta " + dateModel.weekNumberText : "")
                     horizontalAlignment: Text.AlignHCenter
                     verticalAlignment: Text.AlignVCenter
-                    font.family: rootWindow.selectedFontFamily()
+                    font.family: rootWindow.selectedDateFontFamily()
                     font.pixelSize: DesignTokens.bodyPixelSize * dateModel.scale
-                    font.bold: clockModel.bold
+                    font.bold: dateModel.bold
                     color: dateModel.fontColor
                 }
             }
@@ -339,38 +339,6 @@ ModuleWindow {
                 MenuItem {
                     text: "Koyu"
                     checkable: true
-                    checked: Qt.colorEqual(dateModel.fontColor, DesignTokens.primaryText)
-                    onTriggered: dateModel.fontColor = DesignTokens.primaryText
-                }
-
-                MenuItem {
-                    text: "Mavi"
-                    checkable: true
-                    checked: Qt.colorEqual(dateModel.fontColor, DesignTokens.accent)
-                    onTriggered: dateModel.fontColor = DesignTokens.accent
-                }
-
-                MenuItem {
-                    text: "Turuncu"
-                    checkable: true
-                    checked: Qt.colorEqual(dateModel.fontColor, DesignTokens.warning)
-                    onTriggered: dateModel.fontColor = DesignTokens.warning
-                }
-            }
-
-            MenuItem {
-                text: "Kalın"
-                checkable: true
-                checked: dateModel.bold
-                onTriggered: dateModel.bold = checked
-            }
-
-            Menu {
-                title: "Font rengi"
-
-                MenuItem {
-                    text: "Koyu"
-                    checkable: true
                     checked: Qt.colorEqual(clockModel.fontColor, DesignTokens.primaryText)
                     onTriggered: clockModel.fontColor = DesignTokens.primaryText
                 }
@@ -506,6 +474,38 @@ ModuleWindow {
                     checked: dateModel.useEmbeddedFont && dateModel.fontFamily === technologyFont.name
                     onTriggered: rootWindow.selectDateEmbeddedFont(technologyFont)
                 }
+            }
+
+            Menu {
+                title: "Font rengi"
+
+                MenuItem {
+                    text: "Koyu"
+                    checkable: true
+                    checked: Qt.colorEqual(dateModel.fontColor, DesignTokens.primaryText)
+                    onTriggered: dateModel.fontColor = DesignTokens.primaryText
+                }
+
+                MenuItem {
+                    text: "Mavi"
+                    checkable: true
+                    checked: Qt.colorEqual(dateModel.fontColor, DesignTokens.accent)
+                    onTriggered: dateModel.fontColor = DesignTokens.accent
+                }
+
+                MenuItem {
+                    text: "Turuncu"
+                    checkable: true
+                    checked: Qt.colorEqual(dateModel.fontColor, DesignTokens.warning)
+                    onTriggered: dateModel.fontColor = DesignTokens.warning
+                }
+            }
+
+            MenuItem {
+                text: "Kalın"
+                checkable: true
+                checked: dateModel.bold
+                onTriggered: dateModel.bold = checked
             }
 
             MenuItem {

@@ -9,6 +9,10 @@
 
 #include "clock_model.h"
 #include "clock_service.h"
+#include "battery_model.h"
+#ifdef Q_OS_WIN
+#include "windows_battery_service.h"
+#endif
 #include "date_model.h"
 #include "date_service.h"
 
@@ -24,6 +28,13 @@ int main(int argc, char *argv[])
     DeskPilot::ClockModel clockModel;
     DeskPilot::DateService dateService;
     DeskPilot::DateModel dateModel;
+#ifdef Q_OS_WIN
+    DeskPilot::WindowsBatteryService batteryService;
+    DeskPilot::BatteryModel batteryModel(&batteryService);
+#else
+    DeskPilot::BatteryModel batteryModel(nullptr);
+#endif
+    batteryModel.refresh();
     QSettings settings("DeskPilot", "DeskPilotC");
 
     settings.beginGroup("clock");
@@ -147,6 +158,7 @@ int main(int argc, char *argv[])
     engine.rootContext()->setContextProperty("clockModel", &clockModel);
     engine.rootContext()->setContextProperty("dateService", &dateService);
     engine.rootContext()->setContextProperty("dateModel", &dateModel);
+    engine.rootContext()->setContextProperty("batteryModel", &batteryModel);
     engine.loadFromModule("DeskPilot", "Main");
 
     if (engine.rootObjects().isEmpty()) {
