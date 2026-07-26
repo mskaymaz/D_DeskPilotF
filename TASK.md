@@ -7,7 +7,7 @@
 - `[!]` Blocked / decision required
 
 ## Active Phase
-**Phase 4 â€” Battery Module**
+**Phase 5 â€” Layout System and Quick Actions**
 
 ## Active Tasks
 - [x] Freeze Python DeskPilot reference repository.
@@ -52,15 +52,23 @@
 - [x] Stable rendering without visible width jitter.
 - [x] Grouped-layout integration.
 - [x] Free-layout integration.
-- [x] Platform-independent battery abstraction.
-- [x] Windows battery implementation.
-- [x] Battery percentage/status presentation.
-- [x] Charging/plugged-in detection.
-- [ ] Optional battery icon.
-- [ ] Battery visibility.
-- [ ] Battery font/color/bold settings.
-- [x] Independent battery scaling.
-- [ ] Low-battery threshold.
+- [1] Platform-independent battery abstraction.
+- [2] Windows battery implementation.
+- [3] Battery percentage/status presentation.
+- [4] Charging/plugged-in detection.
+- [5] Optional battery icon.
+- [6] Battery visibility.
+- [7] Battery font/color/bold settings.
+- [8] Independent battery scaling.
+- [9] Low-battery threshold.
+- [10] Full-charge threshold.
+- [11] Alert interval.
+- [12] Alert sound configuration.
+- [13] Respect silent mode.
+- [14] Safe no-battery behavior.
+- [15] Grouped-layout integration.
+- [16] Free-layout integration.
+- [17] Efficient polling/event strategy.
 - [x] Turkish locale correctness.
 - [x] Persistent settings.
 - [x] Persistent clock settings.
@@ -85,7 +93,7 @@
 Work on one verified task at a time. Do not begin later phases early. Do not mechanically port Python/PyQt code. Use the frozen Python project only as a behavioral reference.
 
 ## Next Immediate Task
-Implement and verify the optional battery icon.
+Begin Phase 5 with final grouped-layout behavior.
 
 
 

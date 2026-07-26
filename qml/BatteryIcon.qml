@@ -1,4 +1,5 @@
 import QtQuick
+import QtQuick.Effects
 
 Item {
     id: root
@@ -6,48 +7,47 @@ Item {
     property int percentage: -1
     property bool charging: false
     property color iconColor: DesignTokens.primaryText
+    property real fontPixelSize: DesignTokens.moduleBasePixelSize
+    property real scaleFactor: fontPixelSize / DesignTokens.moduleBasePixelSize
+    readonly property real paintedWidth: width
+    readonly property real paintedHeight: height
 
-    implicitWidth: 24
-    implicitHeight: 14
-
-    Rectangle {
-        id: batteryBody
-        x: 0
-        y: 1
-        width: root.width - terminal.width - DesignTokens.space1
-        height: root.height - 2
-        radius: DesignTokens.radiusSmall
-        color: "transparent"
-        border.color: root.iconColor
-        border.width: 1
-
-        Rectangle {
-            anchors.left: parent.left
-            anchors.leftMargin: 2
-            anchors.verticalCenter: parent.verticalCenter
-            width: percentage >= 0 ? Math.max(0, Math.min(100, percentage)) / 100 * (parent.width - 4) : 0
-            height: parent.height - 4
-            radius: 1
-            color: root.iconColor
-        }
-    }
+    implicitWidth: fontPixelSize * 0.9
+    implicitHeight: fontPixelSize * 0.55
 
     Rectangle {
-        id: terminal
-        anchors.left: batteryBody.right
-        anchors.verticalCenter: batteryBody.verticalCenter
-        width: 2
-        height: 6
-        radius: 1
+        id: chargeFill
+        x: root.width * 0.12
+        y: root.height * 0.2
+        width: percentage >= 0
+            ? Math.max(0, Math.min(100, percentage)) / 100 * root.width * 0.73 : 0
+        height: root.height * 0.6
         color: root.iconColor
     }
 
-    Text {
-        anchors.centerIn: batteryBody
+    Image {
+        id: outlineSource
+        anchors.fill: parent
+        visible: false
+        source: "qrc:/qt/qml/DeskPilot/img/icons/battery_icon.svg"
+        fillMode: Image.Stretch
+        sourceSize: Qt.size(root.width, root.height)
+    }
+
+    MultiEffect {
+        anchors.fill: outlineSource
+        source: outlineSource
+        colorization: 1.0
+        colorizationColor: root.iconColor
+    }
+
+    Image {
+        anchors.centerIn: parent
+        width: root.height * 0.5
+        height: width
         visible: root.charging
-        text: "⚡"
-        color: DesignTokens.surface
-        font.pixelSize: 9
-        font.bold: true
+        source: "qrc:/qt/qml/DeskPilot/img/icons/lightning_icon.svg"
+        fillMode: Image.PreserveAspectFit
+        sourceSize: Qt.size(width, height)
     }
 }

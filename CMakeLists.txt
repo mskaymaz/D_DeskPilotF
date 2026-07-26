@@ -48,6 +48,12 @@ file(GLOB DESKPILOT_FONT_FILES CONFIGURE_DEPENDS
     "${CMAKE_CURRENT_SOURCE_DIR}/assets/fonts/*"
 )
 
+file(GLOB DESKPILOT_IMAGE_FILES CONFIGURE_DEPENDS
+    RELATIVE "${CMAKE_CURRENT_SOURCE_DIR}"
+    "${CMAKE_CURRENT_SOURCE_DIR}/img/icons/*"
+    "${CMAKE_CURRENT_SOURCE_DIR}/img/logos/*"
+)
+
 qt_add_qml_module(DeskPilotC
     URI DeskPilot
     VERSION 1.0
@@ -60,6 +66,7 @@ qt_add_qml_module(DeskPilotC
         qml/Main.qml
         qml/ModuleWindow.qml
     RESOURCES
+        ${DESKPILOT_IMAGE_FILES}
         ${DESKPILOT_FONT_FILES}
 )
 

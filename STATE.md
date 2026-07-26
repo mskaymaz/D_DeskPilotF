@@ -7,12 +7,14 @@
 Private GitHub repository: `mskaymaz/D_DeskPilotC`
 
 ## Current Phase
-**Phase 4 — Battery Module**
+**Phase 5 — Layout System and Quick Actions**
 
 ## Current Status
-The desktop surface is transparent and panel-free across the primary screen. Visible module regions receive input; all other areas pass through to underlying applications. Free-layout modules remain within the available screen area, while grouped mode moves all modules together. The Clock and Date modules are implemented and build-verified. Phase 4 battery work is being revalidated and completed one item at a time; the platform-independent abstraction, Windows battery implementation, percentage/status presentation, independent scaling, grouped-layout integration, and free-layout integration are verified.
+The desktop surface is transparent and panel-free across the primary screen. Visible module regions receive input; all other areas pass through to underlying applications. Free-layout modules remain within the available screen area, while grouped mode moves all modules together. The Clock, Date, and Battery modules are implemented and build-verified. Phase 4 battery work is complete, including efficient polling and unchanged-state suppression. Phase 5 layout and Quick Actions work is next.
 
 Module settings persistence, including stable layout, placement, and visual settings across close/reopen, remains incomplete.
+
+> Not: Faz 4 — Battery Module tamamlandı. Faz 5 — Layout System and Quick Actions başlangıcına geçildi.
 
 ## Completed
 - Existing Python/PyQt DeskPilot repository was frozen.
@@ -49,6 +51,16 @@ Module settings persistence, including stable layout, placement, and visual sett
 - Phase 4 battery percentage/status verified by `BatteryModelTest` and Debug build.
 - Phase 4 independent scaling and free-layout integration verified by `BatteryModelTest` and Debug build.
 - Phase 4 charging/plugged-in detection verified by deterministic Windows battery-state tests.
+- Phase 4 optional battery icon added with persisted visibility setting and verified by Debug build and CTest.
+- Phase 4 battery visibility menu control and persistence verified by Debug build and CTest.
+- Phase 4 battery font, color, and bold controls verified by Debug build and CTest.
+- Phase 4 low-battery threshold boundaries and discharging-only behavior verified by CTest.
+- Phase 4 full-charge threshold boundaries and charging-only behavior verified by CTest.
+- Phase 4 alert interval setting, persistence, and bounds verified by Debug build and CTest.
+- Phase 4 alert sound enable/disable setting and persistence verified by Debug build and CTest.
+- Phase 4 silent-mode suppression state and persistence verified by Debug build and CTest.
+- Phase 4 no-battery fallback and non-alerting behavior verified by `BatteryModelTest`.
+- Phase 4 efficient 30-second coarse polling and unchanged-state suppression verified by Debug build and CTest.
 - Persistent layout mode, module positions, and battery appearance settings added and INI round-trip verified.
 - Clock and date context-menu options grouped into dedicated settings submenus.
 
@@ -95,7 +107,7 @@ Use the SPP-style workflow:
 Commands and patches should be concise and fail-fast. When working interactively with the user, provide one implementation step at a time and wait for the result when later steps depend on it.
 
 ## Immediate Next Steps
-1. Implement and verify the optional battery icon.
+1. Begin Phase 5 with final grouped-layout behavior.
 
 ## AI Agent Continuation Instruction
 Before modifying this repository, read in this order:
@@ -113,7 +125,7 @@ Continue from the current state. Do not restart architectural interpretation unl
 Communicate with the user in Turkish unless explicitly requested otherwise.
 
 ## Last Updated
-2026-07-26 — Layout and battery settings persistence verified by INI round-trip, Debug build, and CTest; optional battery icon is next.
+2026-07-26 — Phase 4 battery module completed through efficient polling/event verification; Phase 5 layout work is next.
 
 
 

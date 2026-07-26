@@ -1,12 +1,17 @@
 ﻿#include <QGuiApplication>
+#include <QDateTime>
+#include <QFile>
 #include <QQmlApplicationEngine>
 #include <QQmlContext>
 #include <QDebug>
+#include <cstdio>
 #include <QScreen>
 #include <QSettings>
+#include <QStringList>
 #include <QTimer>
 #include <QWindow>
 #include <QJSValue>
+#include <QTextStream>
 #include <qqml.h>
 
 #include "clock_model.h"
@@ -19,6 +24,43 @@
 #include "date_service.h"
 #include "window_input_mask_controller.h"
 
+namespace {
+
+QFile deskPilotLogFile;
+constexpr int kBatteryRefreshIntervalMs = 30000;
+
+const char *messageTypeName(QtMsgType type)
+{
+    switch (type) {
+    case QtDebugMsg:
+        return "debug";
+    case QtInfoMsg:
+        return "info";
+    case QtWarningMsg:
+        return "warning";
+    case QtCriticalMsg:
+        return "critical";
+    case QtFatalMsg:
+        return "fatal";
+    }
+    return "unknown";
+}
+
+void deskPilotMessageHandler(QtMsgType type, const QMessageLogContext &, const QString &message)
+{
+    if (deskPilotLogFile.isOpen()) {
+        QTextStream stream(&deskPilotLogFile);
+        stream << QDateTime::currentDateTime().toString(Qt::ISODateWithMs)
+               << " [" << messageTypeName(type) << "] " << message << '\n';
+        stream.flush();
+    }
+
+    const QByteArray output = message.toLocal8Bit();
+    fprintf(stderr, "%s\n", output.constData());
+}
+
+} // namespace
+
 int main(int argc, char *argv[])
 {
     QGuiApplication::setHighDpiScaleFactorRoundingPolicy(
@@ -27,6 +69,10 @@ int main(int argc, char *argv[])
     QGuiApplication app(argc, argv);
     app.setOrganizationName("DeskPilot");
     app.setApplicationName("DeskPilotC");
+    deskPilotLogFile.setFileName(QGuiApplication::applicationDirPath() + "/DeskPilotC.log");
+    if (deskPilotLogFile.open(QIODevice::Append | QIODevice::Text)) {
+        qInstallMessageHandler(deskPilotMessageHandler);
+    }
 
     qmlRegisterType<DeskPilot::ClockModel>("DeskPilot.Clock", 1, 0, "ClockModel");
     DeskPilot::ClockService clockService;
@@ -41,8 +87,16 @@ int main(int argc, char *argv[])
     DeskPilot::BatteryModel batteryModel(nullptr);
 #endif
     batteryModel.refresh();
+    auto *batteryRefreshTimer = new QTimer(&app);
+    batteryRefreshTimer->setInterval(kBatteryRefreshIntervalMs);
+    batteryRefreshTimer->setTimerType(Qt::CoarseTimer);
+    QObject::connect(batteryRefreshTimer, &QTimer::timeout,
+        [&batteryModel]() { batteryModel.refresh(); });
+    batteryRefreshTimer->start();
+    qInfo() << "DeskPilotC battery refresh interval:" << kBatteryRefreshIntervalMs << "ms";
     QSettings settings(QGuiApplication::applicationDirPath() + "/DeskPilotC.ini",
         QSettings::IniFormat);
+    qInfo() << "DeskPilotC settings file:" << settings.fileName();
 
     settings.beginGroup("clock");
     clockModel.setVisible(settings.value("visible", clockModel.visible()).toBool());
@@ -65,8 +119,17 @@ int main(int argc, char *argv[])
 
     settings.beginGroup("battery");
     batteryModel.setVisible(settings.value("visible", batteryModel.visible()).toBool());
+    batteryModel.setShowIcon(settings.value("showIcon", batteryModel.showIcon()).toBool());
     batteryModel.setLowBatteryThreshold(
         settings.value("lowBatteryThreshold", batteryModel.lowBatteryThreshold()).toInt());
+    batteryModel.setFullChargeThreshold(
+        settings.value("fullChargeThreshold", batteryModel.fullChargeThreshold()).toInt());
+    batteryModel.setAlertIntervalMinutes(
+        settings.value("alertIntervalMinutes", batteryModel.alertIntervalMinutes()).toInt());
+    batteryModel.setAlertSoundEnabled(
+        settings.value("alertSoundEnabled", batteryModel.alertSoundEnabled()).toBool());
+    batteryModel.setSilentMode(
+        settings.value("silentMode", batteryModel.silentMode()).toBool());
     batteryModel.setFontFamily(
         settings.value("fontFamily", batteryModel.fontFamily()).toString());
     const QColor savedBatteryFontColor(
@@ -112,6 +175,19 @@ int main(int argc, char *argv[])
     dateModel.setScale(settings.value("scale", dateModel.scale()).toDouble());
     settings.endGroup();
 
+    qInfo() << "DeskPilotC settings loaded:"
+            << "clock=" << clockModel.visible() << clockModel.showSeconds()
+            << clockModel.use24HourFormat() << clockModel.fontFamily()
+            << clockModel.fontColor() << clockModel.bold() << clockModel.scale()
+            << clockModel.secondsScale()
+            << "date=" << dateModel.visible() << dateModel.dateFormat()
+            << dateModel.showWeekNumber() << dateModel.gregorianFirst()
+            << dateModel.fontFamily() << dateModel.fontColor() << dateModel.bold()
+            << dateModel.scale()
+            << "battery=" << batteryModel.visible() << batteryModel.fontFamily()
+            << batteryModel.fontColor() << batteryModel.bold() << batteryModel.scale()
+            << "layoutFree=" << savedFreeLayout << "positions=" << savedModulePositions;
+
     const auto saveClockSettings = [&settings, &clockModel]() {
         settings.beginGroup("clock");
         settings.setValue("visible", clockModel.visible());
@@ -125,6 +201,11 @@ int main(int argc, char *argv[])
         settings.setValue("secondsScale", clockModel.secondsScale());
         settings.endGroup();
         settings.sync();
+        qInfo() << "DeskPilotC settings saved: clock" << settings.fileName()
+                << "visible=" << clockModel.visible()
+                << "color=" << clockModel.fontColor()
+                << "scale=" << clockModel.scale()
+                << "status=" << static_cast<int>(settings.status());
     };
 
     const auto saveDateSettings = [&settings, &dateModel]() {
@@ -140,23 +221,43 @@ int main(int argc, char *argv[])
         settings.setValue("scale", dateModel.scale());
         settings.endGroup();
         settings.sync();
+        qInfo() << "DeskPilotC settings saved: date" << settings.fileName()
+                << "visible=" << dateModel.visible()
+                << "color=" << dateModel.fontColor()
+                << "scale=" << dateModel.scale()
+                << "status=" << static_cast<int>(settings.status());
     };
 
     const auto saveBatterySettings = [&settings, &batteryModel]() {
         settings.beginGroup("battery");
         settings.setValue("visible", batteryModel.visible());
+        settings.setValue("showIcon", batteryModel.showIcon());
         settings.setValue("lowBatteryThreshold", batteryModel.lowBatteryThreshold());
+        settings.setValue("fullChargeThreshold", batteryModel.fullChargeThreshold());
+        settings.setValue("alertIntervalMinutes", batteryModel.alertIntervalMinutes());
+        settings.setValue("alertSoundEnabled", batteryModel.alertSoundEnabled());
+        settings.setValue("silentMode", batteryModel.silentMode());
         settings.setValue("fontFamily", batteryModel.fontFamily());
         settings.setValue("fontColor", batteryModel.fontColor().name(QColor::HexArgb));
         settings.setValue("bold", batteryModel.bold());
         settings.setValue("scale", batteryModel.scale());
         settings.endGroup();
         settings.sync();
+        qInfo() << "DeskPilotC settings saved: battery" << settings.fileName()
+                << "visible=" << batteryModel.visible()
+                << "fullChargeThreshold=" << batteryModel.fullChargeThreshold()
+                << "alertIntervalMinutes=" << batteryModel.alertIntervalMinutes()
+                << "alertSoundEnabled=" << batteryModel.alertSoundEnabled()
+                << "silentMode=" << batteryModel.silentMode()
+                << "color=" << batteryModel.fontColor()
+                << "scale=" << batteryModel.scale()
+                << "status=" << static_cast<int>(settings.status());
     };
 
     const auto saveLayoutSettings = [&settings](QObject *window) {
         const QVariant rawPositions = window->property("modulePositions");
         const QJSValue positions = rawPositions.value<QJSValue>();
+        QStringList positionSummary;
         settings.beginGroup("layout");
         settings.setValue("freeLayoutEnabled", window->property("freeLayoutEnabled"));
         settings.remove("modulePositions");
@@ -165,8 +266,11 @@ int main(int argc, char *argv[])
             const QJSValue position = positions.property(key);
             settings.beginGroup(key);
             if (position.isObject()) {
-                settings.setValue("x", position.property("x").toNumber());
-                settings.setValue("y", position.property("y").toNumber());
+                const double x = position.property("x").toNumber();
+                const double y = position.property("y").toNumber();
+                settings.setValue("x", x);
+                settings.setValue("y", y);
+                positionSummary.append(QStringLiteral("%1=(%2,%3)").arg(key).arg(x).arg(y));
             } else {
                 settings.remove("");
             }
@@ -174,8 +278,14 @@ int main(int argc, char *argv[])
         }
         settings.endGroup();
         settings.sync();
+        qInfo() << "DeskPilotC settings saved: layout" << settings.fileName()
+                << "freeLayout=" << window->property("freeLayoutEnabled")
+                << "positions=" << positionSummary.join(", ")
+                << "status=" << static_cast<int>(settings.status());
     };
 
+    QObject::connect(&app, &QCoreApplication::aboutToQuit,
+        []() { qInfo() << "DeskPilotC aboutToQuit: saving settings"; });
     QObject::connect(&clockModel, &DeskPilot::ClockModel::visibleChanged, saveClockSettings);
     QObject::connect(&clockModel, &DeskPilot::ClockModel::showSecondsChanged, saveClockSettings);
     QObject::connect(
@@ -204,6 +314,22 @@ int main(int argc, char *argv[])
     QObject::connect(
         &batteryModel,
         &DeskPilot::BatteryModel::lowBatteryThresholdChanged,
+        saveBatterySettings);
+    QObject::connect(
+        &batteryModel,
+        &DeskPilot::BatteryModel::fullChargeThresholdChanged,
+        saveBatterySettings);
+    QObject::connect(
+        &batteryModel,
+        &DeskPilot::BatteryModel::alertIntervalChanged,
+        saveBatterySettings);
+    QObject::connect(
+        &batteryModel,
+        &DeskPilot::BatteryModel::alertSoundEnabledChanged,
+        saveBatterySettings);
+    QObject::connect(
+        &batteryModel,
+        &DeskPilot::BatteryModel::silentModeChanged,
         saveBatterySettings);
     QObject::connect(&batteryModel, &DeskPilot::BatteryModel::visibleChanged, saveBatterySettings);
     QObject::connect(&batteryModel, &DeskPilot::BatteryModel::appearanceChanged,
@@ -270,7 +396,7 @@ int main(int argc, char *argv[])
                 lastFreeLayout = currentFreeLayout;
                 lastModulePositions = currentModulePositions;
                 initialized = true;
-            });
+        });
         layoutSaveTimer->start();
         QObject::connect(&app, &QCoreApplication::aboutToQuit,
             [window, saveLayoutSettings]() { saveLayoutSettings(window); });

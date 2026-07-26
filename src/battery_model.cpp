@@ -87,6 +87,102 @@ bool BatteryModel::lowBattery() const
         && m_state.percentage <= m_lowBatteryThreshold;
 }
 
+int BatteryModel::fullChargeThreshold() const
+{
+    return m_fullChargeThreshold;
+}
+
+void BatteryModel::setFullChargeThreshold(int value)
+{
+    const int normalizedValue = qBound(0, value, 100);
+    if (m_fullChargeThreshold == normalizedValue) {
+        return;
+    }
+
+    m_fullChargeThreshold = normalizedValue;
+    emit fullChargeThresholdChanged();
+    emit fullChargeChanged();
+}
+
+bool BatteryModel::fullCharge() const
+{
+    const bool chargingState = m_state.status == BatteryStatus::Charging
+        || m_state.status == BatteryStatus::Full;
+    return m_state.present
+        && m_state.pluggedIn
+        && chargingState
+        && m_state.percentage >= 0
+        && m_state.percentage >= m_fullChargeThreshold;
+}
+
+int BatteryModel::alertIntervalMinutes() const
+{
+    return m_alertIntervalMinutes;
+}
+
+void BatteryModel::setAlertIntervalMinutes(int value)
+{
+    const int normalizedValue = qBound(1, value, 1440);
+    if (m_alertIntervalMinutes == normalizedValue) {
+        return;
+    }
+
+    m_alertIntervalMinutes = normalizedValue;
+    emit alertIntervalChanged();
+}
+
+bool BatteryModel::alertSoundEnabled() const
+{
+    return m_alertSoundEnabled;
+}
+
+void BatteryModel::setAlertSoundEnabled(bool value)
+{
+    if (m_alertSoundEnabled == value) {
+        return;
+    }
+
+    m_alertSoundEnabled = value;
+    emit alertSoundEnabledChanged();
+    emit alertSoundStateChanged();
+}
+
+bool BatteryModel::silentMode() const
+{
+    return m_silentMode;
+}
+
+void BatteryModel::setSilentMode(bool value)
+{
+    if (m_silentMode == value) {
+        return;
+    }
+
+    m_silentMode = value;
+    emit silentModeChanged();
+    emit alertSoundStateChanged();
+}
+
+bool BatteryModel::audibleAlertsEnabled() const
+{
+    return m_alertSoundEnabled && !m_silentMode;
+}
+
+bool BatteryModel::showIcon() const
+{
+    return m_showIcon;
+}
+
+void BatteryModel::setShowIcon(bool value)
+{
+    if (m_showIcon == value) {
+        return;
+    }
+
+    m_showIcon = value;
+    emit appearanceChanged();
+}
+
 QString BatteryModel::fontFamily() const
 {
     return m_fontFamily;
@@ -173,6 +269,7 @@ void BatteryModel::updateState()
     m_state = nextState;
     emit stateChanged();
     emit lowBatteryChanged();
+    emit fullChargeChanged();
 }
 
 } // namespace DeskPilot

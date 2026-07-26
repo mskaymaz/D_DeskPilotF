@@ -34,6 +34,7 @@ ModuleWindow {
     function saveAndClose() {
         contextMenuOpen = false
         updateInputMask()
+        scheduleLayoutSettingsSave()
         closeAfterSaveTimer.restart()
     }
 
@@ -193,7 +194,11 @@ ModuleWindow {
 
         var regions = []
         var currentPositions = {}
-        if (freeLayoutEnabled) {
+        var freeLayoutPositionsReady = freeLayoutEnabled
+            && layout.inputItems.every(function(loader) {
+                return loader === null || !loader.visible || loader.positionInitialized
+            })
+        if (freeLayoutPositionsReady) {
             for (var existingKey in modulePositions) {
                 currentPositions[existingKey] = modulePositions[existingKey]
             }
@@ -210,10 +215,10 @@ ModuleWindow {
             }
 
             var modulePosition = loader.mapToItem(rootWindow.contentItem, 0, 0)
-            if (freeLayoutEnabled) {
+            if (freeLayoutPositionsReady) {
                 currentPositions[moduleKey(index)] = {
-                    x: modulePosition.x,
-                    y: modulePosition.y
+                    x: loader.x,
+                    y: loader.y
                 }
             }
 
@@ -250,7 +255,7 @@ ModuleWindow {
             }
         }
 
-        if (freeLayoutEnabled) {
+        if (freeLayoutPositionsReady) {
             modulePositions = currentPositions
             scheduleLayoutSettingsSave()
         }
@@ -435,28 +440,47 @@ ModuleWindow {
             id: batteryDisplayComponent
 
             Item {
-                width: batteryMetrics.width
-                height: batteryText.implicitHeight
+                width: batteryRow.implicitWidth
+                height: batteryRow.implicitHeight
                 implicitWidth: width
                 implicitHeight: height
                 visible: batteryModel.visible
-                property var renderedItems: [batteryText]
+                property var renderedItems: batteryModel.showIcon
+                    ? [batteryIcon, batteryText] : [batteryText]
 
-                BaseText {
-                    id: batteryText
-                    anchors.fill: parent
-                    text: batteryModel.percentage >= 0
-                        ? "Pil: %1% · %2".arg(batteryModel.percentage).arg(batteryModel.statusText)
-                        : "Pil: " + batteryModel.statusText
-                    horizontalAlignment: Text.AlignHCenter
-                    verticalAlignment: Text.AlignVCenter
-                    font.family: batteryModel.fontFamily !== ""
-                        ? batteryModel.fontFamily : "Segoe UI"
-                    font.pixelSize: DesignTokens.moduleBasePixelSize * batteryModel.scale
-                    font.bold: batteryModel.bold
-                    color: batteryModel.fontColor
-                    onPaintedWidthChanged: rootWindow.updateInputMask()
-                    onPaintedHeightChanged: rootWindow.updateInputMask()
+                Row {
+                    id: batteryRow
+                    anchors.centerIn: parent
+                    spacing: batteryModel.showIcon ? DesignTokens.space2 : 0
+
+                    BatteryIcon {
+                        id: batteryIcon
+                        width: batteryModel.showIcon ? implicitWidth : 0
+                        height: batteryModel.showIcon ? implicitHeight : 0
+                        fontPixelSize: DesignTokens.moduleBasePixelSize * batteryModel.scale
+                        scaleFactor: batteryModel.scale
+                        percentage: batteryModel.percentage
+                        charging: batteryModel.charging
+                        iconColor: batteryModel.fontColor
+                    }
+
+                    BaseText {
+                        id: batteryText
+                        width: batteryMetrics.width
+                        text: batteryModel.percentage >= 0
+                            ? "Pil: %1% · %2".arg(batteryModel.percentage)
+                                .arg(batteryModel.statusText)
+                            : "Pil: " + batteryModel.statusText
+                        horizontalAlignment: Text.AlignHCenter
+                        verticalAlignment: Text.AlignVCenter
+                        font.family: batteryModel.fontFamily !== ""
+                            ? batteryModel.fontFamily : "Segoe UI"
+                        font.pixelSize: DesignTokens.moduleBasePixelSize * batteryModel.scale
+                        font.bold: batteryModel.bold
+                        color: batteryModel.fontColor
+                        onPaintedWidthChanged: rootWindow.updateInputMask()
+                        onPaintedHeightChanged: rootWindow.updateInputMask()
+                    }
                 }
             }
         }
@@ -1032,6 +1056,96 @@ ModuleWindow {
         Menu {
             title: "Pil ayarları"
 
+            MenuItem {
+                text: "Pil ikonunu göster"
+                checkable: true
+                checked: batteryModel.showIcon
+                onTriggered: batteryModel.showIcon = checked
+            }
+
+            MenuItem {
+                text: "Pili göster"
+                checkable: true
+                checked: batteryModel.visible
+                onTriggered: batteryModel.visible = checked
+            }
+
+            Menu {
+                title: "Pil fontu"
+
+                MenuItem {
+                    text: "Sistem fontu"
+                    checkable: true
+                    checked: batteryModel.fontFamily === ""
+                    onTriggered: batteryModel.fontFamily = ""
+                }
+
+                MenuItem {
+                    text: "Stencil"
+                    checkable: true
+                    checked: batteryModel.fontFamily === stencilFont.name
+                    onTriggered: {
+                        if (stencilFont.status === FontLoader.Ready) {
+                            batteryModel.fontFamily = stencilFont.name
+                        }
+                    }
+                }
+
+                MenuItem {
+                    text: "Digital-7"
+                    checkable: true
+                    checked: batteryModel.fontFamily === digitalFont.name
+                    onTriggered: {
+                        if (digitalFont.status === FontLoader.Ready) {
+                            batteryModel.fontFamily = digitalFont.name
+                        }
+                    }
+                }
+
+                MenuItem {
+                    text: "Technology"
+                    checkable: true
+                    checked: batteryModel.fontFamily === technologyFont.name
+                    onTriggered: {
+                        if (technologyFont.status === FontLoader.Ready) {
+                            batteryModel.fontFamily = technologyFont.name
+                        }
+                    }
+                }
+            }
+
+            Menu {
+                title: "Pil font rengi"
+
+                MenuItem {
+                    text: "Gri"
+                    checkable: true
+                    checked: Qt.colorEqual(batteryModel.fontColor, DesignTokens.secondaryText)
+                    onTriggered: batteryModel.fontColor = DesignTokens.secondaryText
+                }
+
+                MenuItem {
+                    text: "Mavi"
+                    checkable: true
+                    checked: Qt.colorEqual(batteryModel.fontColor, DesignTokens.accent)
+                    onTriggered: batteryModel.fontColor = DesignTokens.accent
+                }
+
+                MenuItem {
+                    text: "Turuncu"
+                    checkable: true
+                    checked: Qt.colorEqual(batteryModel.fontColor, DesignTokens.warning)
+                    onTriggered: batteryModel.fontColor = DesignTokens.warning
+                }
+            }
+
+            MenuItem {
+                text: "Pil fontunu kalın göster"
+                checkable: true
+                checked: batteryModel.bold
+                onTriggered: batteryModel.bold = checked
+            }
+
             Menu {
                 title: "Düşük pil eşiği"
 
@@ -1068,6 +1182,102 @@ ModuleWindow {
                     checkable: true
                     checked: batteryModel.lowBatteryThreshold === 30
                     onTriggered: batteryModel.lowBatteryThreshold = 30
+                }
+            }
+
+            Menu {
+                title: "Tam dolu pil eşiği"
+
+                MenuItem {
+                    text: "%80"
+                    checkable: true
+                    checked: batteryModel.fullChargeThreshold === 80
+                    onTriggered: batteryModel.fullChargeThreshold = 80
+                }
+
+                MenuItem {
+                    text: "%85"
+                    checkable: true
+                    checked: batteryModel.fullChargeThreshold === 85
+                    onTriggered: batteryModel.fullChargeThreshold = 85
+                }
+
+                MenuItem {
+                    text: "%90"
+                    checkable: true
+                    checked: batteryModel.fullChargeThreshold === 90
+                    onTriggered: batteryModel.fullChargeThreshold = 90
+                }
+
+                MenuItem {
+                    text: "%95"
+                    checkable: true
+                    checked: batteryModel.fullChargeThreshold === 95
+                    onTriggered: batteryModel.fullChargeThreshold = 95
+                }
+
+                MenuItem {
+                    text: "%100"
+                    checkable: true
+                    checked: batteryModel.fullChargeThreshold === 100
+                    onTriggered: batteryModel.fullChargeThreshold = 100
+                }
+            }
+
+            Menu {
+                title: "Uyarı aralığı"
+
+                MenuItem {
+                    text: "5 dakika"
+                    checkable: true
+                    checked: batteryModel.alertIntervalMinutes === 5
+                    onTriggered: batteryModel.alertIntervalMinutes = 5
+                }
+
+                MenuItem {
+                    text: "15 dakika"
+                    checkable: true
+                    checked: batteryModel.alertIntervalMinutes === 15
+                    onTriggered: batteryModel.alertIntervalMinutes = 15
+                }
+
+                MenuItem {
+                    text: "30 dakika"
+                    checkable: true
+                    checked: batteryModel.alertIntervalMinutes === 30
+                    onTriggered: batteryModel.alertIntervalMinutes = 30
+                }
+
+                MenuItem {
+                    text: "60 dakika"
+                    checkable: true
+                    checked: batteryModel.alertIntervalMinutes === 60
+                    onTriggered: batteryModel.alertIntervalMinutes = 60
+                }
+
+                MenuItem {
+                    text: "120 dakika"
+                    checkable: true
+                    checked: batteryModel.alertIntervalMinutes === 120
+                    onTriggered: batteryModel.alertIntervalMinutes = 120
+                }
+            }
+
+            Menu {
+                title: "Uyarı sesi"
+
+                MenuItem {
+                    text: "Uyarı sesini etkinleştir"
+                    checkable: true
+                    checked: batteryModel.alertSoundEnabled
+                    onTriggered: batteryModel.alertSoundEnabled = checked
+                }
+
+                MenuItem {
+                    text: "Sessiz mod"
+                    checkable: true
+                    checked: batteryModel.silentMode
+                    onTriggered: batteryModel.silentMode = checked
                 }
             }
 

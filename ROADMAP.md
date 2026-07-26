@@ -155,29 +155,29 @@ Phase 0 is complete when:
 
 ---
 
-## [~] Phase 4 â€” Battery Module
+## [x] Phase 4 â€” Battery Module
 
 **Goal:** Implement efficient battery status and alert foundations.
 
 ### Tasks
 
-- [x] Platform-independent battery abstraction.
-- [x] Windows battery implementation.
-- [x] Battery percentage/status.
-- [x] Charging/plugged-in detection.
-- [ ] Optional battery icon.
-- [ ] Battery visibility.
-- [ ] Font/color/bold settings.
-- [x] Independent scaling.
-- [ ] Low-battery threshold.
-- [ ] Full-charge threshold.
-- [ ] Alert interval.
-- [ ] Alert sound configuration.
-- [ ] Respect silent mode.
-- [ ] Safe no-battery behavior.
-- [x] Grouped-layout integration.
-- [x] Free-layout integration.
-- [ ] Efficient polling/event strategy.
+- [1] Platform-independent battery abstraction.
+- [2] Windows battery implementation.
+- [3] Battery percentage/status.
+- [4] Charging/plugged-in detection.
+- [5] Optional battery icon.
+- [6] Battery visibility.
+- [7] Font/color/bold settings.
+- [8] Independent scaling.
+- [9] Low-battery threshold.
+- [10] Full-charge threshold.
+- [11] Alert interval.
+- [12] Alert sound configuration.
+- [13] Respect silent mode.
+- [14] Safe no-battery behavior.
+- [15] Grouped-layout integration.
+- [16] Free-layout integration.
+- [17] Efficient polling/event strategy.
 
 ### Completion Criteria
 
@@ -622,7 +622,7 @@ Potential areas:
 
 # CURRENT POSITION
 
-**Current phase:** Phase 4 â€” Battery Module (percentage/status, independent scaling, grouped, and free-layout integration complete)
+**Current phase:** Phase 5 â€” Layout System and Quick Actions
 
 **Completed so far:**
 
@@ -640,8 +640,9 @@ Potential areas:
 - Phase 4 grouped-layout integration verified by Debug build and CTest.
 - Phase 4 charging/plugged-in detection verified by deterministic Windows battery-state tests.
 - Persistent layout mode, module positions, and battery appearance settings verified by INI round-trip.
+- Phase 4 efficient 30-second coarse polling and unchanged-state suppression verified by Debug build and CTest.
 
 **Immediate next step:**
 
-1. Implement and verify the optional battery icon.
+1. Begin Phase 5 with final grouped-layout behavior.
 
