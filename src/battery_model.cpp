@@ -62,6 +62,31 @@ bool BatteryModel::charging() const
     return m_state.status == BatteryStatus::Charging;
 }
 
+int BatteryModel::lowBatteryThreshold() const
+{
+    return m_lowBatteryThreshold;
+}
+
+void BatteryModel::setLowBatteryThreshold(int value)
+{
+    const int normalizedValue = qBound(0, value, 100);
+    if (m_lowBatteryThreshold == normalizedValue) {
+        return;
+    }
+
+    m_lowBatteryThreshold = normalizedValue;
+    emit lowBatteryThresholdChanged();
+    emit lowBatteryChanged();
+}
+
+bool BatteryModel::lowBattery() const
+{
+    return m_state.present
+        && m_state.status == BatteryStatus::Discharging
+        && m_state.percentage >= 0
+        && m_state.percentage <= m_lowBatteryThreshold;
+}
+
 QString BatteryModel::fontFamily() const
 {
     return m_fontFamily;
@@ -147,6 +172,7 @@ void BatteryModel::updateState()
 
     m_state = nextState;
     emit stateChanged();
+    emit lowBatteryChanged();
 }
 
 } // namespace DeskPilot

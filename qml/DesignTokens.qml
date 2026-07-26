@@ -43,6 +43,7 @@ QtObject {
 
     readonly property int headingPixelSize: scaled(42)
     readonly property int bodyPixelSize: scaled(16)
+    readonly property int moduleBasePixelSize: scaled(40)
     readonly property int captionPixelSize: scaled(12)
     readonly property int headingWeight: Font.Normal
 

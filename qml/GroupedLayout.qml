@@ -3,12 +3,30 @@ import QtQuick
 Item {
     id: root
 
-    property int layoutSpacing: DesignTokens.space4
-    default property alias contentData: stack.data
+    default property alias contentData: root.data
+    signal groupMoved(real deltaX, real deltaY)
 
-    Column {
-        id: stack
-        anchors.centerIn: parent
-        spacing: root.layoutSpacing
+    MouseArea {
+        anchors.fill: parent
+        acceptedButtons: Qt.LeftButton
+        cursorShape: pressed ? Qt.ClosedHandCursor : Qt.OpenHandCursor
+
+        property real lastMouseX
+        property real lastMouseY
+
+        onPressed: {
+            lastMouseX = mouse.x
+            lastMouseY = mouse.y
+        }
+
+        onPositionChanged: {
+            if (!pressed) {
+                return
+            }
+
+            root.groupMoved(mouse.x - lastMouseX, mouse.y - lastMouseY)
+            lastMouseX = mouse.x
+            lastMouseY = mouse.y
+        }
     }
 }

@@ -15,6 +15,7 @@
 #endif
 #include "date_model.h"
 #include "date_service.h"
+#include "window_input_mask_controller.h"
 
 int main(int argc, char *argv[])
 {
@@ -28,6 +29,7 @@ int main(int argc, char *argv[])
     DeskPilot::ClockModel clockModel;
     DeskPilot::DateService dateService;
     DeskPilot::DateModel dateModel;
+    DeskPilot::WindowInputMaskController inputMaskController;
 #ifdef Q_OS_WIN
     DeskPilot::WindowsBatteryService batteryService;
     DeskPilot::BatteryModel batteryModel(&batteryService);
@@ -54,6 +56,12 @@ int main(int argc, char *argv[])
     clockModel.setScale(settings.value("scale", clockModel.scale()).toDouble());
     clockModel.setSecondsScale(
         settings.value("secondsScale", clockModel.secondsScale()).toDouble());
+    settings.endGroup();
+
+    settings.beginGroup("battery");
+    batteryModel.setLowBatteryThreshold(
+        settings.value("lowBatteryThreshold", batteryModel.lowBatteryThreshold()).toInt());
+    batteryModel.setScale(settings.value("scale", batteryModel.scale()).toDouble());
     settings.endGroup();
 
     settings.beginGroup("date");
@@ -105,6 +113,14 @@ int main(int argc, char *argv[])
         settings.sync();
     };
 
+    const auto saveBatterySettings = [&settings, &batteryModel]() {
+        settings.beginGroup("battery");
+        settings.setValue("lowBatteryThreshold", batteryModel.lowBatteryThreshold());
+        settings.setValue("scale", batteryModel.scale());
+        settings.endGroup();
+        settings.sync();
+    };
+
     QObject::connect(&clockModel, &DeskPilot::ClockModel::visibleChanged, saveClockSettings);
     QObject::connect(&clockModel, &DeskPilot::ClockModel::showSecondsChanged, saveClockSettings);
     QObject::connect(
@@ -130,6 +146,12 @@ int main(int argc, char *argv[])
         &dateModel, &DeskPilot::DateModel::useEmbeddedFontChanged, saveDateSettings);
     QObject::connect(&dateModel, &DeskPilot::DateModel::scaleChanged, saveDateSettings);
     QObject::connect(&app, &QCoreApplication::aboutToQuit, saveDateSettings);
+    QObject::connect(
+        &batteryModel,
+        &DeskPilot::BatteryModel::lowBatteryThresholdChanged,
+        saveBatterySettings);
+    QObject::connect(&batteryModel, &DeskPilot::BatteryModel::scaleChanged, saveBatterySettings);
+    QObject::connect(&app, &QCoreApplication::aboutToQuit, saveBatterySettings);
 
     QObject::connect(
         &clockService,
@@ -159,6 +181,7 @@ int main(int argc, char *argv[])
     engine.rootContext()->setContextProperty("dateService", &dateService);
     engine.rootContext()->setContextProperty("dateModel", &dateModel);
     engine.rootContext()->setContextProperty("batteryModel", &batteryModel);
+    engine.rootContext()->setContextProperty("inputMaskController", &inputMaskController);
     engine.loadFromModule("DeskPilot", "Main");
 
     if (engine.rootObjects().isEmpty()) {
@@ -168,37 +191,10 @@ int main(int argc, char *argv[])
 
     auto *window = qobject_cast<QWindow *>(engine.rootObjects().constFirst());
     if (window != nullptr) {
-        if (settings.contains("window/x") && settings.contains("window/y")) {
-            const int savedX = settings.value("window/x").toInt();
-            const int savedY = settings.value("window/y").toInt();
-            const QRect savedGeometry(savedX, savedY, window->width(), window->height());
-
-            bool savedPositionAvailable = false;
-            for (const auto *screen : QGuiApplication::screens()) {
-                if (screen->availableGeometry().intersects(savedGeometry)) {
-                    savedPositionAvailable = true;
-                    break;
-                }
-            }
-
-            if (savedPositionAvailable) {
-                window->setPosition(savedX, savedY);
-            } else if (const auto *primaryScreen = QGuiApplication::primaryScreen()) {
-                const QRect availableGeometry = primaryScreen->availableGeometry();
-                const int safeX = availableGeometry.left()
-                    + qMax(0, (availableGeometry.width() - window->width()) / 2);
-                const int safeY = availableGeometry.top()
-                    + qMax(0, (availableGeometry.height() - window->height()) / 2);
-                window->setPosition(safeX, safeY);
-                qWarning() << "Saved window position was unavailable; moved to primary screen.";
-            }
+        if (const auto *primaryScreen = QGuiApplication::primaryScreen()) {
+            window->setGeometry(primaryScreen->availableGeometry());
         }
-
-        QObject::connect(&app, &QCoreApplication::aboutToQuit, [&settings, window]() {
-            settings.setValue("window/x", window->x());
-            settings.setValue("window/y", window->y());
-            settings.sync();
-        });
+        inputMaskController.setWindow(window);
     }
 
     return app.exec();

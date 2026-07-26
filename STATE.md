@@ -10,7 +10,7 @@ Private GitHub repository: `mskaymaz/D_DeskPilotC`
 **Phase 4 — Battery Module**
 
 ## Current Status
-The Clock and Date modules are implemented and build-verified. Phase 4 battery abstraction, Windows adapter, percentage/status presentation, charging/plugged-in detection, optional icon, visibility, font/color/bold settings, and independent scaling are implemented and build-verified.
+The desktop surface is transparent and panel-free across the primary screen. Visible module regions receive input; all other areas pass through to underlying applications. Free-layout modules remain within the available screen area, while grouped mode moves all modules together. The Clock and Date modules are implemented and build-verified. Phase 4 battery work is being revalidated and completed one item at a time; the platform-independent abstraction, Windows battery implementation, percentage/status presentation, independent scaling, grouped-layout integration, and free-layout integration are verified.
 
 ## Completed
 - Existing Python/PyQt DeskPilot repository was frozen.
@@ -42,14 +42,10 @@ The Clock and Date modules are implemented and build-verified. Phase 4 battery a
 - Persistent Date Module settings added and build-verified.
 - Turkish locale correctness verified for the Date Module and build-verified.
 - Phase 3 Date Module completed.
-- Phase 4 platform-independent battery abstraction implemented and build-verified.
-- Windows battery adapter implemented and build-verified.
-- Battery percentage/status presentation implemented and build-verified.
-- Charging/plugged-in detection implemented and build-verified.
-- Optional battery icon implemented and build-verified.
-- Battery visibility implemented and build-verified.
-- Battery font/color/bold settings implemented and build-verified.
-- Independent battery scaling implemented and build-verified.
+- Phase 4 platform-independent battery abstraction verified by `BatteryModelTest`.
+- Phase 4 Windows battery implementation verified by `WindowsBatteryServiceTest`.
+- Phase 4 battery percentage/status verified by `BatteryModelTest` and Debug build.
+- Phase 4 independent scaling and free-layout integration verified by `BatteryModelTest` and Debug build.
 - Clock and date context-menu options grouped into dedicated settings submenus.
 
 ## Clock Performance Verification
@@ -95,7 +91,7 @@ Use the SPP-style workflow:
 Commands and patches should be concise and fail-fast. When working interactively with the user, provide one implementation step at a time and wait for the result when later steps depend on it.
 
 ## Immediate Next Steps
-1. Implement and verify grouped-layout battery integration.
+1. Implement and verify charging/plugged-in detection.
 
 ## AI Agent Continuation Instruction
 Before modifying this repository, read in this order:
@@ -113,7 +109,7 @@ Continue from the current state. Do not restart architectural interpretation unl
 Communicate with the user in Turkish unless explicitly requested otherwise.
 
 ## Last Updated
-2026-07-25 — Phase 4 independent battery scaling implemented and build-verified; grouped-layout integration is next.
+2026-07-26 — Module input mask and screen-bound drag behavior verified by Debug build and CTest; charging/plugged-in detection is next.
 
 
 

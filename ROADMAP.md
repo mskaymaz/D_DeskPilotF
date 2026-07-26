@@ -164,10 +164,10 @@ Phase 0 is complete when:
 - [x] Platform-independent battery abstraction.
 - [x] Windows battery implementation.
 - [x] Battery percentage/status.
-- [x] Charging/plugged-in detection.
-- [x] Optional battery icon.
-- [x] Battery visibility.
-- [x] Font/color/bold settings.
+- [ ] Charging/plugged-in detection.
+- [ ] Optional battery icon.
+- [ ] Battery visibility.
+- [ ] Font/color/bold settings.
 - [x] Independent scaling.
 - [ ] Low-battery threshold.
 - [ ] Full-charge threshold.
@@ -175,8 +175,8 @@ Phase 0 is complete when:
 - [ ] Alert sound configuration.
 - [ ] Respect silent mode.
 - [ ] Safe no-battery behavior.
-- [ ] Grouped-layout integration.
-- [ ] Free-layout integration.
+- [x] Grouped-layout integration.
+- [x] Free-layout integration.
 - [ ] Efficient polling/event strategy.
 
 ### Completion Criteria
@@ -622,7 +622,7 @@ Potential areas:
 
 # CURRENT POSITION
 
-**Current phase:** Phase 4 â€” Battery Module (Platform-independent abstraction complete)
+**Current phase:** Phase 4 â€” Battery Module (percentage/status, independent scaling, grouped, and free-layout integration complete)
 
 **Completed so far:**
 
@@ -633,10 +633,13 @@ Potential areas:
 - DeskPilot product specification added.
 - DeskPilotC architecture document added.
 - Master roadmap created.
-- Phase 4 platform-independent battery abstraction implemented and build-verified.
-- Windows battery adapter implemented and build-verified.
+- Phase 4 platform-independent battery abstraction verified by `BatteryModelTest`.
+- Phase 4 Windows battery implementation verified by `WindowsBatteryServiceTest`.
+- Phase 4 battery percentage/status verified by `BatteryModelTest` and Debug build.
+- Phase 4 independent scaling and free-layout integration verified by `BatteryModelTest` and Debug build.
+- Phase 4 grouped-layout integration verified by Debug build and CTest.
 
 **Immediate next step:**
 
-1. Implement and verify grouped-layout battery integration.
+1. Implement and verify charging/plugged-in detection.
 

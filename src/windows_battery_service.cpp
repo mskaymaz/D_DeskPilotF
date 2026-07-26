@@ -34,12 +34,12 @@ void WindowsBatteryService::refresh()
         ? -1
         : static_cast<int>(powerStatus.BatteryLifePercent);
 
-    if ((powerStatus.BatteryFlag & 8) != 0) {
+    if (powerStatus.BatteryFlag == 255) {
+        nextState.status = BatteryStatus::Unknown;
+    } else if ((powerStatus.BatteryFlag & 8) != 0) {
         nextState.status = BatteryStatus::Charging;
     } else if (nextState.pluggedIn && nextState.percentage == 100) {
         nextState.status = BatteryStatus::Full;
-    } else if (powerStatus.BatteryFlag == 255) {
-        nextState.status = BatteryStatus::Unknown;
     } else {
         nextState.status = BatteryStatus::Discharging;
     }
