@@ -55,7 +55,7 @@
 - [x] Platform-independent battery abstraction.
 - [x] Windows battery implementation.
 - [x] Battery percentage/status presentation.
-- [ ] Charging/plugged-in detection.
+- [x] Charging/plugged-in detection.
 - [ ] Optional battery icon.
 - [ ] Battery visibility.
 - [ ] Battery font/color/bold settings.
@@ -64,6 +64,7 @@
 - [x] Turkish locale correctness.
 - [x] Persistent settings.
 - [x] Persistent clock settings.
+- [~] Stable module settings persistence across close/reopen remains incomplete.
 - [x] Performance verification.
 - [x] Date service.
 - [x] Gregorian date.
@@ -84,7 +85,7 @@
 Work on one verified task at a time. Do not begin later phases early. Do not mechanically port Python/PyQt code. Use the frozen Python project only as a behavioral reference.
 
 ## Next Immediate Task
-Implement and verify charging/plugged-in detection.
+Implement and verify the optional battery icon.
 
 
 

@@ -7,6 +7,48 @@ class WindowsBatteryServiceTest final : public QObject
     Q_OBJECT
 
 private slots:
+    void detectsChargingAndPluggedInState()
+    {
+        const DeskPilot::BatteryState state =
+            DeskPilot::WindowsBatteryService::stateFromPowerStatus(1, 8, 72);
+
+        QVERIFY(state.present);
+        QVERIFY(state.pluggedIn);
+        QCOMPARE(state.percentage, 72);
+        QCOMPARE(state.status, DeskPilot::BatteryStatus::Charging);
+    }
+
+    void detectsPluggedInFullState()
+    {
+        const DeskPilot::BatteryState state =
+            DeskPilot::WindowsBatteryService::stateFromPowerStatus(1, 1, 100);
+
+        QVERIFY(state.present);
+        QVERIFY(state.pluggedIn);
+        QCOMPARE(state.status, DeskPilot::BatteryStatus::Full);
+    }
+
+    void detectsDischargingState()
+    {
+        const DeskPilot::BatteryState state =
+            DeskPilot::WindowsBatteryService::stateFromPowerStatus(0, 1, 48);
+
+        QVERIFY(state.present);
+        QVERIFY(!state.pluggedIn);
+        QCOMPARE(state.status, DeskPilot::BatteryStatus::Discharging);
+    }
+
+    void handlesMissingBattery()
+    {
+        const DeskPilot::BatteryState state =
+            DeskPilot::WindowsBatteryService::stateFromPowerStatus(1, 128, 255);
+
+        QVERIFY(!state.present);
+        QVERIFY(!state.pluggedIn);
+        QCOMPARE(state.percentage, -1);
+        QCOMPARE(state.status, DeskPilot::BatteryStatus::NotPresent);
+    }
+
     void readsConsistentSystemPowerState()
     {
         DeskPilot::WindowsBatteryService service;

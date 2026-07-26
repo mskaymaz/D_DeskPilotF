@@ -164,7 +164,7 @@ Phase 0 is complete when:
 - [x] Platform-independent battery abstraction.
 - [x] Windows battery implementation.
 - [x] Battery percentage/status.
-- [ ] Charging/plugged-in detection.
+- [x] Charging/plugged-in detection.
 - [ ] Optional battery icon.
 - [ ] Battery visibility.
 - [ ] Font/color/bold settings.
@@ -196,7 +196,7 @@ Phase 0 is complete when:
 - [ ] Final grouped-layout behavior.
 - [ ] Final free-layout behavior.
 - [ ] Independent Clock/Date/Battery positioning.
-- [ ] Position persistence.
+- [x] Position persistence.
 - [ ] Lock/unlock behavior where required.
 - [ ] Inter-module spacing.
 - [ ] Scale interactions.
@@ -638,8 +638,10 @@ Potential areas:
 - Phase 4 battery percentage/status verified by `BatteryModelTest` and Debug build.
 - Phase 4 independent scaling and free-layout integration verified by `BatteryModelTest` and Debug build.
 - Phase 4 grouped-layout integration verified by Debug build and CTest.
+- Phase 4 charging/plugged-in detection verified by deterministic Windows battery-state tests.
+- Persistent layout mode, module positions, and battery appearance settings verified by INI round-trip.
 
 **Immediate next step:**
 
-1. Implement and verify charging/plugged-in detection.
+1. Implement and verify the optional battery icon.
 

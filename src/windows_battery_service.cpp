@@ -22,21 +22,29 @@ void WindowsBatteryService::refresh()
         return;
     }
 
-    if (powerStatus.BatteryFlag == 128) {
-        m_state = BatteryState::unavailable();
-        return;
+    m_state = stateFromPowerStatus(
+        powerStatus.ACLineStatus,
+        powerStatus.BatteryFlag,
+        powerStatus.BatteryLifePercent);
+}
+
+BatteryState WindowsBatteryService::stateFromPowerStatus(
+    BYTE acLineStatus, BYTE batteryFlag, BYTE batteryLifePercent)
+{
+    if (batteryFlag == 128) {
+        return BatteryState::unavailable();
     }
 
     BatteryState nextState;
     nextState.present = true;
-    nextState.pluggedIn = powerStatus.ACLineStatus == 1;
-    nextState.percentage = powerStatus.BatteryLifePercent == 255
+    nextState.pluggedIn = acLineStatus == 1;
+    nextState.percentage = batteryLifePercent == 255
         ? -1
-        : static_cast<int>(powerStatus.BatteryLifePercent);
+        : static_cast<int>(batteryLifePercent);
 
-    if (powerStatus.BatteryFlag == 255) {
+    if (batteryFlag == 255) {
         nextState.status = BatteryStatus::Unknown;
-    } else if ((powerStatus.BatteryFlag & 8) != 0) {
+    } else if ((batteryFlag & 8) != 0) {
         nextState.status = BatteryStatus::Charging;
     } else if (nextState.pluggedIn && nextState.percentage == 100) {
         nextState.status = BatteryStatus::Full;
@@ -44,7 +52,7 @@ void WindowsBatteryService::refresh()
         nextState.status = BatteryStatus::Discharging;
     }
 
-    m_state = nextState;
+    return nextState;
 }
 
 } // namespace DeskPilot

@@ -11,10 +11,61 @@ ModuleWindow {
     property bool contextMenuOpen: false
     property var modulePositions: ({})
     property bool modulePositionsInitialized: false
+    signal layoutSettingsChanged()
+
+    Timer {
+        id: layoutSettingsSaveTimer
+        interval: 250
+        repeat: false
+        onTriggered: rootWindow.layoutSettingsChanged()
+    }
+
+    Timer {
+        id: closeAfterSaveTimer
+        interval: 500
+        repeat: false
+        onTriggered: Qt.quit()
+    }
+
+    function scheduleLayoutSettingsSave() {
+        layoutSettingsSaveTimer.restart()
+    }
+
+    function saveAndClose() {
+        contextMenuOpen = false
+        updateInputMask()
+        closeAfterSaveTimer.restart()
+    }
 
     function savedModulePosition(key, fallbackX, fallbackY) {
         var position = modulePositions[key]
         return position === undefined ? { x: fallbackX, y: fallbackY } : position
+    }
+
+    function applySavedModulePositions() {
+        if (!freeLayoutEnabled) {
+            updateInputMask()
+            return
+        }
+
+        var layout = layoutLoader.item
+        if (layout === null || layout.inputItems === undefined) {
+            return
+        }
+
+        for (var index = 0; index < layout.inputItems.length; ++index) {
+            var loader = layout.inputItems[index]
+            var position = modulePositions[moduleKey(index)]
+            if (loader === null || position === undefined || loader.width <= 0 || loader.height <= 0) {
+                continue
+            }
+
+            loader.positionInitialized = true
+            loader.x = Math.max(0, Math.min(rootWindow.width - loader.width, position.x))
+            loader.y = Math.max(0, Math.min(rootWindow.height - loader.height, position.y))
+        }
+
+        updateInputMask()
     }
 
     function moduleKey(index) {
@@ -70,6 +121,7 @@ ModuleWindow {
 
         modulePositions = nextPositions
         modulePositionsInitialized = true
+        scheduleLayoutSettingsSave()
     }
 
     function moveGroupedModules(deltaX, deltaY) {
@@ -119,6 +171,7 @@ ModuleWindow {
             }
         }
         modulePositions = nextPositions
+        scheduleLayoutSettingsSave()
     }
 
     function updateInputMask() {
@@ -199,12 +252,16 @@ ModuleWindow {
 
         if (freeLayoutEnabled) {
             modulePositions = currentPositions
+            scheduleLayoutSettingsSave()
         }
 
         inputMaskController.setRegions(regions)
     }
 
-    onFreeLayoutEnabledChanged: updateInputMask()
+    onFreeLayoutEnabledChanged: {
+        updateInputMask()
+        scheduleLayoutSettingsSave()
+    }
     onWidthChanged: {
         updateInputMask()
         initializeGroupedPositions()
@@ -284,8 +341,9 @@ ModuleWindow {
 
         TextMetrics {
             id: batteryMetrics
-            font.family: "Segoe UI"
+            font.family: batteryModel.fontFamily !== "" ? batteryModel.fontFamily : "Segoe UI"
             font.pixelSize: DesignTokens.moduleBasePixelSize * batteryModel.scale
+            font.bold: batteryModel.bold
             text: "Pil: 100% · Pil kullanılıyor"
         }
 
@@ -381,6 +439,7 @@ ModuleWindow {
                 height: batteryText.implicitHeight
                 implicitWidth: width
                 implicitHeight: height
+                visible: batteryModel.visible
                 property var renderedItems: [batteryText]
 
                 BaseText {
@@ -391,9 +450,11 @@ ModuleWindow {
                         : "Pil: " + batteryModel.statusText
                     horizontalAlignment: Text.AlignHCenter
                     verticalAlignment: Text.AlignVCenter
-                    font.family: "Segoe UI"
+                    font.family: batteryModel.fontFamily !== ""
+                        ? batteryModel.fontFamily : "Segoe UI"
                     font.pixelSize: DesignTokens.moduleBasePixelSize * batteryModel.scale
-                    color: DesignTokens.secondaryText
+                    font.bold: batteryModel.bold
+                    color: batteryModel.fontColor
                     onPaintedWidthChanged: rootWindow.updateInputMask()
                     onPaintedHeightChanged: rootWindow.updateInputMask()
                 }
@@ -443,7 +504,7 @@ ModuleWindow {
 
                 Loader {
                     id: groupedBatteryLoader
-                    visible: batteryModel.available
+                    visible: batteryModel.available && batteryModel.visible
                     sourceComponent: batteryDisplayComponent
                     x: rootWindow.moduleX("battery", (parent.width - width) / 2)
                     y: rootWindow.moduleY("battery", (parent.height - height) / 2)
@@ -571,7 +632,7 @@ ModuleWindow {
                     id: freeBatteryLoader
                     z: 1
                     property bool positionInitialized: false
-                    visible: batteryModel.available
+                    visible: batteryModel.available && batteryModel.visible
                     sourceComponent: batteryDisplayComponent
                     x: freeDateLoader.x + (freeDateLoader.width - width) / 2
                     y: freeDateLoader.y + freeDateLoader.height + DesignTokens.space2
@@ -1068,7 +1129,7 @@ ModuleWindow {
 
         MenuItem {
             text: "Kapat"
-            onTriggered: Qt.quit()
+            onTriggered: rootWindow.saveAndClose()
         }
     }
 }

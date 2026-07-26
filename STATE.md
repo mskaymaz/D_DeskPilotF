@@ -12,6 +12,8 @@ Private GitHub repository: `mskaymaz/D_DeskPilotC`
 ## Current Status
 The desktop surface is transparent and panel-free across the primary screen. Visible module regions receive input; all other areas pass through to underlying applications. Free-layout modules remain within the available screen area, while grouped mode moves all modules together. The Clock and Date modules are implemented and build-verified. Phase 4 battery work is being revalidated and completed one item at a time; the platform-independent abstraction, Windows battery implementation, percentage/status presentation, independent scaling, grouped-layout integration, and free-layout integration are verified.
 
+Module settings persistence, including stable layout, placement, and visual settings across close/reopen, remains incomplete.
+
 ## Completed
 - Existing Python/PyQt DeskPilot repository was frozen.
 - Frozen reference was tagged as `deskpilot-python-freeze`.
@@ -46,6 +48,8 @@ The desktop surface is transparent and panel-free across the primary screen. Vis
 - Phase 4 Windows battery implementation verified by `WindowsBatteryServiceTest`.
 - Phase 4 battery percentage/status verified by `BatteryModelTest` and Debug build.
 - Phase 4 independent scaling and free-layout integration verified by `BatteryModelTest` and Debug build.
+- Phase 4 charging/plugged-in detection verified by deterministic Windows battery-state tests.
+- Persistent layout mode, module positions, and battery appearance settings added and INI round-trip verified.
 - Clock and date context-menu options grouped into dedicated settings submenus.
 
 ## Clock Performance Verification
@@ -91,7 +95,7 @@ Use the SPP-style workflow:
 Commands and patches should be concise and fail-fast. When working interactively with the user, provide one implementation step at a time and wait for the result when later steps depend on it.
 
 ## Immediate Next Steps
-1. Implement and verify charging/plugged-in detection.
+1. Implement and verify the optional battery icon.
 
 ## AI Agent Continuation Instruction
 Before modifying this repository, read in this order:
@@ -109,7 +113,7 @@ Continue from the current state. Do not restart architectural interpretation unl
 Communicate with the user in Turkish unless explicitly requested otherwise.
 
 ## Last Updated
-2026-07-26 — Module input mask and screen-bound drag behavior verified by Debug build and CTest; charging/plugged-in detection is next.
+2026-07-26 — Layout and battery settings persistence verified by INI round-trip, Debug build, and CTest; optional battery icon is next.
 
 
 

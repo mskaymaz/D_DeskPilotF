@@ -4,7 +4,9 @@
 #include <QDebug>
 #include <QScreen>
 #include <QSettings>
+#include <QTimer>
 #include <QWindow>
+#include <QJSValue>
 #include <qqml.h>
 
 #include "clock_model.h"
@@ -23,6 +25,8 @@ int main(int argc, char *argv[])
         Qt::HighDpiScaleFactorRoundingPolicy::PassThrough);
 
     QGuiApplication app(argc, argv);
+    app.setOrganizationName("DeskPilot");
+    app.setApplicationName("DeskPilotC");
 
     qmlRegisterType<DeskPilot::ClockModel>("DeskPilot.Clock", 1, 0, "ClockModel");
     DeskPilot::ClockService clockService;
@@ -37,7 +41,8 @@ int main(int argc, char *argv[])
     DeskPilot::BatteryModel batteryModel(nullptr);
 #endif
     batteryModel.refresh();
-    QSettings settings("DeskPilot", "DeskPilotC");
+    QSettings settings(QGuiApplication::applicationDirPath() + "/DeskPilotC.ini",
+        QSettings::IniFormat);
 
     settings.beginGroup("clock");
     clockModel.setVisible(settings.value("visible", clockModel.visible()).toBool());
@@ -59,9 +64,33 @@ int main(int argc, char *argv[])
     settings.endGroup();
 
     settings.beginGroup("battery");
+    batteryModel.setVisible(settings.value("visible", batteryModel.visible()).toBool());
     batteryModel.setLowBatteryThreshold(
         settings.value("lowBatteryThreshold", batteryModel.lowBatteryThreshold()).toInt());
+    batteryModel.setFontFamily(
+        settings.value("fontFamily", batteryModel.fontFamily()).toString());
+    const QColor savedBatteryFontColor(
+        settings.value("fontColor", batteryModel.fontColor().name(QColor::HexArgb)).toString());
+    if (savedBatteryFontColor.isValid()) {
+        batteryModel.setFontColor(savedBatteryFontColor);
+    }
+    batteryModel.setBold(settings.value("bold", batteryModel.bold()).toBool());
     batteryModel.setScale(settings.value("scale", batteryModel.scale()).toDouble());
+    settings.endGroup();
+
+    settings.beginGroup("layout");
+    const bool savedFreeLayout = settings.value("freeLayoutEnabled", false).toBool();
+    QVariantMap savedModulePositions;
+    for (const auto &key : {QStringLiteral("clock"), QStringLiteral("date"),
+             QStringLiteral("battery")}) {
+        settings.beginGroup(key);
+        if (settings.contains("x") && settings.contains("y")) {
+            savedModulePositions.insert(key, QVariantMap{
+                {QStringLiteral("x"), settings.value("x").toDouble()},
+                {QStringLiteral("y"), settings.value("y").toDouble()}});
+        }
+        settings.endGroup();
+    }
     settings.endGroup();
 
     settings.beginGroup("date");
@@ -115,8 +144,34 @@ int main(int argc, char *argv[])
 
     const auto saveBatterySettings = [&settings, &batteryModel]() {
         settings.beginGroup("battery");
+        settings.setValue("visible", batteryModel.visible());
         settings.setValue("lowBatteryThreshold", batteryModel.lowBatteryThreshold());
+        settings.setValue("fontFamily", batteryModel.fontFamily());
+        settings.setValue("fontColor", batteryModel.fontColor().name(QColor::HexArgb));
+        settings.setValue("bold", batteryModel.bold());
         settings.setValue("scale", batteryModel.scale());
+        settings.endGroup();
+        settings.sync();
+    };
+
+    const auto saveLayoutSettings = [&settings](QObject *window) {
+        const QVariant rawPositions = window->property("modulePositions");
+        const QJSValue positions = rawPositions.value<QJSValue>();
+        settings.beginGroup("layout");
+        settings.setValue("freeLayoutEnabled", window->property("freeLayoutEnabled"));
+        settings.remove("modulePositions");
+        for (const auto &key : {QStringLiteral("clock"), QStringLiteral("date"),
+                 QStringLiteral("battery")}) {
+            const QJSValue position = positions.property(key);
+            settings.beginGroup(key);
+            if (position.isObject()) {
+                settings.setValue("x", position.property("x").toNumber());
+                settings.setValue("y", position.property("y").toNumber());
+            } else {
+                settings.remove("");
+            }
+            settings.endGroup();
+        }
         settings.endGroup();
         settings.sync();
     };
@@ -149,6 +204,9 @@ int main(int argc, char *argv[])
     QObject::connect(
         &batteryModel,
         &DeskPilot::BatteryModel::lowBatteryThresholdChanged,
+        saveBatterySettings);
+    QObject::connect(&batteryModel, &DeskPilot::BatteryModel::visibleChanged, saveBatterySettings);
+    QObject::connect(&batteryModel, &DeskPilot::BatteryModel::appearanceChanged,
         saveBatterySettings);
     QObject::connect(&batteryModel, &DeskPilot::BatteryModel::scaleChanged, saveBatterySettings);
     QObject::connect(&app, &QCoreApplication::aboutToQuit, saveBatterySettings);
@@ -194,6 +252,28 @@ int main(int argc, char *argv[])
         if (const auto *primaryScreen = QGuiApplication::primaryScreen()) {
             window->setGeometry(primaryScreen->availableGeometry());
         }
+        window->setProperty("modulePositions", savedModulePositions);
+        window->setProperty("freeLayoutEnabled", savedFreeLayout);
+        QMetaObject::invokeMethod(window, "applySavedModulePositions", Qt::QueuedConnection);
+        auto *layoutSaveTimer = new QTimer(&app);
+        layoutSaveTimer->setInterval(250);
+        QObject::connect(layoutSaveTimer, &QTimer::timeout,
+            [window, saveLayoutSettings, lastFreeLayout = QVariant(),
+                lastModulePositions = QVariant(), initialized = false]() mutable {
+                const QVariant currentFreeLayout = window->property("freeLayoutEnabled");
+                const QVariant currentModulePositions = window->property("modulePositions");
+                if (initialized && currentFreeLayout == lastFreeLayout
+                    && currentModulePositions == lastModulePositions) {
+                    return;
+                }
+                saveLayoutSettings(window);
+                lastFreeLayout = currentFreeLayout;
+                lastModulePositions = currentModulePositions;
+                initialized = true;
+            });
+        layoutSaveTimer->start();
+        QObject::connect(&app, &QCoreApplication::aboutToQuit,
+            [window, saveLayoutSettings]() { saveLayoutSettings(window); });
         inputMaskController.setWindow(window);
     }
 
