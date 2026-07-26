@@ -65,6 +65,7 @@ qt_add_qml_module(DeskPilotC
         qml/GroupedLayout.qml
         qml/Main.qml
         qml/ModuleWindow.qml
+        qml/QuickActions.qml
     RESOURCES
         ${DESKPILOT_IMAGE_FILES}
         ${DESKPILOT_FONT_FILES}

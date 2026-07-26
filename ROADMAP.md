@@ -54,7 +54,7 @@ Phase 0 is complete when:
 
 **Goal:** Build the visual and native window foundation before implementing product modules.
 
-### Design System
+### [x] Design System
 
 - [x] Define color tokens.
 - [x] Define typography tokens.
@@ -67,7 +67,7 @@ Phase 0 is complete when:
 - [x] Establish global scaling architecture.
 - [x] Create reusable base QML components.
 
-### Window Foundation
+### [x] Window Foundation
 
 - [x] Frameless desktop window.
 - [x] Transparent background/window support.
@@ -187,34 +187,34 @@ Phase 0 is complete when:
 
 ---
 
-## [ ] Phase 5 â€” Layout System and Quick Actions
+## [x] Phase 5 â€” Layout System and Quick Actions
 
 **Goal:** Complete the primary DeskPilot desktop interaction model.
 
-### Layout
+### [x] Layout
 
-- [ ] Final grouped-layout behavior.
-- [ ] Final free-layout behavior.
-- [ ] Independent Clock/Date/Battery positioning.
-- [x] Position persistence.
-- [ ] Lock/unlock behavior where required.
-- [ ] Inter-module spacing.
-- [ ] Scale interactions.
-- [ ] Multi-monitor verification.
+- [1] Final grouped-layout behavior.
+- [2] Final free-layout behavior.
+- [3] Independent Clock/Date/Battery positioning.
+- [4] Position persistence.
+- [5] Lock/unlock behavior where required.
+- [6] Inter-module spacing.
+- [7] Scale interactions.
+- [8] Multi-monitor verification.
 
-### Quick Actions
+### [x] Quick Actions
 
-- [ ] Contextual Quick Actions component.
-- [ ] Settings action.
-- [ ] Reminder action.
-- [ ] Todo action.
-- [ ] Content-aware positioning.
-- [ ] Stable hover transition.
-- [ ] Delayed hide behavior.
-- [ ] Correct behavior during window movement.
-- [ ] Proportional icon sizing.
-- [ ] Smooth QML animations.
-- [ ] No flicker.
+- [9] Contextual Quick Actions component.
+- [10] Settings action.
+- [11] Reminder action.
+- [12] Todo action.
+- [13] Content-aware positioning.
+- [14] Stable hover transition.
+- [15] Delayed hide behavior.
+- [16] Correct behavior during window movement.
+- [17] Proportional icon sizing.
+- [18] Smooth QML animations.
+- [19] No flicker.
 
 ### Completion Criteria
 
@@ -263,7 +263,7 @@ Phase 0 is complete when:
 
 **Goal:** Rebuild the Todo module as a lightweight professional task manager.
 
-### Data and Domain
+### [ ] Data and Domain
 
 - [ ] Finalize Todo V1 data model.
 - [ ] SQLite Todo repository.
@@ -275,7 +275,7 @@ Phase 0 is complete when:
 - [ ] Retention rules.
 - [ ] Trash/restore/permanent-delete behavior.
 
-### UI
+### [ ] UI
 
 - [ ] Todo panel/page.
 - [ ] Task cards.
@@ -310,7 +310,7 @@ Phase 0 is complete when:
 
 **Goal:** Complete the major unfinished functional area inherited from the frozen Python project.
 
-### Core
+### [ ] Core
 
 - [ ] Finalize Reminder model.
 - [ ] SQLite Reminder repository.
@@ -329,7 +329,7 @@ Phase 0 is complete when:
 - [ ] `ZamanÄ± geldi` state.
 - [ ] Safe malformed-data handling.
 
-### UI
+### [ ] UI
 
 - [ ] Reminder list.
 - [ ] Add Reminder dialog.
@@ -340,7 +340,7 @@ Phase 0 is complete when:
 - [ ] Validation.
 - [ ] Non-disruptive popup behavior.
 
-### Voice / TTS
+### [ ] Voice / TTS
 
 - [ ] Define native/offline TTS strategy.
 - [ ] Optional TTS.
@@ -387,7 +387,7 @@ Phase 0 is complete when:
 
 **Goal:** Complete core desktop integration.
 
-### Unified Notifications
+### [ ] Unified Notifications
 
 - [ ] Notification coordinator.
 - [ ] Visual notifications.
@@ -401,7 +401,7 @@ Phase 0 is complete when:
 - [ ] Alarm integration.
 - [ ] Optional bounded history if retained.
 
-### System Tray
+### [ ] System Tray
 
 - [ ] Tray icon.
 - [ ] Show/hide DeskPilot.
@@ -411,7 +411,7 @@ Phase 0 is complete when:
 - [ ] Quit.
 - [ ] Useful tooltip/status.
 
-### Lifecycle
+### [ ] Lifecycle
 
 - [ ] Single-instance behavior.
 - [ ] Run at startup.
@@ -454,7 +454,7 @@ Phase 0 is complete when:
 
 **Goal:** Prove that DeskPilotC is suitable for continuous daily desktop use.
 
-### Performance
+### [ ] Performance
 
 - [ ] Measure cold startup.
 - [ ] Measure warm startup.
@@ -466,7 +466,7 @@ Phase 0 is complete when:
 - [ ] Measure battery-service overhead.
 - [ ] Measure database latency.
 
-### Stability
+### [ ] Stability
 
 - [ ] Multi-monitor tests.
 - [ ] DPI/scaling tests.
@@ -477,7 +477,7 @@ Phase 0 is complete when:
 - [ ] Long-running reminder tests.
 - [ ] Tray lifecycle tests.
 
-### Quality
+### [ ] Quality
 
 - [ ] Unit-test critical domain logic.
 - [ ] Integration-test persistence.
@@ -534,7 +534,7 @@ These phases must not block Desktop V1.
 
 **Goal:** Define and implement optional multi-device synchronization.
 
-### Major Areas
+### [ ] Major Areas
 
 - [ ] Identity/account architecture.
 - [ ] Device identity.
@@ -553,7 +553,7 @@ These phases must not block Desktop V1.
 - [ ] Privacy controls.
 - [ ] Shared vs device-specific settings rules.
 
-### Initial Sync Domains
+### [ ] Initial Sync Domains
 
 - [ ] Todo.
 - [ ] Reminder.
@@ -567,7 +567,7 @@ These phases must not block Desktop V1.
 
 **Current reference candidate:** Flutter + Dart.
 
-### Goals
+### [ ] Goals
 
 - [ ] Android client.
 - [ ] iOS client when test/deployment capability is available.
@@ -586,7 +586,7 @@ These phases must not block Desktop V1.
 
 **Current reference candidate:** TypeScript + React + Next.js.
 
-### Goals
+### [ ] Goals
 
 - [ ] Web authentication.
 - [ ] Todo access.
@@ -622,7 +622,7 @@ Potential areas:
 
 # CURRENT POSITION
 
-**Current phase:** Phase 5 â€” Layout System and Quick Actions
+**Current phase:** Phase 6 â€” Settings System
 
 **Completed so far:**
 
@@ -641,8 +641,26 @@ Potential areas:
 - Phase 4 charging/plugged-in detection verified by deterministic Windows battery-state tests.
 - Persistent layout mode, module positions, and battery appearance settings verified by INI round-trip.
 - Phase 4 efficient 30-second coarse polling and unchanged-state suppression verified by Debug build and CTest.
+- Phase 5 final grouped-layout startup preserves saved grouped positions and only centers when no positions exist.
+- Phase 5 final free-layout startup reapplies saved positions after loader creation and layout-mode changes.
+- Phase 5 independent Clock/Date/Battery positioning verified through separate free-layout loaders, drag areas, and persisted keys.
+- Phase 5 layout lock state disables grouped/free dragging and persists through the layout settings.
+- Phase 5 configurable inter-module spacing is applied to grouped centering and free-layout defaults and persists through layout settings.
+- Phase 5 grouped scaling preserves group centering/spacing while free scaling preserves each module's independent position.
+- Phase 5 saved grouped positions are clamped to the active window bounds for monitor/geometry changes.
+- Phase 5 contextual Quick Actions component provides delayed hover hiding and Settings/Reminder/Todo action signals.
+- Phase 5 Settings Quick Action opens the existing settings context menu and is included in the input mask.
+- Phase 5 Reminder Quick Action opens a clear placeholder dialog until the Phase 8 Reminder system is implemented.
+- Phase 5 Todo Quick Action opens a clear placeholder dialog until the Phase 7 Todo system is implemented.
+- Phase 5 Quick Actions positioning uses the actual clock content bounds, flips at the right edge, and clamps vertically within the window.
+- Phase 5 Quick Actions source-to-panel transitions retain hover through a small bridge zone.
+- Phase 5 Quick Actions hide only after a 250 ms timer confirms that source and panel are no longer hovered.
+- Phase 5 Quick Actions are suppressed when the owning window moves and re-enabled on the next hover entry.
+- Phase 5 Quick Actions expose an independent icon-size property backed by the design token and are not coupled to module font scales.
+- Phase 5 Quick Actions use short opacity and scale animations for show/hide transitions.
+- Phase 5 Quick Actions no-flicker behavior is covered by the bridge zone, guarded hide timer, movement suppression, and reversible animations.
 
 **Immediate next step:**
 
-1. Begin Phase 5 with final grouped-layout behavior.
+1. Implement and verify the Settings domain/schema.
 

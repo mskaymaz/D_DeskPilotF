@@ -8,6 +8,8 @@ ModuleWindow {
     visible: true
     title: "DeskPilotC"
     property bool freeLayoutEnabled: false
+    property bool layoutLocked: false
+    property int moduleSpacing: DesignTokens.space4
     property bool contextMenuOpen: false
     property var modulePositions: ({})
     property bool modulePositionsInitialized: false
@@ -27,6 +29,44 @@ ModuleWindow {
         onTriggered: Qt.quit()
     }
 
+    Dialog {
+        id: reminderDialog
+        title: "Hatırlatıcı"
+        modal: true
+        standardButtons: Dialog.Ok
+        width: 360
+
+        contentItem: Label {
+            text: "Hatırlatıcı ekranı Faz 8 kapsamında etkinleştirilecek."
+            wrapMode: Text.WordWrap
+            padding: DesignTokens.space4
+        }
+
+        onClosed: {
+            rootWindow.contextMenuOpen = false
+            rootWindow.updateInputMask()
+        }
+    }
+
+    Dialog {
+        id: todoDialog
+        title: "Todo"
+        modal: true
+        standardButtons: Dialog.Ok
+        width: 360
+
+        contentItem: Label {
+            text: "Todo ekranı Faz 7 kapsamında etkinleştirilecek."
+            wrapMode: Text.WordWrap
+            padding: DesignTokens.space4
+        }
+
+        onClosed: {
+            rootWindow.contextMenuOpen = false
+            rootWindow.updateInputMask()
+        }
+    }
+
     function scheduleLayoutSettingsSave() {
         layoutSettingsSaveTimer.restart()
     }
@@ -36,6 +76,62 @@ ModuleWindow {
         updateInputMask()
         scheduleLayoutSettingsSave()
         closeAfterSaveTimer.restart()
+    }
+
+    function handleQuickAction(actionKey) {
+        if (actionKey === "reminder") {
+            contextMenuOpen = true
+            updateInputMask()
+            reminderDialog.open()
+            return
+        }
+
+        if (actionKey === "todo") {
+            contextMenuOpen = true
+            updateInputMask()
+            todoDialog.open()
+            return
+        }
+
+        if (actionKey !== "settings") {
+            return
+        }
+
+        contextMenuOpen = true
+        updateInputMask()
+        contextMenu.popup()
+    }
+
+    function updateQuickActionsPosition() {
+        var layout = layoutLoader.item
+        if (layout === null || layout.inputItems === undefined
+            || layout.inputItems.length === 0) {
+            return
+        }
+
+        var clockLoader = layout.inputItems[0]
+        if (clockLoader === null || clockLoader.item === null
+            || clockLoader.item.updateQuickActionsPosition === undefined) {
+            return
+        }
+
+        clockLoader.item.updateQuickActionsPosition()
+    }
+
+    function hideQuickActionsForWindowMovement() {
+        var layout = layoutLoader.item
+        if (layout === null || layout.inputItems === undefined
+            || layout.inputItems.length === 0) {
+            return
+        }
+
+        var clockLoader = layout.inputItems[0]
+        if (clockLoader === null || clockLoader.item === null
+            || clockLoader.item.hideQuickActionsForWindowMovement === undefined) {
+            return
+        }
+
+        clockLoader.item.hideQuickActionsForWindowMovement()
     }
 
     function savedModulePosition(key, fallbackX, fallbackY) {
@@ -83,11 +179,71 @@ ModuleWindow {
         return position === undefined ? fallbackY : position.y
     }
 
+    function setModuleSpacing(value) {
+        moduleSpacing = Math.max(0, Math.min(64, value))
+        if (!freeLayoutEnabled) {
+            modulePositionsInitialized = false
+            centerGroupedModules()
+        }
+        scheduleLayoutSettingsSave()
+    }
+
     function initializeGroupedPositions() {
         if (freeLayoutEnabled || modulePositionsInitialized) {
             return
         }
 
+        if (Object.keys(modulePositions).length > 0) {
+            modulePositionsInitialized = true
+            updateInputMask()
+            return
+        }
+
+        centerGroupedModules()
+    }
+
+    function clampGroupedPositions() {
+        if (freeLayoutEnabled) {
+            return
+        }
+
+        var layout = layoutLoader.item
+        if (layout === null || layout.inputItems === undefined) {
+            return
+        }
+
+        var nextPositions = {}
+        var changed = false
+        for (var key in modulePositions) {
+            nextPositions[key] = modulePositions[key]
+        }
+
+        for (var index = 0; index < layout.inputItems.length; ++index) {
+            var loader = layout.inputItems[index]
+            var key = moduleKey(index)
+            var position = modulePositions[key]
+            if (loader === null || position === undefined || loader.width <= 0
+                || loader.height <= 0) {
+                continue
+            }
+
+            var clampedPosition = {
+                x: Math.max(0, Math.min(rootWindow.width - loader.width, position.x)),
+                y: Math.max(0, Math.min(rootWindow.height - loader.height, position.y))
+            }
+            if (clampedPosition.x !== position.x || clampedPosition.y !== position.y) {
+                nextPositions[key] = clampedPosition
+                changed = true
+            }
+        }
+
+        if (changed) {
+            modulePositions = nextPositions
+            scheduleLayoutSettingsSave()
+        }
+    }
+
+    function centerGroupedModules() {
         var layout = layoutLoader.item
         if (layout === null || layout.inputItems === undefined) {
             return
@@ -108,7 +264,7 @@ ModuleWindow {
             return
         }
 
-        totalHeight += DesignTokens.space4 * (visibleLoaders.length - 1)
+        totalHeight += moduleSpacing * (visibleLoaders.length - 1)
         var nextPositions = {}
         var currentY = Math.max(0, (rootWindow.height - totalHeight) / 2)
         for (var visibleIndex = 0; visibleIndex < visibleLoaders.length; ++visibleIndex) {
@@ -117,12 +273,83 @@ ModuleWindow {
                 x: Math.max(0, (rootWindow.width - visibleLoader.loader.width) / 2),
                 y: currentY
             }
-            currentY += visibleLoader.loader.height + DesignTokens.space4
+            currentY += visibleLoader.loader.height + moduleSpacing
         }
 
         modulePositions = nextPositions
         modulePositionsInitialized = true
         scheduleLayoutSettingsSave()
+    }
+
+    function reflowGroupedModules() {
+        if (freeLayoutEnabled || !modulePositionsInitialized) {
+            return
+        }
+
+        var layout = layoutLoader.item
+        if (layout === null || layout.inputItems === undefined) {
+            return
+        }
+
+        var visibleLoaders = []
+        var minX = rootWindow.width
+        var minY = rootWindow.height
+        var maxX = 0
+        var maxY = 0
+        var totalHeight = 0
+        for (var index = 0; index < layout.inputItems.length; ++index) {
+            var loader = layout.inputItems[index]
+            if (loader === null || !loader.visible || loader.width <= 0 || loader.height <= 0) {
+                continue
+            }
+
+            var position = loader.mapToItem(rootWindow.contentItem, 0, 0)
+            minX = Math.min(minX, position.x)
+            minY = Math.min(minY, position.y)
+            maxX = Math.max(maxX, position.x + loader.width)
+            maxY = Math.max(maxY, position.y + loader.height)
+            totalHeight += loader.height
+            visibleLoaders.push({ loader: loader, key: moduleKey(index) })
+        }
+
+        if (visibleLoaders.length === 0) {
+            return
+        }
+
+        totalHeight += moduleSpacing * (visibleLoaders.length - 1)
+        var groupWidth = maxX - minX
+        var groupCenterX = (minX + maxX) / 2
+        var groupCenterY = (minY + maxY) / 2
+        groupCenterX = Math.max(groupWidth / 2,
+            Math.min(rootWindow.width - groupWidth / 2, groupCenterX))
+        groupCenterY = Math.max(totalHeight / 2,
+            Math.min(rootWindow.height - totalHeight / 2, groupCenterY))
+
+        var nextPositions = {}
+        for (var key in modulePositions) {
+            nextPositions[key] = modulePositions[key]
+        }
+
+        var currentY = groupCenterY - totalHeight / 2
+        for (var visibleIndex = 0; visibleIndex < visibleLoaders.length; ++visibleIndex) {
+            var visibleLoader = visibleLoaders[visibleIndex]
+            nextPositions[visibleLoader.key] = {
+                x: groupCenterX - visibleLoader.loader.width / 2,
+                y: currentY
+            }
+            currentY += visibleLoader.loader.height + moduleSpacing
+        }
+
+        modulePositions = nextPositions
+        scheduleLayoutSettingsSave()
+        updateInputMask()
+    }
+
+    function handleModuleScaleChanged() {
+        if (!freeLayoutEnabled) {
+            Qt.callLater(function() { rootWindow.reflowGroupedModules() })
+        }
+        updateInputMask()
     }
 
     function moveGroupedModules(deltaX, deltaY) {
@@ -265,15 +492,43 @@ ModuleWindow {
 
     onFreeLayoutEnabledChanged: {
         updateInputMask()
+        if (freeLayoutEnabled) {
+            Qt.callLater(function() { rootWindow.applySavedModulePositions() })
+        } else {
+            modulePositionsInitialized = false
+            Qt.callLater(function() { rootWindow.initializeGroupedPositions() })
+        }
         scheduleLayoutSettingsSave()
     }
+    onLayoutLockedChanged: scheduleLayoutSettingsSave()
+    onXChanged: hideQuickActionsForWindowMovement()
+    onYChanged: hideQuickActionsForWindowMovement()
     onWidthChanged: {
         updateInputMask()
         initializeGroupedPositions()
+        clampGroupedPositions()
+        updateQuickActionsPosition()
     }
     onHeightChanged: {
         updateInputMask()
         initializeGroupedPositions()
+        clampGroupedPositions()
+        updateQuickActionsPosition()
+    }
+
+    Connections {
+        target: clockModel
+        function onScaleChanged() { rootWindow.handleModuleScaleChanged() }
+    }
+
+    Connections {
+        target: dateModel
+        function onScaleChanged() { rootWindow.handleModuleScaleChanged() }
+    }
+
+    Connections {
+        target: batteryModel
+        function onScaleChanged() { rootWindow.handleModuleScaleChanged() }
     }
 
     FontLoader {
@@ -359,19 +614,79 @@ ModuleWindow {
             sourceComponent: rootWindow.freeLayoutEnabled
                 ? freeLayoutComponent
                 : groupedLayoutComponent
-            onLoaded: rootWindow.updateInputMask()
+            onLoaded: {
+                rootWindow.initializeGroupedPositions()
+                rootWindow.clampGroupedPositions()
+                rootWindow.updateInputMask()
+                rootWindow.updateQuickActionsPosition()
+            }
         }
 
         Component {
             id: clockDisplayComponent
 
             Item {
-                width: primaryMetrics.width + DesignTokens.space1 + secondsMetrics.width
+                id: clockDisplay
+                width: primaryMetrics.width
+                    + (clockModel.showSeconds
+                        ? DesignTokens.space1 + secondsMetrics.width : 0)
                 height: Math.max(primaryText.implicitHeight, secondsText.implicitHeight)
                 implicitWidth: width
                 implicitHeight: height
                 visible: clockModel.visible
-                property var renderedItems: [primaryText, secondsText]
+                property var renderedItems: [primaryText, secondsText, clockQuickActions]
+
+                function updateQuickActionsPosition() {
+                    if (clockQuickActions.width <= 0 || clockQuickActions.height <= 0) {
+                        return
+                    }
+
+                    var sourcePosition = clockDisplay.mapToItem(
+                        rootWindow.contentItem, 0, 0)
+                    var gap = DesignTokens.space2
+                    var rightX = sourcePosition.x + clockDisplay.width + gap
+                    var leftX = sourcePosition.x - clockQuickActions.width - gap
+                    var globalX = rightX + clockQuickActions.width <= rootWindow.width
+                        ? rightX : leftX
+                    globalX = Math.max(0, Math.min(
+                        rootWindow.width - clockQuickActions.width, globalX))
+
+                    var globalY = sourcePosition.y
+                        + (clockDisplay.height - clockQuickActions.height) / 2
+                    globalY = Math.max(0, Math.min(
+                        rootWindow.height - clockQuickActions.height, globalY))
+
+                    var localPosition = clockDisplay.mapFromItem(
+                        rootWindow.contentItem, globalX, globalY)
+                    clockQuickActions.x = localPosition.x
+                    clockQuickActions.y = localPosition.y
+                }
+
+                function hideQuickActionsForWindowMovement() {
+                    clockQuickActions.hideForWindowMovement()
+                }
+
+                HoverHandler {
+                    id: clockSourceHover
+                }
+
+                QuickActions {
+                    id: clockQuickActions
+                    x: clockDisplay.width + DesignTokens.space2
+                    y: (clockDisplay.height - height) / 2
+                    sourceHovered: clockSourceHover.hovered
+                    onShowingChanged: {
+                        clockDisplay.updateQuickActionsPosition()
+                        rootWindow.updateInputMask()
+                    }
+                    onWidthChanged: clockDisplay.updateQuickActionsPosition()
+                    onHeightChanged: clockDisplay.updateQuickActionsPosition()
+                    onActionTriggered: rootWindow.handleQuickAction(actionKey)
+                }
+
+                Component.onCompleted: updateQuickActionsPosition()
+                onWidthChanged: updateQuickActionsPosition()
+                onHeightChanged: updateQuickActionsPosition()
 
                 BaseText {
                     id: primaryText
@@ -491,6 +806,7 @@ ModuleWindow {
             GroupedLayout {
                 id: groupedLayout
                 anchors.fill: parent
+                layoutLocked: rootWindow.layoutLocked
                 property var inputItems: [
                     groupedClockLoader,
                     groupedDateLoader,
@@ -506,9 +822,18 @@ ModuleWindow {
                     sourceComponent: clockDisplayComponent
                     x: rootWindow.moduleX("clock", (parent.width - width) / 2)
                     y: rootWindow.moduleY("clock", (parent.height - height) / 2)
-                    onVisibleChanged: rootWindow.updateInputMask()
-                    onXChanged: rootWindow.updateInputMask()
-                    onYChanged: rootWindow.updateInputMask()
+                    onVisibleChanged: {
+                        rootWindow.updateInputMask()
+                        rootWindow.updateQuickActionsPosition()
+                    }
+                    onXChanged: {
+                        rootWindow.updateInputMask()
+                        rootWindow.updateQuickActionsPosition()
+                    }
+                    onYChanged: {
+                        rootWindow.updateInputMask()
+                        rootWindow.updateQuickActionsPosition()
+                    }
                     onWidthChanged: rootWindow.updateInputMask()
                     onHeightChanged: rootWindow.updateInputMask()
                 }
@@ -571,14 +896,30 @@ ModuleWindow {
                         }
                         rootWindow.updateInputMask()
                     }
-                    onVisibleChanged: rootWindow.updateInputMask()
-                    onWidthChanged: rootWindow.updateInputMask()
-                    onHeightChanged: rootWindow.updateInputMask()
-                    onXChanged: rootWindow.updateInputMask()
-                    onYChanged: rootWindow.updateInputMask()
+                    onVisibleChanged: {
+                        rootWindow.updateInputMask()
+                        rootWindow.updateQuickActionsPosition()
+                    }
+                    onWidthChanged: {
+                        rootWindow.updateInputMask()
+                        rootWindow.updateQuickActionsPosition()
+                    }
+                    onHeightChanged: {
+                        rootWindow.updateInputMask()
+                        rootWindow.updateQuickActionsPosition()
+                    }
+                    onXChanged: {
+                        rootWindow.updateInputMask()
+                        rootWindow.updateQuickActionsPosition()
+                    }
+                    onYChanged: {
+                        rootWindow.updateInputMask()
+                        rootWindow.updateQuickActionsPosition()
+                    }
 
                     MouseArea {
                         anchors.fill: parent
+                        enabled: !rootWindow.layoutLocked
                         cursorShape: pressed ? Qt.ClosedHandCursor : Qt.OpenHandCursor
 
                         property real pressOffsetX
@@ -608,13 +949,13 @@ ModuleWindow {
                     visible: dateModel.visible
                     sourceComponent: dateDisplayComponent
                     x: freeClockLoader.x + (freeClockLoader.width - width) / 2
-                    y: freeClockLoader.y + freeClockLoader.height + DesignTokens.space2
+                    y: freeClockLoader.y + freeClockLoader.height + rootWindow.moduleSpacing
                     onLoaded: {
                         if (!positionInitialized) {
                             var position = rootWindow.savedModulePosition(
                                 "date",
                                 freeClockLoader.x + (freeClockLoader.width - width) / 2,
-                                freeClockLoader.y + freeClockLoader.height + DesignTokens.space2)
+                                freeClockLoader.y + freeClockLoader.height + rootWindow.moduleSpacing)
                             x = Math.max(0, Math.min(parent.width - width, position.x))
                             y = Math.max(0, Math.min(parent.height - height, position.y))
                             positionInitialized = true
@@ -630,6 +971,7 @@ ModuleWindow {
                     MouseArea {
                         anchors.fill: parent
                         acceptedButtons: Qt.LeftButton
+                        enabled: !rootWindow.layoutLocked
                         cursorShape: pressed ? Qt.ClosedHandCursor : Qt.OpenHandCursor
 
                         property real pressOffsetX
@@ -659,13 +1001,13 @@ ModuleWindow {
                     visible: batteryModel.available && batteryModel.visible
                     sourceComponent: batteryDisplayComponent
                     x: freeDateLoader.x + (freeDateLoader.width - width) / 2
-                    y: freeDateLoader.y + freeDateLoader.height + DesignTokens.space2
+                    y: freeDateLoader.y + freeDateLoader.height + rootWindow.moduleSpacing
                     onLoaded: {
                         if (!positionInitialized) {
                             var position = rootWindow.savedModulePosition(
                                 "battery",
                                 freeDateLoader.x + (freeDateLoader.width - width) / 2,
-                                freeDateLoader.y + freeDateLoader.height + DesignTokens.space2)
+                                freeDateLoader.y + freeDateLoader.height + rootWindow.moduleSpacing)
                             x = Math.max(0, Math.min(parent.width - width, position.x))
                             y = Math.max(0, Math.min(parent.height - height, position.y))
                             positionInitialized = true
@@ -681,6 +1023,7 @@ ModuleWindow {
                     MouseArea {
                         anchors.fill: parent
                         acceptedButtons: Qt.LeftButton
+                        enabled: !rootWindow.layoutLocked
                         cursorShape: pressed ? Qt.ClosedHandCursor : Qt.OpenHandCursor
 
                         property real pressOffsetX
@@ -1333,6 +1676,52 @@ ModuleWindow {
             checkable: true
             checked: !rootWindow.freeLayoutEnabled
             onTriggered: rootWindow.freeLayoutEnabled = false
+        }
+
+        MenuItem {
+            text: "Yerleşimi kilitle"
+            checkable: true
+            checked: rootWindow.layoutLocked
+            onTriggered: rootWindow.layoutLocked = checked
+        }
+
+        Menu {
+            title: "Modül aralığı"
+
+            MenuItem {
+                text: "0 px"
+                checkable: true
+                checked: rootWindow.moduleSpacing === 0
+                onTriggered: rootWindow.setModuleSpacing(0)
+            }
+
+            MenuItem {
+                text: "8 px"
+                checkable: true
+                checked: rootWindow.moduleSpacing === 8
+                onTriggered: rootWindow.setModuleSpacing(8)
+            }
+
+            MenuItem {
+                text: "16 px"
+                checkable: true
+                checked: rootWindow.moduleSpacing === 16
+                onTriggered: rootWindow.setModuleSpacing(16)
+            }
+
+            MenuItem {
+                text: "24 px"
+                checkable: true
+                checked: rootWindow.moduleSpacing === 24
+                onTriggered: rootWindow.setModuleSpacing(24)
+            }
+
+            MenuItem {
+                text: "32 px"
+                checkable: true
+                checked: rootWindow.moduleSpacing === 32
+                onTriggered: rootWindow.setModuleSpacing(32)
+            }
         }
 
         MenuSeparator {}

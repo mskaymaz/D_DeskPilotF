@@ -143,6 +143,9 @@ int main(int argc, char *argv[])
 
     settings.beginGroup("layout");
     const bool savedFreeLayout = settings.value("freeLayoutEnabled", false).toBool();
+    const bool savedLayoutLocked = settings.value("layoutLocked", false).toBool();
+    const int savedModuleSpacing = qBound(
+        0, settings.value("moduleSpacing", 16).toInt(), 64);
     QVariantMap savedModulePositions;
     for (const auto &key : {QStringLiteral("clock"), QStringLiteral("date"),
              QStringLiteral("battery")}) {
@@ -260,6 +263,8 @@ int main(int argc, char *argv[])
         QStringList positionSummary;
         settings.beginGroup("layout");
         settings.setValue("freeLayoutEnabled", window->property("freeLayoutEnabled"));
+        settings.setValue("layoutLocked", window->property("layoutLocked"));
+        settings.setValue("moduleSpacing", window->property("moduleSpacing"));
         settings.remove("modulePositions");
         for (const auto &key : {QStringLiteral("clock"), QStringLiteral("date"),
                  QStringLiteral("battery")}) {
@@ -280,6 +285,8 @@ int main(int argc, char *argv[])
         settings.sync();
         qInfo() << "DeskPilotC settings saved: layout" << settings.fileName()
                 << "freeLayout=" << window->property("freeLayoutEnabled")
+                << "layoutLocked=" << window->property("layoutLocked")
+                << "moduleSpacing=" << window->property("moduleSpacing")
                 << "positions=" << positionSummary.join(", ")
                 << "status=" << static_cast<int>(settings.status());
     };
@@ -380,6 +387,8 @@ int main(int argc, char *argv[])
         }
         window->setProperty("modulePositions", savedModulePositions);
         window->setProperty("freeLayoutEnabled", savedFreeLayout);
+        window->setProperty("layoutLocked", savedLayoutLocked);
+        window->setProperty("moduleSpacing", savedModuleSpacing);
         QMetaObject::invokeMethod(window, "applySavedModulePositions", Qt::QueuedConnection);
         auto *layoutSaveTimer = new QTimer(&app);
         layoutSaveTimer->setInterval(250);

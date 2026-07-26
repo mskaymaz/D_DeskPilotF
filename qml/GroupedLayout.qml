@@ -4,10 +4,12 @@ Item {
     id: root
 
     default property alias contentData: root.data
+    property bool layoutLocked: false
     signal groupMoved(real deltaX, real deltaY)
 
     MouseArea {
         anchors.fill: parent
+        enabled: !root.layoutLocked
         acceptedButtons: Qt.LeftButton
         cursorShape: pressed ? Qt.ClosedHandCursor : Qt.OpenHandCursor
 

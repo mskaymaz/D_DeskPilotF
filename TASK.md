@@ -7,9 +7,29 @@
 - `[!]` Blocked / decision required
 
 ## Active Phase
-**Phase 5 â€” Layout System and Quick Actions**
+**Phase 6 â€” Settings System**
 
 ## Active Tasks
+- [1] Final grouped-layout behavior.
+- [2] Final free-layout behavior.
+- [3] Independent Clock/Date/Battery positioning.
+- [4] Position persistence.
+- [5] Lock/unlock behavior where required.
+- [6] Inter-module spacing.
+- [7] Scale interactions.
+- [8] Multi-monitor verification.
+- [9] Contextual Quick Actions component.
+- [10] Settings action.
+- [11] Reminder action.
+- [12] Todo action.
+- [13] Content-aware positioning.
+- [14] Stable hover transition.
+- [15] Delayed hide behavior.
+- [16] Correct behavior during window movement.
+- [17] Proportional icon sizing.
+- [18] Smooth QML animations.
+- [19] No flicker.
+- [ ] Settings domain/schema.
 - [x] Freeze Python DeskPilot reference repository.
 - [x] Tag frozen reference as `deskpilot-python-freeze`.
 - [x] Create private `D_DeskPilotC` repository.
@@ -93,7 +113,7 @@
 Work on one verified task at a time. Do not begin later phases early. Do not mechanically port Python/PyQt code. Use the frozen Python project only as a behavioral reference.
 
 ## Next Immediate Task
-Begin Phase 5 with final grouped-layout behavior.
+Implement and verify the Settings domain/schema.
 
 
 

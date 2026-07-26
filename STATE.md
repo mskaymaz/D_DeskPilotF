@@ -7,10 +7,10 @@
 Private GitHub repository: `mskaymaz/D_DeskPilotC`
 
 ## Current Phase
-**Phase 5 — Layout System and Quick Actions**
+**Phase 6 — Settings System**
 
 ## Current Status
-The desktop surface is transparent and panel-free across the primary screen. Visible module regions receive input; all other areas pass through to underlying applications. Free-layout modules remain within the available screen area, while grouped mode moves all modules together. The Clock, Date, and Battery modules are implemented and build-verified. Phase 4 battery work is complete, including efficient polling and unchanged-state suppression. Phase 5 layout and Quick Actions work is next.
+The desktop surface is transparent and panel-free across the primary screen. Visible module regions receive input; all other areas pass through to underlying applications. Free-layout modules remain within the available screen area, while grouped mode moves all modules together. The Clock, Date, and Battery modules are implemented and build-verified. Phase 4 battery work is complete, including efficient polling and unchanged-state suppression. Phase 5 grouped/free startup behavior, independent module positioning, layout locking, inter-module spacing, scale interactions, monitor-bound clamping, the reusable contextual Quick Actions component, the Settings action, the Reminder action, the Todo action, content-aware Quick Actions positioning, stable hover transition, delayed hide behavior, window movement behavior, proportional icon sizing, smooth QML animations, and no-flicker behavior are verified. Phase 6 Settings System is now active.
 
 Module settings persistence, including stable layout, placement, and visual settings across close/reopen, remains incomplete.
 
@@ -61,6 +61,26 @@ Module settings persistence, including stable layout, placement, and visual sett
 - Phase 4 silent-mode suppression state and persistence verified by Debug build and CTest.
 - Phase 4 no-battery fallback and non-alerting behavior verified by `BatteryModelTest`.
 - Phase 4 efficient 30-second coarse polling and unchanged-state suppression verified by Debug build and CTest.
+- Phase 5 final grouped-layout startup preserves saved grouped positions and only centers when no positions exist.
+- Phase 5 final free-layout startup reapplies saved positions after loader creation and layout-mode changes.
+- Phase 5 independent Clock/Date/Battery positioning verified through separate free-layout loaders, drag areas, and persisted keys.
+- Phase 5 layout lock state disables grouped/free dragging and persists through the layout settings.
+- Phase 5 configurable inter-module spacing is applied to grouped centering and free-layout defaults and persists through layout settings.
+- Phase 5 grouped scaling preserves group centering/spacing while free scaling preserves each module's independent position.
+- Phase 5 saved grouped positions are clamped to the active window bounds for monitor/geometry changes.
+- Phase 5 reusable contextual Quick Actions component was verified with delayed hover hiding and Settings/Reminder/Todo action signals.
+- Phase 5 Settings Quick Action opens the existing settings context menu and is included in the input mask.
+- Phase 5 Reminder Quick Action opens a clear placeholder dialog until the Phase 8 Reminder system is implemented.
+- Phase 5 Todo Quick Action opens a clear placeholder dialog until the Phase 7 Todo system is implemented.
+- Phase 5 Quick Actions positioning uses the actual clock content bounds, flips at the right edge, and clamps vertically within the window.
+- Phase 5 Quick Actions source-to-panel transitions retain hover through a small bridge zone.
+- Phase 5 Quick Actions hide only after a 250 ms timer confirms that source and panel are no longer hovered.
+- Phase 5 Quick Actions are suppressed when the owning window moves and re-enabled on the next hover entry.
+- Phase 5 Quick Actions expose an independent icon-size property backed by the design token and are not coupled to module font scales.
+- Phase 5 Quick Actions use short opacity and scale animations for show/hide transitions.
+- Phase 5 Quick Actions no-flicker behavior is covered by the bridge zone, guarded hide timer, movement suppression, and reversible animations.
+
+> Not: Faz 5 — Layout System and Quick Actions tamamlandı. Faz 6 — Settings System başlangıcına geçildi.
 - Persistent layout mode, module positions, and battery appearance settings added and INI round-trip verified.
 - Clock and date context-menu options grouped into dedicated settings submenus.
 
@@ -107,7 +127,7 @@ Use the SPP-style workflow:
 Commands and patches should be concise and fail-fast. When working interactively with the user, provide one implementation step at a time and wait for the result when later steps depend on it.
 
 ## Immediate Next Steps
-1. Begin Phase 5 with final grouped-layout behavior.
+1. Implement and verify the Settings domain/schema.
 
 ## AI Agent Continuation Instruction
 Before modifying this repository, read in this order:
@@ -125,7 +145,7 @@ Continue from the current state. Do not restart architectural interpretation unl
 Communicate with the user in Turkish unless explicitly requested otherwise.
 
 ## Last Updated
-2026-07-26 — Phase 4 battery module completed through efficient polling/event verification; Phase 5 layout work is next.
+2026-07-26 — Phase 5 Quick Actions no-flicker behavior verified; Phase 6 Settings domain/schema is next.
 
 
 
