@@ -112,7 +112,7 @@ void ClockModel::updateTimeText()
     }
 
     const QString primaryFormat = m_use24HourFormat ? QStringLiteral("HH:mm")
-                                                    : QStringLiteral("hh:mm AP");
+                                                     : QStringLiteral("hh:mm ap");
     const QString nextPrimaryText = m_currentDateTime.toString(primaryFormat);
     const QString nextSecondsText = m_showSeconds
         ? m_currentDateTime.toString(QStringLiteral("ss"))
@@ -120,7 +120,7 @@ void ClockModel::updateTimeText()
     const QString nextText = m_showSeconds
         ? m_currentDateTime.toString(
             m_use24HourFormat ? QStringLiteral("HH:mm:ss")
-                              : QStringLiteral("hh:mm:ss AP"))
+                              : QStringLiteral("hh:mm:ss ap"))
         : nextPrimaryText;
 
     if (m_timeText != nextText) {

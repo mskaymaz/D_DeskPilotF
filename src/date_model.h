@@ -38,6 +38,7 @@ public:
     bool showWeekNumber() const;
     void setShowWeekNumber(bool value);
     QString weekNumberText() const;
+    QString hijriWeekNumberText() const;
     bool gregorianFirst() const;
     void setGregorianFirst(bool value);
     QString fontFamily() const;

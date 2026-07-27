@@ -1,4 +1,4 @@
-﻿import QtQuick
+import QtQuick
 import QtQuick.Controls
 
 ModuleWindow {
@@ -942,7 +942,7 @@ ModuleWindow {
                     text: (dateModel.gregorianFirst
                         ? dateModel.gregorianText + " / " + dateModel.hijriText
                         : dateModel.hijriText + " / " + dateModel.gregorianText)
-                        + (dateModel.showWeekNumber ? " · Hafta " + dateModel.weekNumberText : "")
+                        + (dateModel.showWeekNumber ? " · Hafta " + dateModel.weekNumberText + " (Hicri " + dateModel.hijriWeekNumberText + ")" : "")
                     horizontalAlignment: Text.AlignLeft
                     verticalAlignment: Text.AlignTop
                     font.family: rootWindow.selectedDateFontFamily()

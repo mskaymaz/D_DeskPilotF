@@ -1,4 +1,6 @@
-﻿# DESKPILOTC ROADMAP
+# DESKPILOTC ROADMAP
+
+<!-- AI NOTE: This roadmap is structured for automated AI processing. Each phase should be checked sequentially, marking status symbols (✅, 🔍, ⚠️, ✏️, ❌) after verification. -->
 
 ## Status Legend
 
@@ -17,26 +19,26 @@
 
 ### Tasks
 
-- [x] Freeze the Python DeskPilot reference repository.
-- [x] Create `deskpilot-python-freeze` Git tag.
-- [x] Create new private `D_DeskPilotC` GitHub repository.
-- [x] Initialize local `D_DeskPilotC` Git repository.
-- [x] Connect local repository to GitHub remote.
-- [x] Add `PRODUCT_ARCHITECTURE_PRINCIPLES_AI_EN.md`.
-- [x] Create and add `DESKPILOT_PRODUCT_SPEC.md`.
-- [x] Create and add `ARCHITECTURE.md`.
-- [x] Create `ROADMAP.md`.
-- [x] Create `TASK.md`.
-- [x] Create `STATE.md`.
-- [x] Create initial `README.md`.
-- [x] Define Qt licensing strategy for Desktop V1.
-- [x] Verify required development toolchain.
-- [x] Create initial repository structure.
-- [x] Create initial `.gitignore`.
-- [x] Create root `CMakeLists.txt`.
-- [x] Create minimal Qt 6 / Qt Quick / QML application.
-- [x] Confirm clean configure/build/run cycle.
-- [x] Commit and push the verified project foundation.
+- [x] Freeze the Python DeskPilot reference repository. ✅
+- [x] Create `deskpilot-python-freeze` Git tag. ✅
+- [x] Create new private `D_DeskPilotC` GitHub repository. ✅
+- [x] Initialize local `D_DeskPilotC` Git repository. ✅
+- [x] Connect local repository to GitHub remote. ✅
+- [x] Add `PRODUCT_ARCHITECTURE_PRINCIPLES_AI_EN.md`. ✅
+- [x] Create and add `DESKPILOT_PRODUCT_SPEC.md`. ✅
+- [x] Create and add `ARCHITECTURE.md`. ✅
+- [x] Create `ROADMAP.md`. ✅
+- [x] Create `TASK.md`. ✅
+- [x] Create `STATE.md`. ✅
+- [x] Create initial `README.md`. ✅
+- [x] Define Qt licensing strategy for Desktop V1. ✅
+- [x] Verify required development toolchain. ✅
+- [x] Create initial repository structure. ✅
+- [x] Create initial `.gitignore`. ✅
+- [x] Create root `CMakeLists.txt`. ✅
+- [x] Create minimal Qt 6 / Qt Quick / QML application. ✅
+- [x] Confirm clean configure/build/run cycle. ✅
+- [x] Commit and push the verified project foundation. ✅
 
 ### Completion Criteria
 
@@ -50,37 +52,37 @@ Phase 0 is complete when:
 
 ---
 
-## [x] Phase 1 â€” Design System and Desktop Window Foundation
+## [ ] Phase 1 — Design System and Desktop Window Foundation
+
+### Design System
 
 **Goal:** Build the visual and native window foundation before implementing product modules.
 
-### [x] Design System
+- ✅ Define color tokens.
+- ✅ Define typography tokens.
+- ✅ Define spacing tokens.
+- ✅ Define radius tokens.
+- ✅ Define sizing tokens.
+- ✅ Define z-layer tokens.
+- ✅ Define motion/animation tokens.
+- ✅ Establish high-DPI strategy.
+- ✅ Establish global scaling architecture.
+- ✅ Create reusable base QML components.
 
-- [x] Define color tokens.
-- [x] Define typography tokens.
-- [x] Define spacing tokens.
-- [x] Define radius tokens.
-- [x] Define sizing tokens.
-- [x] Define z-layer tokens.
-- [x] Define motion/animation tokens.
-- [x] Establish high-DPI strategy.
-- [x] Establish global scaling architecture.
-- [x] Create reusable base QML components.
+### [ ] Window Foundation
 
-### [x] Window Foundation
-
-- [x] Frameless desktop window.
-- [x] Transparent background/window support.
-- [x] Stable drag behavior.
-- [x] Always-on-top support.
-- [x] Window position persistence.
-- [x] Multi-monitor detection.
-- [x] Safe recovery from unavailable monitors.
-- [x] Grouped-layout foundation.
-- [x] Free-layout foundation.
-- [x] Reusable independent module-window behavior.
-- [x] Stable focus/show/hide lifecycle.
-- [x] Verify idle resource behavior.
+- ✅ Frameless desktop window.
+- ✅ Transparent background/window support.
+- ✅ Stable drag behavior.
+- ✅ Always-on-top support.
+- ✅ Window position persistence.
+- ✅ Multi-monitor detection.
+- ✅ Safe recovery from unavailable monitors.
+- ✅ Grouped-layout foundation.
+- ✅ Free-layout foundation.
+- ✅ Reusable independent module-window behavior.
+- ✅ Stable focus/show/hide lifecycle.
+- ✅ Verify idle resource behavior.
 
 ### Completion Criteria
 
@@ -312,10 +314,10 @@ Phase 0 is complete when:
 
 ### [ ] Core
 
-- [ ] Finalize Reminder model.
-- [ ] SQLite Reminder repository.
-- [ ] Reminder scheduler.
-- [ ] One-time reminders.
+- [x] Finalize Reminder model.
+- [x] SQLite Reminder repository.
+- [x] Reminder scheduler.
+- [x] One-time reminders.
 - [ ] Daily recurrence.
 - [ ] Weekly recurrence.
 - [ ] Missed reminder recovery.
@@ -622,7 +624,7 @@ Potential areas:
 
 # CURRENT POSITION
 
-**Current phase:** Phase 7 â€” Todo V1
+**Current phase:** Phase 8 — Reminder V1 Completion
 
 **Completed so far:**
 
@@ -677,8 +679,12 @@ Potential areas:
 - Phase 7 Useful empty states added and build-verified.
 - Phase 7 Stable scrolling and updates added and build-verified.
 - Phase 7 Visual customization added and build-verified.
+- Phase 8 Reminder model finalized and verified with tests.
+- Phase 8 SQLite Reminder repository finalized and verified with tests.
+- Phase 8 Reminder scheduler created and verified with tests.
+- Phase 8 One-time reminders implemented and verified with tests.
 
 **Immediate next step:**
 
-1. Finalize Phase 7 completion criteria before Phase 8.
+1. Daily recurrence.
 

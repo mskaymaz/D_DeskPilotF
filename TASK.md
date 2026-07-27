@@ -1,4 +1,4 @@
-﻿# DESKPILOTC TASK
+# DESKPILOTC TASK
 
 ## Status Legend
 - `[x]` Completed
@@ -123,30 +123,30 @@
 Work on one verified task at a time. Do not begin later phases early. Do not mechanically port Python/PyQt code. Use the frozen Python project only as a behavioral reference.
 
 ## Phase 7 — Todo V1
-- [10] Todo panel/page.
-- [11] Task cards.
-- [12] New Task dialog.
-- [13] Edit Task dialog.
-- [14] Description.
-- [15] Date/time input.
-- [16] Priority selection.
-- [17] Completed state.
-- [18] Overdue state.
-- [19] Cancelled state.
-- [20] Trash state.
-- [21] Search.
-- [22] Turkish-character search correctness.
-- [23] Today view/filter.
-- [24] Tomorrow view/filter.
-- [25] Week view/filter.
-- [26] Completed view/filter.
-- [27] Useful empty states.
-- [28] Stable scrolling and updates.
-- [29] Visual customization where appropriate.
-- [30] TodoModel–SQLite–QML integration.
+- [10*] Todo panel/page.
+- [11*] Task cards.
+- [12*] New Task dialog.
+- [13*] Edit Task dialog.
+- [14*] Description.
+- [15*] Date/time input.
+- [16*] Priority selection.
+- [17*] Completed state.
+- [18*] Overdue state.
+- [19*] Cancelled state.
+- [20*] Trash state.
+- [21*] Search.
+- [22*] Turkish-character search correctness.
+- [23*] Today view/filter.
+- [24*] Tomorrow view/filter.
+- [25*] Week view/filter.
+- [26*] Completed view/filter.
+- [27*] Useful empty states.
+- [28*] Stable scrolling and updates.
+- [29*] Visual customization where appropriate.
+- [30*] TodoModel–SQLite–QML integration.
 
 ## Next Immediate Task
-Finalize Reminder model.
+Daily recurrence.
 
 
 

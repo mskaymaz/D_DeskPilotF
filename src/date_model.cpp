@@ -66,6 +66,11 @@ QString DateModel::weekNumberText() const
     return m_weekNumberText;
 }
 
+QString DateModel::hijriWeekNumberText() const
+{
+    return m_hijriWeekNumberText;
+}
+
 bool DateModel::gregorianFirst() const
 {
     return m_gregorianFirst;
@@ -200,6 +205,17 @@ void DateModel::updateDateTexts()
     if (m_hijriText != nextHijriText) {
         m_hijriText = nextHijriText;
         emit hijriTextChanged();
+    }
+
+    // Hijri week number (approximate)
+    const QDate hijriDate = islamicCivilCalendar.dateFromJulianDay(m_currentDate.toJulianDay());
+    const int hijriWeekNumber = (hijriDate.dayOfYear() + 6) / 7; // simple week calc
+    const QString nextHijriWeekNumberText = m_currentDate.isValid()
+        ? QString::number(hijriWeekNumber)
+        : QStringLiteral("--");
+    if (m_hijriWeekNumberText != nextHijriWeekNumberText) {
+        m_hijriWeekNumberText = nextHijriWeekNumberText;
+        emit hijriWeekNumberTextChanged();
     }
 
     const QString nextWeekNumberText = m_currentDate.isValid()

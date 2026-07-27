@@ -5,7 +5,7 @@ import QtQuick.Layouts
 Dialog {
     id: root
 
-    property var tasksModel: []
+    property var tasksModel: todoModel
     property string searchQuery: ""
     property bool todayOnly: false
     property bool tomorrowOnly: false

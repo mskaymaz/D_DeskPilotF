@@ -1,4 +1,4 @@
-﻿# DESKPILOTC STATE
+# DESKPILOTC STATE
 
 ## Project
 **D_DeskPilotC**
@@ -175,7 +175,7 @@ Use the SPP-style workflow:
 Commands and patches should be concise and fail-fast. When working interactively with the user, provide one implementation step at a time and wait for the result when later steps depend on it.
 
 ## Immediate Next Steps
-1. Finalize Reminder model.
+1. Daily recurrence.
 
 ## AI Agent Continuation Instruction
 Before modifying this repository, read in this order:

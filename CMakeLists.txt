@@ -1,4 +1,4 @@
-﻿cmake_minimum_required(VERSION 3.21)
+cmake_minimum_required(VERSION 3.21)
 
 project(D_DeskPilotC VERSION 0.1.0 LANGUAGES CXX)
 
@@ -33,6 +33,12 @@ target_sources(DeskPilotC
     src/settings_schema.h
     src/startup_service.cpp
     src/startup_service.h
+        src/reminder_domain.cpp
+        src/reminder_domain.h
+        src/reminder_repository.cpp
+        src/reminder_repository.h
+        src/reminder_scheduler.cpp
+        src/reminder_scheduler.h
         src/todo_domain.cpp
         src/todo_domain.h
         src/todo_model.cpp
@@ -171,6 +177,94 @@ if(BUILD_TESTING)
     endif()
 
     add_test(NAME TodoDomainTest COMMAND TodoDomainTest)
+
+    qt_add_executable(ReminderDomainTest
+        tests/reminder_domain_test.cpp
+        src/reminder_domain.cpp
+        src/reminder_domain.h
+    )
+
+    target_include_directories(ReminderDomainTest PRIVATE src)
+    target_link_libraries(ReminderDomainTest PRIVATE Qt6::Core Qt6::Test)
+
+    if(WIN32)
+        foreach(qt_runtime IN ITEMS Qt6::Core Qt6::Test)
+            add_custom_command(TARGET ReminderDomainTest POST_BUILD
+                COMMAND ${CMAKE_COMMAND} -E copy_if_different
+                        "$<TARGET_FILE:${qt_runtime}>"
+                        "$<TARGET_FILE_DIR:ReminderDomainTest>"
+                VERBATIM
+            )
+        endforeach()
+    endif()
+
+    add_test(NAME ReminderDomainTest COMMAND ReminderDomainTest)
+
+    qt_add_executable(ReminderRepositoryTest
+        tests/reminder_repository_test.cpp
+        src/reminder_repository.cpp
+        src/reminder_repository.h
+        src/reminder_domain.cpp
+        src/reminder_domain.h
+    )
+
+    target_include_directories(ReminderRepositoryTest PRIVATE src)
+    target_link_libraries(ReminderRepositoryTest PRIVATE Qt6::Core Qt6::Sql Qt6::Test)
+
+    if(WIN32)
+        foreach(qt_runtime IN ITEMS Qt6::Core Qt6::Sql Qt6::Test)
+            add_custom_command(TARGET ReminderRepositoryTest POST_BUILD
+                COMMAND ${CMAKE_COMMAND} -E copy_if_different
+                        "$<TARGET_FILE:${qt_runtime}>"
+                        "$<TARGET_FILE_DIR:ReminderRepositoryTest>"
+                VERBATIM
+            )
+        endforeach()
+        add_custom_command(TARGET ReminderRepositoryTest POST_BUILD
+            COMMAND ${CMAKE_COMMAND} -E make_directory
+                    "$<TARGET_FILE_DIR:ReminderRepositoryTest>/sqldrivers"
+            COMMAND ${CMAKE_COMMAND} -E copy_if_different
+                    "$<IF:$<CONFIG:Debug>,$<TARGET_FILE_DIR:Qt6::Sql>/../plugins/sqldrivers/qsqlited.dll,$<TARGET_FILE_DIR:Qt6::Sql>/../plugins/sqldrivers/qsqlite.dll>"
+                    "$<TARGET_FILE_DIR:ReminderRepositoryTest>/sqldrivers/$<IF:$<CONFIG:Debug>,qsqlited.dll,qsqlite.dll>"
+            VERBATIM
+        )
+    endif()
+
+    add_test(NAME ReminderRepositoryTest COMMAND ReminderRepositoryTest)
+
+    qt_add_executable(ReminderSchedulerTest
+        tests/reminder_scheduler_test.cpp
+        src/reminder_scheduler.cpp
+        src/reminder_scheduler.h
+        src/reminder_repository.cpp
+        src/reminder_repository.h
+        src/reminder_domain.cpp
+        src/reminder_domain.h
+    )
+
+    target_include_directories(ReminderSchedulerTest PRIVATE src)
+    target_link_libraries(ReminderSchedulerTest PRIVATE Qt6::Core Qt6::Sql Qt6::Test)
+
+    if(WIN32)
+        foreach(qt_runtime IN ITEMS Qt6::Core Qt6::Sql Qt6::Test)
+            add_custom_command(TARGET ReminderSchedulerTest POST_BUILD
+                COMMAND ${CMAKE_COMMAND} -E copy_if_different
+                        "$<TARGET_FILE:${qt_runtime}>"
+                        "$<TARGET_FILE_DIR:ReminderSchedulerTest>"
+                VERBATIM
+            )
+        endforeach()
+        add_custom_command(TARGET ReminderSchedulerTest POST_BUILD
+            COMMAND ${CMAKE_COMMAND} -E make_directory
+                    "$<TARGET_FILE_DIR:ReminderSchedulerTest>/sqldrivers"
+            COMMAND ${CMAKE_COMMAND} -E copy_if_different
+                    "$<IF:$<CONFIG:Debug>,$<TARGET_FILE_DIR:Qt6::Sql>/../plugins/sqldrivers/qsqlited.dll,$<TARGET_FILE_DIR:Qt6::Sql>/../plugins/sqldrivers/qsqlite.dll>"
+                    "$<TARGET_FILE_DIR:ReminderSchedulerTest>/sqldrivers/$<IF:$<CONFIG:Debug>,qsqlited.dll,qsqlite.dll>"
+            VERBATIM
+        )
+    endif()
+
+    add_test(NAME ReminderSchedulerTest COMMAND ReminderSchedulerTest)
 
     qt_add_executable(TodoRepositoryTest
         tests/todo_repository_test.cpp
