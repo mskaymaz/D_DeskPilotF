@@ -224,32 +224,32 @@ Phase 0 is complete when:
 
 ---
 
-## [ ] Phase 6 â€” Settings System
+## [x] Phase 6 â€” Settings System
 
 **Goal:** Build a professional, versioned settings architecture and polished settings UI.
 
 ### Tasks
 
-- [ ] Settings domain/schema.
-- [ ] Versioned settings storage.
-- [ ] Safe defaults.
-- [ ] Migration mechanism.
-- [ ] Corruption recovery strategy.
-- [ ] Separate user/shared settings from device-specific settings.
-- [ ] Clock settings UI.
-- [ ] Date settings UI.
-- [ ] Battery settings UI.
-- [ ] Layout settings UI.
-- [ ] Quick Actions settings UI.
-- [ ] Notification settings UI.
-- [ ] Silent mode.
-- [ ] Always-on-top setting.
-- [ ] Startup setting.
-- [ ] Global scale.
-- [ ] Per-module scale.
-- [ ] Live visual updates.
-- [ ] Reset-to-default behavior.
-- [ ] Import/export strategy if included in V1.
+- [1] Settings domain/schema.
+- [2] Versioned settings storage.
+- [3] Safe defaults.
+- [4] Migration mechanism.
+- [5] Corruption recovery strategy.
+- [6] Separate user/shared settings from device-specific settings.
+- [7] Clock settings UI.
+- [8] Date settings UI.
+- [9] Battery settings UI.
+- [10] Layout settings UI.
+- [11] Quick Actions settings UI.
+- [12] Notification settings UI.
+- [13] Silent mode.
+- [14] Always-on-top setting.
+- [15] Startup setting.
+- [16] Global scale.
+- [17] Per-module scale.
+- [18] Live visual updates.
+- [19] Reset-to-default behavior.
+- [20] Import/export strategy deferred for V1.
 
 ### Completion Criteria
 
@@ -622,7 +622,7 @@ Potential areas:
 
 # CURRENT POSITION
 
-**Current phase:** Phase 6 â€” Settings System
+**Current phase:** Phase 7 â€” Todo V1
 
 **Completed so far:**
 
@@ -662,5 +662,5 @@ Potential areas:
 
 **Immediate next step:**
 
-1. Implement and verify the Settings domain/schema.
+1. Implement and verify Finalize Todo V1 data model.
 

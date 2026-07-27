@@ -7,12 +7,12 @@
 Private GitHub repository: `mskaymaz/D_DeskPilotC`
 
 ## Current Phase
-**Phase 6 — Settings System**
+**Phase 7 — Todo V1**
 
 ## Current Status
-The desktop surface is transparent and panel-free across the primary screen. Visible module regions receive input; all other areas pass through to underlying applications. Free-layout modules remain within the available screen area, while grouped mode moves all modules together. The Clock, Date, and Battery modules are implemented and build-verified. Phase 4 battery work is complete, including efficient polling and unchanged-state suppression. Phase 5 grouped/free startup behavior, independent module positioning, layout locking, inter-module spacing, scale interactions, monitor-bound clamping, the reusable contextual Quick Actions component, the Settings action, the Reminder action, the Todo action, content-aware Quick Actions positioning, stable hover transition, delayed hide behavior, window movement behavior, proportional icon sizing, smooth QML animations, and no-flicker behavior are verified. Phase 6 Settings System is now active.
+The desktop surface is transparent and panel-free across the primary screen. Visible module regions receive input; all other areas pass through to underlying applications. Free-layout modules remain within the available screen area, while grouped mode moves all modules together. The Clock, Date, and Battery modules are implemented and build-verified. Phase 4 battery work is complete, including efficient polling and unchanged-state suppression. Phase 5 grouped/free startup behavior, independent module positioning, layout locking, inter-module spacing, scale interactions, monitor-bound clamping, the reusable contextual Quick Actions component, the Settings action, the Reminder action, the Todo action, content-aware Quick Actions positioning, stable hover transition, delayed hide behavior, window movement behavior, proportional icon sizing, smooth QML animations, and no-flicker behavior are verified. Phase 6 Settings System is complete; Phase 7 Todo V1 is now active.
 
-Module settings persistence, including stable layout, placement, and visual settings across close/reopen, remains incomplete.
+Module settings persistence, including stable layout, placement, and visual settings across close/reopen, is complete for the current scope.
 
 > Not: Faz 4 — Battery Module tamamlandı. Faz 5 — Layout System and Quick Actions başlangıcına geçildi.
 
@@ -83,6 +83,26 @@ Module settings persistence, including stable layout, placement, and visual sett
 > Not: Faz 5 — Layout System and Quick Actions tamamlandı. Faz 6 — Settings System başlangıcına geçildi.
 - Persistent layout mode, module positions, and battery appearance settings added and INI round-trip verified.
 - Clock and date context-menu options grouped into dedicated settings submenus.
+- Settings domain/schema centralized in a typed snapshot with safe defaults, bounded values, INI round-trip, and automated tests.
+- Versioned settings storage added with `meta/schemaVersion` round-trip at schema version 1.
+- Safe defaults verified for missing, malformed, bounded, and invalid-position settings values.
+- Legacy settings without metadata migrate to schema version 1; unsupported future versions are rejected safely.
+- Corrupted INI settings are preserved as `.corrupt` backups and recovered to a clean settings file.
+- Settings are separated into user/shared module preferences and device-specific layout settings, with v1-to-v2 scoped-key migration.
+- Clock settings UI added as a dedicated live panel with visibility-related presentation, font, color, bold, and scale controls.
+- Date settings UI added as a dedicated live panel with visibility, calendar ordering, format, week-number, font, color, bold, and scale controls.
+- Battery settings UI added as a dedicated live panel with visibility, icon, appearance, thresholds, alert interval, sound, and silent-mode controls.
+- Layout settings UI added as a dedicated live panel with layout mode, lock, and module-spacing controls.
+- Quick Actions settings UI added as a dedicated live panel with visibility, action toggles, icon size, and action-spacing controls.
+- Notification settings UI added as a dedicated live panel with visual, sound, TTS, and cooldown preferences.
+- Global silent mode added to notification settings; it suppresses battery alert audio while preserving visual notification preference.
+- Always-on-top setting added as a persisted device-specific window preference with a context-menu toggle.
+- Startup setting added with a persisted device-specific preference and Windows Run-key registration service.
+- Global scale added with live 75%–150% DesignTokens scaling, menu controls, persistence, and bounds validation.
+- Per-module scale controls for Clock, Date, and Battery are live, persisted, and covered by schema round-trip tests.
+- Live visual updates verified across settings panels, model bindings, layout reflow, Quick Actions, and input-mask refreshes.
+- Reset-to-default behavior added with confirmation and restoration of schema defaults across module, layout, notification, window, startup, and scale settings.
+- Import/export is explicitly deferred from V1; the versioned INI settings store remains the supported persistence mechanism.
 
 ## Clock Performance Verification
 - Debug build completed successfully.
@@ -127,7 +147,7 @@ Use the SPP-style workflow:
 Commands and patches should be concise and fail-fast. When working interactively with the user, provide one implementation step at a time and wait for the result when later steps depend on it.
 
 ## Immediate Next Steps
-1. Implement and verify the Settings domain/schema.
+1. Implement and verify Finalize Todo V1 data model.
 
 ## AI Agent Continuation Instruction
 Before modifying this repository, read in this order:
@@ -145,7 +165,7 @@ Continue from the current state. Do not restart architectural interpretation unl
 Communicate with the user in Turkish unless explicitly requested otherwise.
 
 ## Last Updated
-2026-07-26 — Phase 5 Quick Actions no-flicker behavior verified; Phase 6 Settings domain/schema is next.
+2026-07-27 — Phase 6 Settings System completed; import/export deferred from V1; Phase 7 Todo V1 data model is next.
 
 
 

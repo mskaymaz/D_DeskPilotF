@@ -10,10 +10,25 @@ ModuleWindow {
     property bool freeLayoutEnabled: false
     property bool layoutLocked: false
     property int moduleSpacing: DesignTokens.space4
+    property bool quickActionsVisible: true
+    property bool quickActionsSettingsEnabled: true
+    property bool quickActionsReminderEnabled: true
+    property bool quickActionsTodoEnabled: true
+    property int quickActionsIconSize: DesignTokens.iconMedium
+    property int quickActionsSpacing: DesignTokens.space1
+    property bool notificationVisualEnabled: true
+    property bool notificationSoundEnabled: true
+    property bool notificationTtsEnabled: false
+    property int notificationCooldownMinutes: 5
+    property bool notificationSilentMode: false
+    property real globalScale: 1.0
     property bool contextMenuOpen: false
     property var modulePositions: ({})
     property bool modulePositionsInitialized: false
     signal layoutSettingsChanged()
+
+    onNotificationSilentModeChanged: batteryModel.silentMode = notificationSilentMode
+    onGlobalScaleChanged: DesignTokens.globalScale = globalScale
 
     Timer {
         id: layoutSettingsSaveTimer
@@ -67,6 +82,137 @@ ModuleWindow {
         }
     }
 
+    Dialog {
+        id: resetSettingsDialog
+        title: "Ayarları sıfırla"
+        modal: true
+        standardButtons: Dialog.Yes | Dialog.No
+        width: DesignTokens.scaled(380)
+
+        contentItem: Label {
+            text: "Tüm ayarlar varsayılan değerlerine döndürülsün mü?"
+            wrapMode: Text.WordWrap
+            padding: DesignTokens.space4
+        }
+
+        onOpened: {
+            rootWindow.contextMenuOpen = true
+            rootWindow.updateInputMask()
+        }
+
+        onAccepted: rootWindow.resetSettingsToDefaults()
+
+        onClosed: {
+            rootWindow.contextMenuOpen = false
+            rootWindow.updateInputMask()
+        }
+    }
+
+    ClockSettingsPopup {
+        id: clockSettingsPopup
+        x: Math.round((rootWindow.width - width) / 2)
+        y: Math.round((rootWindow.height - height) / 2)
+        stencilFontName: stencilFont.name
+        digitalFontName: digitalFont.name
+        technologyFontName: technologyFont.name
+
+        onOpened: {
+            rootWindow.contextMenuOpen = true
+            rootWindow.updateInputMask()
+        }
+
+        onClosed: {
+            rootWindow.contextMenuOpen = false
+            rootWindow.updateInputMask()
+        }
+    }
+
+    DateSettingsPopup {
+        id: dateSettingsPopup
+        x: Math.round((rootWindow.width - width) / 2)
+        y: Math.round((rootWindow.height - height) / 2)
+        stencilFontName: stencilFont.name
+        digitalFontName: digitalFont.name
+        technologyFontName: technologyFont.name
+
+        onOpened: {
+            rootWindow.contextMenuOpen = true
+            rootWindow.updateInputMask()
+        }
+
+        onClosed: {
+            rootWindow.contextMenuOpen = false
+            rootWindow.updateInputMask()
+        }
+    }
+
+    BatterySettingsPopup {
+        id: batterySettingsPopup
+        x: Math.round((rootWindow.width - width) / 2)
+        y: Math.round((rootWindow.height - height) / 2)
+        stencilFontName: stencilFont.name
+        digitalFontName: digitalFont.name
+        technologyFontName: technologyFont.name
+
+        onOpened: {
+            rootWindow.contextMenuOpen = true
+            rootWindow.updateInputMask()
+        }
+
+        onClosed: {
+            rootWindow.contextMenuOpen = false
+            rootWindow.updateInputMask()
+        }
+    }
+
+    LayoutSettingsPopup {
+        id: layoutSettingsPopup
+        x: Math.round((rootWindow.width - width) / 2)
+        y: Math.round((rootWindow.height - height) / 2)
+
+        onOpened: {
+            rootWindow.contextMenuOpen = true
+            rootWindow.updateInputMask()
+        }
+
+        onClosed: {
+            rootWindow.contextMenuOpen = false
+            rootWindow.updateInputMask()
+        }
+    }
+
+    QuickActionsSettingsPopup {
+        id: quickActionsSettingsPopup
+        x: Math.round((rootWindow.width - width) / 2)
+        y: Math.round((rootWindow.height - height) / 2)
+
+        onOpened: {
+            rootWindow.contextMenuOpen = true
+            rootWindow.updateInputMask()
+        }
+
+        onClosed: {
+            rootWindow.contextMenuOpen = false
+            rootWindow.updateInputMask()
+        }
+    }
+
+    NotificationSettingsPopup {
+        id: notificationSettingsPopup
+        x: Math.round((rootWindow.width - width) / 2)
+        y: Math.round((rootWindow.height - height) / 2)
+
+        onOpened: {
+            rootWindow.contextMenuOpen = true
+            rootWindow.updateInputMask()
+        }
+
+        onClosed: {
+            rootWindow.contextMenuOpen = false
+            rootWindow.updateInputMask()
+        }
+    }
+
     function scheduleLayoutSettingsSave() {
         layoutSettingsSaveTimer.restart()
     }
@@ -76,6 +222,68 @@ ModuleWindow {
         updateInputMask()
         scheduleLayoutSettingsSave()
         closeAfterSaveTimer.restart()
+    }
+
+    function resetSettingsToDefaults() {
+        globalScale = 1.0
+        freeLayoutEnabled = false
+        layoutLocked = false
+        moduleSpacing = 16
+        modulePositions = ({})
+        modulePositionsInitialized = false
+        alwaysOnTop = true
+
+        quickActionsVisible = true
+        quickActionsSettingsEnabled = true
+        quickActionsReminderEnabled = true
+        quickActionsTodoEnabled = true
+        quickActionsIconSize = DesignTokens.iconMedium
+        quickActionsSpacing = DesignTokens.space1
+
+        notificationVisualEnabled = true
+        notificationSoundEnabled = true
+        notificationTtsEnabled = false
+        notificationCooldownMinutes = 5
+        notificationSilentMode = false
+        startupService.enabled = false
+
+        clockModel.visible = true
+        clockModel.showSeconds = false
+        clockModel.use24HourFormat = true
+        clockModel.fontFamily = ""
+        clockModel.fontColor = DesignTokens.primaryText
+        clockModel.bold = false
+        clockModel.useEmbeddedFont = true
+        clockModel.scale = 1.0
+        clockModel.secondsScale = 1.0
+
+        dateModel.visible = true
+        dateModel.dateFormat = "dd.MM.yyyy"
+        dateModel.showWeekNumber = false
+        dateModel.gregorianFirst = true
+        dateModel.fontFamily = ""
+        dateModel.fontColor = DesignTokens.secondaryText
+        dateModel.bold = false
+        dateModel.useEmbeddedFont = true
+        dateModel.scale = 1.0
+
+        batteryModel.visible = true
+        batteryModel.showIcon = false
+        batteryModel.lowBatteryThreshold = 20
+        batteryModel.fullChargeThreshold = 100
+        batteryModel.alertIntervalMinutes = 60
+        batteryModel.alertSoundEnabled = true
+        batteryModel.silentMode = false
+        batteryModel.fontFamily = ""
+        batteryModel.fontColor = DesignTokens.secondaryText
+        batteryModel.bold = false
+        batteryModel.scale = 1.0
+
+        Qt.callLater(function() {
+            initializeGroupedPositions()
+            updateInputMask()
+            updateQuickActionsPosition()
+        })
     }
 
     function handleQuickAction(actionKey) {
@@ -672,6 +880,12 @@ ModuleWindow {
 
                 QuickActions {
                     id: clockQuickActions
+                    actionsVisible: rootWindow.quickActionsVisible
+                    settingsEnabled: rootWindow.quickActionsSettingsEnabled
+                    reminderEnabled: rootWindow.quickActionsReminderEnabled
+                    todoEnabled: rootWindow.quickActionsTodoEnabled
+                    iconSize: rootWindow.quickActionsIconSize
+                    actionSpacing: rootWindow.quickActionsSpacing
                     x: clockDisplay.width + DesignTokens.space2
                     y: (clockDisplay.height - height) / 2
                     sourceHovered: clockSourceHover.hovered
@@ -1068,8 +1282,94 @@ ModuleWindow {
             rootWindow.updateInputMask()
         }
 
+        MenuItem {
+            text: "Hızlı eylem ayarlarını aç"
+            onTriggered: {
+                contextMenu.close()
+                rootWindow.contextMenuOpen = true
+                rootWindow.updateInputMask()
+                quickActionsSettingsPopup.open()
+            }
+        }
+
+        MenuItem {
+            text: "Bildirim ayarlarını aç"
+            onTriggered: {
+                contextMenu.close()
+                rootWindow.contextMenuOpen = true
+                rootWindow.updateInputMask()
+                notificationSettingsPopup.open()
+            }
+        }
+
+        MenuItem {
+            text: "Her zaman üstte"
+            checkable: true
+            checked: rootWindow.alwaysOnTop
+            onTriggered: rootWindow.alwaysOnTop = checked
+        }
+
+        MenuItem {
+            text: "Windows ile başlat"
+            checkable: true
+            checked: startupService.enabled
+            onTriggered: startupService.enabled = checked
+        }
+
+        MenuItem {
+            text: "Ayarları varsayılana döndür"
+            onTriggered: {
+                contextMenu.close()
+                rootWindow.contextMenuOpen = true
+                rootWindow.updateInputMask()
+                resetSettingsDialog.open()
+            }
+        }
+
+        Menu {
+            title: "Genel ölçek"
+
+            MenuItem {
+                text: "75%"
+                checkable: true
+                checked: Math.abs(rootWindow.globalScale - 0.75) < 0.01
+                onTriggered: rootWindow.globalScale = 0.75
+            }
+
+            MenuItem {
+                text: "100%"
+                checkable: true
+                checked: Math.abs(rootWindow.globalScale - 1.0) < 0.01
+                onTriggered: rootWindow.globalScale = 1.0
+            }
+
+            MenuItem {
+                text: "125%"
+                checkable: true
+                checked: Math.abs(rootWindow.globalScale - 1.25) < 0.01
+                onTriggered: rootWindow.globalScale = 1.25
+            }
+
+            MenuItem {
+                text: "150%"
+                checkable: true
+                checked: Math.abs(rootWindow.globalScale - 1.5) < 0.01
+                onTriggered: rootWindow.globalScale = 1.5
+            }
+        }
+
         Menu {
             title: "Saat ayarları"
+
+            MenuItem {
+                text: "Ayar panelini aç"
+                onTriggered: {
+                    contextMenu.close()
+                    rootWindow.contextMenuOpen = true
+                    rootWindow.updateInputMask()
+                    clockSettingsPopup.open()
+                }
+            }
 
             MenuItem {
                 text: "Saniyeleri göster"
@@ -1230,6 +1530,16 @@ ModuleWindow {
 
         Menu {
             title: "Tarih ayarları"
+
+            MenuItem {
+                text: "Ayar panelini aç"
+                onTriggered: {
+                    contextMenu.close()
+                    rootWindow.contextMenuOpen = true
+                    rootWindow.updateInputMask()
+                    dateSettingsPopup.open()
+                }
+            }
 
             MenuItem {
                 text: "Sistem fontu kullan"
@@ -1398,6 +1708,16 @@ ModuleWindow {
 
         Menu {
             title: "Pil ayarları"
+
+            MenuItem {
+                text: "Ayar panelini aç"
+                onTriggered: {
+                    contextMenu.close()
+                    rootWindow.contextMenuOpen = true
+                    rootWindow.updateInputMask()
+                    batterySettingsPopup.open()
+                }
+            }
 
             MenuItem {
                 text: "Pil ikonunu göster"
@@ -1619,8 +1939,8 @@ ModuleWindow {
                 MenuItem {
                     text: "Sessiz mod"
                     checkable: true
-                    checked: batteryModel.silentMode
-                    onTriggered: batteryModel.silentMode = checked
+                    checked: rootWindow.notificationSilentMode
+                    onTriggered: rootWindow.notificationSilentMode = checked
                 }
             }
 
@@ -1661,6 +1981,16 @@ ModuleWindow {
                     checked: Math.abs(batteryModel.scale - 1.5) < 0.01
                     onTriggered: batteryModel.scale = 1.5
                 }
+            }
+        }
+
+        MenuItem {
+            text: "Yerleşim ayarlarını aç"
+            onTriggered: {
+                contextMenu.close()
+                rootWindow.contextMenuOpen = true
+                rootWindow.updateInputMask()
+                layoutSettingsPopup.open()
             }
         }
 

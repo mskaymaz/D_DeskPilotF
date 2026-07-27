@@ -10,9 +10,14 @@ Item {
     readonly property bool panelHovered: panelBodyHovered || transitionHovered
     property bool showing: false
     property bool movementSuppressed: false
+    property bool actionsVisible: true
+    property bool settingsEnabled: true
+    property bool reminderEnabled: true
+    property bool todoEnabled: true
     property int hideDelay: 250
     property int hoverMargin: DesignTokens.space2
     property int iconSize: DesignTokens.iconMedium
+    property int actionSpacing: DesignTokens.space1
     property var actions: [
         {
             key: "settings",
@@ -38,11 +43,24 @@ Item {
     property int horizontalAlignment: Text.AlignLeft
     property int verticalAlignment: Text.AlignTop
 
+    function isActionEnabled(actionKey) {
+        if (actionKey === "settings") {
+            return settingsEnabled
+        }
+        if (actionKey === "reminder") {
+            return reminderEnabled
+        }
+        if (actionKey === "todo") {
+            return todoEnabled
+        }
+        return false
+    }
+
     implicitWidth: actionRow.implicitWidth
     implicitHeight: actionRow.implicitHeight
     width: implicitWidth
     height: implicitHeight
-    visible: showing || opacity > 0.01
+    visible: actionsVisible && (showing || opacity > 0.01)
     opacity: showing ? 1.0 : 0.0
     scale: showing ? 1.0 : 0.96
 
@@ -93,6 +111,12 @@ Item {
         }
         refreshVisibility()
     }
+    onActionsVisibleChanged: {
+        if (!actionsVisible) {
+            showing = false
+        }
+        refreshVisibility()
+    }
 
     Timer {
         id: hideTimer
@@ -124,10 +148,12 @@ Item {
 
     Row {
         id: actionRow
-        spacing: DesignTokens.space1
+        spacing: root.actionSpacing
 
         Repeater {
-            model: root.actions
+            model: root.actions.filter(function(action) {
+                return root.isActionEnabled(action.key)
+            })
 
             delegate: ToolButton {
                 icon.source: modelData.icon

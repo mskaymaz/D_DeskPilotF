@@ -29,6 +29,10 @@ target_sources(DeskPilotC
         src/battery_service.h
         src/battery_model.cpp
         src/battery_model.h
+    src/settings_schema.cpp
+    src/settings_schema.h
+    src/startup_service.cpp
+    src/startup_service.h
 )
 
 if(WIN32)
@@ -60,12 +64,18 @@ qt_add_qml_module(DeskPilotC
     QML_FILES
         qml/BaseText.qml
         qml/BatteryIcon.qml
+        qml/BatterySettingsPopup.qml
+        qml/ClockSettingsPopup.qml
+        qml/DateSettingsPopup.qml
         qml/DesignTokens.qml
         qml/FreeLayout.qml
         qml/GroupedLayout.qml
+        qml/LayoutSettingsPopup.qml
         qml/Main.qml
         qml/ModuleWindow.qml
+        qml/NotificationSettingsPopup.qml
         qml/QuickActions.qml
+        qml/QuickActionsSettingsPopup.qml
     RESOURCES
         ${DESKPILOT_IMAGE_FILES}
         ${DESKPILOT_FONT_FILES}
@@ -105,6 +115,28 @@ if(BUILD_TESTING)
     endif()
 
     add_test(NAME BatteryModelTest COMMAND BatteryModelTest)
+
+    qt_add_executable(SettingsSchemaTest
+        tests/settings_schema_test.cpp
+        src/settings_schema.cpp
+        src/settings_schema.h
+    )
+
+    target_include_directories(SettingsSchemaTest PRIVATE src)
+    target_link_libraries(SettingsSchemaTest PRIVATE Qt6::Core Qt6::Gui Qt6::Test)
+
+    if(WIN32)
+        foreach(qt_runtime IN ITEMS Qt6::Core Qt6::Test)
+            add_custom_command(TARGET SettingsSchemaTest POST_BUILD
+                COMMAND ${CMAKE_COMMAND} -E copy_if_different
+                        "$<TARGET_FILE:${qt_runtime}>"
+                        "$<TARGET_FILE_DIR:SettingsSchemaTest>"
+                VERBATIM
+            )
+        endforeach()
+    endif()
+
+    add_test(NAME SettingsSchemaTest COMMAND SettingsSchemaTest)
 
     if(WIN32)
         qt_add_executable(WindowsBatteryServiceTest

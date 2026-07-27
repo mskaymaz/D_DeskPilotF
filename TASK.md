@@ -7,7 +7,7 @@
 - `[!]` Blocked / decision required
 
 ## Active Phase
-**Phase 6 â€” Settings System**
+**Phase 7 â€” Todo V1**
 
 ## Active Tasks
 - [1] Final grouped-layout behavior.
@@ -29,7 +29,17 @@
 - [17] Proportional icon sizing.
 - [18] Smooth QML animations.
 - [19] No flicker.
-- [ ] Settings domain/schema.
+- [1] Settings domain/schema.
+- [2] Versioned settings storage.
+- [3] Safe defaults.
+- [4] Migration mechanism.
+- [5] Corruption recovery strategy.
+- [6] Separate user/shared settings from device-specific settings.
+- [7] Clock settings UI.
+- [8] Date settings UI.
+- [9] Battery settings UI.
+- [10] Layout settings UI.
+- [11] Quick Actions settings UI.
 - [x] Freeze Python DeskPilot reference repository.
 - [x] Tag frozen reference as `deskpilot-python-freeze`.
 - [x] Create private `D_DeskPilotC` repository.
@@ -113,7 +123,7 @@
 Work on one verified task at a time. Do not begin later phases early. Do not mechanically port Python/PyQt code. Use the frozen Python project only as a behavioral reference.
 
 ## Next Immediate Task
-Implement and verify the Settings domain/schema.
+Implement and verify Finalize Todo V1 data model.
 
 
 
