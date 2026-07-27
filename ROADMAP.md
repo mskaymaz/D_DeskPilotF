@@ -263,17 +263,17 @@ Phase 0 is complete when:
 
 **Goal:** Rebuild the Todo module as a lightweight professional task manager.
 
-### [ ] Data and Domain
+### [x] Data and Domain
 
-- [ ] Finalize Todo V1 data model.
-- [ ] SQLite Todo repository.
-- [ ] Schema migrations.
-- [ ] Priority model.
-- [ ] Task state transitions.
-- [ ] Due/overdue rules.
-- [ ] Ordering rules.
-- [ ] Retention rules.
-- [ ] Trash/restore/permanent-delete behavior.
+- [1] Finalize Todo V1 data model.
+- [2] SQLite Todo repository.
+- [3] Schema migrations.
+- [4] Priority model.
+- [5] Task state transitions.
+- [6] Due/overdue rules.
+- [7] Ordering rules.
+- [8] Retention rules.
+- [9] Trash/restore/permanent-delete behavior.
 
 ### [ ] UI
 
@@ -662,5 +662,5 @@ Potential areas:
 
 **Immediate next step:**
 
-1. Implement and verify Finalize Todo V1 data model.
+1. Implement and verify Todo panel/page.
 

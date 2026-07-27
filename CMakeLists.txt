@@ -5,7 +5,7 @@ project(D_DeskPilotC VERSION 0.1.0 LANGUAGES CXX)
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
-find_package(Qt6 6.11 REQUIRED COMPONENTS Quick Test)
+find_package(Qt6 6.11 REQUIRED COMPONENTS Quick Test Sql)
 
 qt_standard_project_setup(REQUIRES 6.11)
 
@@ -33,6 +33,10 @@ target_sources(DeskPilotC
     src/settings_schema.h
     src/startup_service.cpp
     src/startup_service.h
+        src/todo_domain.cpp
+        src/todo_domain.h
+        src/todo_repository.cpp
+        src/todo_repository.h
 )
 
 if(WIN32)
@@ -86,7 +90,7 @@ set_target_properties(DeskPilotC PROPERTIES
 )
 
 target_link_libraries(DeskPilotC
-    PRIVATE Qt6::Quick
+    PRIVATE Qt6::Quick Qt6::Sql
 )
 
 include(CTest)
@@ -137,6 +141,60 @@ if(BUILD_TESTING)
     endif()
 
     add_test(NAME SettingsSchemaTest COMMAND SettingsSchemaTest)
+
+    qt_add_executable(TodoDomainTest
+        tests/todo_domain_test.cpp
+        src/todo_domain.cpp
+        src/todo_domain.h
+    )
+
+    target_include_directories(TodoDomainTest PRIVATE src)
+    target_link_libraries(TodoDomainTest PRIVATE Qt6::Core Qt6::Test)
+
+    if(WIN32)
+        foreach(qt_runtime IN ITEMS Qt6::Core Qt6::Test)
+            add_custom_command(TARGET TodoDomainTest POST_BUILD
+                COMMAND ${CMAKE_COMMAND} -E copy_if_different
+                        "$<TARGET_FILE:${qt_runtime}>"
+                        "$<TARGET_FILE_DIR:TodoDomainTest>"
+                VERBATIM
+            )
+        endforeach()
+    endif()
+
+    add_test(NAME TodoDomainTest COMMAND TodoDomainTest)
+
+    qt_add_executable(TodoRepositoryTest
+        tests/todo_repository_test.cpp
+        src/todo_repository.cpp
+        src/todo_repository.h
+        src/todo_domain.cpp
+        src/todo_domain.h
+    )
+
+    target_include_directories(TodoRepositoryTest PRIVATE src)
+    target_link_libraries(TodoRepositoryTest PRIVATE Qt6::Core Qt6::Sql Qt6::Test)
+
+    if(WIN32)
+        foreach(qt_runtime IN ITEMS Qt6::Core Qt6::Sql Qt6::Test)
+            add_custom_command(TARGET TodoRepositoryTest POST_BUILD
+                COMMAND ${CMAKE_COMMAND} -E copy_if_different
+                        "$<TARGET_FILE:${qt_runtime}>"
+                        "$<TARGET_FILE_DIR:TodoRepositoryTest>"
+                VERBATIM
+            )
+        endforeach()
+        add_custom_command(TARGET TodoRepositoryTest POST_BUILD
+            COMMAND ${CMAKE_COMMAND} -E make_directory
+                    "$<TARGET_FILE_DIR:TodoRepositoryTest>/sqldrivers"
+            COMMAND ${CMAKE_COMMAND} -E copy_if_different
+                    "$<IF:$<CONFIG:Debug>,$<TARGET_FILE_DIR:Qt6::Sql>/../plugins/sqldrivers/qsqlited.dll,$<TARGET_FILE_DIR:Qt6::Sql>/../plugins/sqldrivers/qsqlite.dll>"
+                    "$<TARGET_FILE_DIR:TodoRepositoryTest>/sqldrivers/$<IF:$<CONFIG:Debug>,qsqlited.dll,qsqlite.dll>"
+            VERBATIM
+        )
+    endif()
+
+    add_test(NAME TodoRepositoryTest COMMAND TodoRepositoryTest)
 
     if(WIN32)
         qt_add_executable(WindowsBatteryServiceTest

@@ -10,7 +10,7 @@ Private GitHub repository: `mskaymaz/D_DeskPilotC`
 **Phase 7 — Todo V1**
 
 ## Current Status
-The desktop surface is transparent and panel-free across the primary screen. Visible module regions receive input; all other areas pass through to underlying applications. Free-layout modules remain within the available screen area, while grouped mode moves all modules together. The Clock, Date, and Battery modules are implemented and build-verified. Phase 4 battery work is complete, including efficient polling and unchanged-state suppression. Phase 5 grouped/free startup behavior, independent module positioning, layout locking, inter-module spacing, scale interactions, monitor-bound clamping, the reusable contextual Quick Actions component, the Settings action, the Reminder action, the Todo action, content-aware Quick Actions positioning, stable hover transition, delayed hide behavior, window movement behavior, proportional icon sizing, smooth QML animations, and no-flicker behavior are verified. Phase 6 Settings System is complete; Phase 7 Todo V1 is now active.
+The desktop surface is transparent and panel-free across the primary screen. Visible module regions receive input; all other areas pass through to underlying applications. Free-layout modules remain within the available screen area, while grouped mode moves all modules together. The Clock, Date, and Battery modules are implemented and build-verified. Phase 4 battery work is complete, including efficient polling and unchanged-state suppression. Phase 5 grouped/free startup behavior, independent module positioning, layout locking, inter-module spacing, scale interactions, monitor-bound clamping, the reusable contextual Quick Actions component, the Settings action, the Reminder action, the Todo action, content-aware Quick Actions positioning, stable hover transition, delayed hide behavior, window movement behavior, proportional icon sizing, smooth QML animations, and no-flicker behavior are verified. Phase 6 Settings System is complete; Phase 7 Todo V1 Data and Domain stage is complete and the UI stage is next.
 
 Module settings persistence, including stable layout, placement, and visual settings across close/reopen, is complete for the current scope.
 
@@ -103,6 +103,15 @@ Module settings persistence, including stable layout, placement, and visual sett
 - Live visual updates verified across settings panels, model bindings, layout reflow, Quick Actions, and input-mask refreshes.
 - Reset-to-default behavior added with confirmation and restoration of schema defaults across module, layout, notification, window, startup, and scale settings.
 - Import/export is explicitly deferred from V1; the versioned INI settings store remains the supported persistence mechanism.
+- Todo V1 data model finalized with validated identity/content, planned time, priority, state, lifecycle timestamps, and overdue semantics.
+- SQLite Todo repository added with transactional CRUD, schema creation, safe row validation, and clean Debug/Release test deployment.
+- Todo schema migrations added with SQLite user_version tracking, v1 creation, and future-version rejection.
+- Todo priority model added with stable Low/Normal/High values, tokens, validation, and test coverage.
+- Todo state transitions added with guarded lifecycle changes, timestamp updates, restore behavior, and transition validation tests.
+- Todo due/overdue rules added with active-state filtering, exact due-time handling, and future/completed coverage.
+- Todo ordering rules added with state grouping, planned-time priority, priority ranking, creation order, and ID tie-breaking.
+- Todo retention policy added with indefinite default retention and configurable trashed-item purge eligibility.
+- Todo repository now exposes explicit trash, restore, and permanent removal operations with lifecycle validation.
 
 ## Clock Performance Verification
 - Debug build completed successfully.
@@ -147,7 +156,7 @@ Use the SPP-style workflow:
 Commands and patches should be concise and fail-fast. When working interactively with the user, provide one implementation step at a time and wait for the result when later steps depend on it.
 
 ## Immediate Next Steps
-1. Implement and verify Finalize Todo V1 data model.
+1. Implement and verify Todo panel/page.
 
 ## AI Agent Continuation Instruction
 Before modifying this repository, read in this order:
@@ -165,7 +174,7 @@ Continue from the current state. Do not restart architectural interpretation unl
 Communicate with the user in Turkish unless explicitly requested otherwise.
 
 ## Last Updated
-2026-07-27 — Phase 6 Settings System completed; import/export deferred from V1; Phase 7 Todo V1 data model is next.
+2026-07-27 — Phase 7 stage 1 (Todo V1 Data and Domain) completed; all 5 clean Debug tests pass and Todo panel/page is next.
 
 
 

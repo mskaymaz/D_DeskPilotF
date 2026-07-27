@@ -123,7 +123,7 @@
 Work on one verified task at a time. Do not begin later phases early. Do not mechanically port Python/PyQt code. Use the frozen Python project only as a behavioral reference.
 
 ## Next Immediate Task
-Implement and verify Finalize Todo V1 data model.
+Implement and verify Todo panel/page.
 
 
 
