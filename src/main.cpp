@@ -12,6 +12,8 @@
 #include <QWindow>
 #include <QJSValue>
 #include <QTextStream>
+#include <QDir>
+#include <QStandardPaths>
 #include <qqml.h>
 
 #include "clock_model.h"
@@ -24,6 +26,8 @@
 #include "date_service.h"
 #include "settings_schema.h"
 #include "startup_service.h"
+#include "todo_model.h"
+#include "todo_repository.h"
 #include "window_input_mask_controller.h"
 
 namespace {
@@ -145,6 +149,15 @@ int main(int argc, char *argv[])
     const qreal savedGlobalScale = loadedSettings.user.globalScale;
     batteryModel.setSilentMode(savedNotifications.silentMode);
     startupService.setEnabled(savedStartAtLogin);
+
+    const QString todoDataDirectory = QStandardPaths::writableLocation(
+        QStandardPaths::AppDataLocation);
+    QDir().mkpath(todoDataDirectory);
+    DeskPilot::SQLiteTodoRepository todoRepository(todoDataDirectory + "/todos.sqlite");
+    DeskPilot::TodoModel todoModel(&todoRepository);
+    if (!todoModel.reload()) {
+        qWarning() << "DeskPilotC todo model could not be loaded.";
+    }
 
     qInfo() << "DeskPilotC settings loaded:"
             << "clock=" << clockModel.visible() << clockModel.showSeconds()
@@ -313,6 +326,7 @@ int main(int argc, char *argv[])
     engine.rootContext()->setContextProperty("batteryModel", &batteryModel);
     engine.rootContext()->setContextProperty("inputMaskController", &inputMaskController);
     engine.rootContext()->setContextProperty("startupService", &startupService);
+    engine.rootContext()->setContextProperty("todoModel", &todoModel);
     engine.loadFromModule("DeskPilot", "Main");
 
     if (engine.rootObjects().isEmpty()) {

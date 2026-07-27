@@ -35,6 +35,10 @@ target_sources(DeskPilotC
     src/startup_service.h
         src/todo_domain.cpp
         src/todo_domain.h
+        src/todo_model.cpp
+        src/todo_model.h
+        src/todo_model.cpp
+        src/todo_model.h
         src/todo_repository.cpp
         src/todo_repository.h
 )
@@ -80,6 +84,10 @@ qt_add_qml_module(DeskPilotC
         qml/NotificationSettingsPopup.qml
         qml/QuickActions.qml
         qml/QuickActionsSettingsPopup.qml
+        qml/TodoPanel.qml
+        qml/TodoCard.qml
+        qml/NewTaskDialog.qml
+        qml/EditTaskDialog.qml
     RESOURCES
         ${DESKPILOT_IMAGE_FILES}
         ${DESKPILOT_FONT_FILES}
@@ -195,6 +203,40 @@ if(BUILD_TESTING)
     endif()
 
     add_test(NAME TodoRepositoryTest COMMAND TodoRepositoryTest)
+
+    qt_add_executable(TodoModelTest
+        tests/todo_model_test.cpp
+        src/todo_model.cpp
+        src/todo_model.h
+        src/todo_repository.cpp
+        src/todo_repository.h
+        src/todo_domain.cpp
+        src/todo_domain.h
+    )
+
+    target_include_directories(TodoModelTest PRIVATE src)
+    target_link_libraries(TodoModelTest PRIVATE Qt6::Core Qt6::Sql Qt6::Test)
+
+    if(WIN32)
+        foreach(qt_runtime IN ITEMS Qt6::Core Qt6::Sql Qt6::Test)
+            add_custom_command(TARGET TodoModelTest POST_BUILD
+                COMMAND ${CMAKE_COMMAND} -E copy_if_different
+                        "$<TARGET_FILE:${qt_runtime}>"
+                        "$<TARGET_FILE_DIR:TodoModelTest>"
+                VERBATIM
+            )
+        endforeach()
+        add_custom_command(TARGET TodoModelTest POST_BUILD
+            COMMAND ${CMAKE_COMMAND} -E make_directory
+                    "$<TARGET_FILE_DIR:TodoModelTest>/sqldrivers"
+            COMMAND ${CMAKE_COMMAND} -E copy_if_different
+                    "$<IF:$<CONFIG:Debug>,$<TARGET_FILE_DIR:Qt6::Sql>/../plugins/sqldrivers/qsqlited.dll,$<TARGET_FILE_DIR:Qt6::Sql>/../plugins/sqldrivers/qsqlite.dll>"
+                    "$<TARGET_FILE_DIR:TodoModelTest>/sqldrivers/$<IF:$<CONFIG:Debug>,qsqlited.dll,qsqlite.dll>"
+            VERBATIM
+        )
+    endif()
+
+    add_test(NAME TodoModelTest COMMAND TodoModelTest)
 
     if(WIN32)
         qt_add_executable(WindowsBatteryServiceTest

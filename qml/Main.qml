@@ -63,19 +63,9 @@ ModuleWindow {
         }
     }
 
-    Dialog {
-        id: todoDialog
-        title: "Todo"
-        modal: true
-        standardButtons: Dialog.Ok
-        width: 360
-
-        contentItem: Label {
-            text: "Todo ekranı Faz 7 kapsamında etkinleştirilecek."
-            wrapMode: Text.WordWrap
-            padding: DesignTokens.space4
-        }
-
+    TodoPanel {
+        id: todoPanel
+        tasksModel: todoModel
         onClosed: {
             rootWindow.contextMenuOpen = false
             rootWindow.updateInputMask()
@@ -297,7 +287,7 @@ ModuleWindow {
         if (actionKey === "todo") {
             contextMenuOpen = true
             updateInputMask()
-            todoDialog.open()
+            todoPanel.open()
             return
         }
 

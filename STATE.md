@@ -7,10 +7,10 @@
 Private GitHub repository: `mskaymaz/D_DeskPilotC`
 
 ## Current Phase
-**Phase 7 — Todo V1**
+**Phase 8 — Reminder V1 Completion**
 
 ## Current Status
-The desktop surface is transparent and panel-free across the primary screen. Visible module regions receive input; all other areas pass through to underlying applications. Free-layout modules remain within the available screen area, while grouped mode moves all modules together. The Clock, Date, and Battery modules are implemented and build-verified. Phase 4 battery work is complete, including efficient polling and unchanged-state suppression. Phase 5 grouped/free startup behavior, independent module positioning, layout locking, inter-module spacing, scale interactions, monitor-bound clamping, the reusable contextual Quick Actions component, the Settings action, the Reminder action, the Todo action, content-aware Quick Actions positioning, stable hover transition, delayed hide behavior, window movement behavior, proportional icon sizing, smooth QML animations, and no-flicker behavior are verified. Phase 6 Settings System is complete; Phase 7 Todo V1 Data and Domain stage is complete and the UI stage is next.
+The desktop surface is transparent and panel-free across the primary screen. Visible module regions receive input; all other areas pass through to underlying applications. Free-layout modules remain within the available screen area, while grouped mode moves all modules together. The Clock, Date, and Battery modules are implemented and build-verified. Phase 4 battery work is complete, including efficient polling and unchanged-state suppression. Phase 5 grouped/free startup behavior, independent module positioning, layout locking, inter-module spacing, scale interactions, monitor-bound clamping, the reusable contextual Quick Actions component, the Settings action, the Reminder action, the Todo action, content-aware Quick Actions positioning, stable hover transition, delayed hide behavior, window movement behavior, proportional icon sizing, smooth QML animations, and no-flicker behavior are verified. Phase 6 Settings System is complete; Phase 7 Todo V1 Data and Domain stage, Todo panel/page, Task cards, New Task dialog, and Edit Task dialog are complete.
 
 Module settings persistence, including stable layout, placement, and visual settings across close/reopen, is complete for the current scope.
 
@@ -71,7 +71,7 @@ Module settings persistence, including stable layout, placement, and visual sett
 - Phase 5 reusable contextual Quick Actions component was verified with delayed hover hiding and Settings/Reminder/Todo action signals.
 - Phase 5 Settings Quick Action opens the existing settings context menu and is included in the input mask.
 - Phase 5 Reminder Quick Action opens a clear placeholder dialog until the Phase 8 Reminder system is implemented.
-- Phase 5 Todo Quick Action opens a clear placeholder dialog until the Phase 7 Todo system is implemented.
+- Phase 5 Todo Quick Action opens the Phase 7 Todo panel.
 - Phase 5 Quick Actions positioning uses the actual clock content bounds, flips at the right edge, and clamps vertically within the window.
 - Phase 5 Quick Actions source-to-panel transitions retain hover through a small bridge zone.
 - Phase 5 Quick Actions hide only after a 250 ms timer confirms that source and panel are no longer hovered.
@@ -112,6 +112,25 @@ Module settings persistence, including stable layout, placement, and visual sett
 - Todo ordering rules added with state grouping, planned-time priority, priority ranking, creation order, and ID tie-breaking.
 - Todo retention policy added with indefinite default retention and configurable trashed-item purge eligibility.
 - Todo repository now exposes explicit trash, restore, and permanent removal operations with lifecycle validation.
+- Todo panel/page, reusable task cards, and New Task dialog added and build-verified.
+- Edit Task dialog added and build-verified.
+- Description support added to task creation/editing and build-verified.
+- Date/time input added to task creation/editing and build-verified.
+- Priority selection added to task creation/editing and build-verified.
+- Completed state added to task editing/cards and build-verified.
+- Overdue state added to task cards with periodic refresh and build-verified.
+- Cancelled state added to task editing/cards and build-verified.
+- Trash state added to task cards with restore action and build-verified.
+- Search added for task titles/descriptions with empty-result handling and build-verified.
+- Turkish search normalization added for I/İ/ı/i and build-verified.
+- Today filter added for planned tasks and build-verified.
+- Tomorrow filter added for planned tasks and build-verified.
+- Week filter added with Monday-start week calculation and build-verified.
+- Completed view/filter added with task-state matching and build-verified.
+- Filter-specific empty-state messages added and build-verified.
+- Stable scrolling and model-update refresh handling added and build-verified.
+- Todo card visual customization added for status/priority states and build-verified.
+- TodoModel–SQLite–QML integration added with CRUD, state transitions, and 6/6 CTest coverage.
 
 ## Clock Performance Verification
 - Debug build completed successfully.
@@ -156,7 +175,7 @@ Use the SPP-style workflow:
 Commands and patches should be concise and fail-fast. When working interactively with the user, provide one implementation step at a time and wait for the result when later steps depend on it.
 
 ## Immediate Next Steps
-1. Implement and verify Todo panel/page.
+1. Finalize Reminder model.
 
 ## AI Agent Continuation Instruction
 Before modifying this repository, read in this order:
@@ -174,7 +193,7 @@ Continue from the current state. Do not restart architectural interpretation unl
 Communicate with the user in Turkish unless explicitly requested otherwise.
 
 ## Last Updated
-2026-07-27 — Phase 7 stage 1 (Todo V1 Data and Domain) completed; all 5 clean Debug tests pass and Todo panel/page is next.
+2026-07-27 — Phase 7 completed; TodoModel integration added, Debug build and 6/6 CTest passed.
 
 
 

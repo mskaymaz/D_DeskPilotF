@@ -259,7 +259,7 @@ Phase 0 is complete when:
 
 ---
 
-## [ ] Phase 7 â€” Todo V1
+## [x] Phase 7 â€” Todo V1
 
 **Goal:** Rebuild the Todo module as a lightweight professional task manager.
 
@@ -275,28 +275,32 @@ Phase 0 is complete when:
 - [8] Retention rules.
 - [9] Trash/restore/permanent-delete behavior.
 
-### [ ] UI
+### [x] UI
 
-- [ ] Todo panel/page.
-- [ ] Task cards.
-- [ ] New Task dialog.
-- [ ] Edit Task dialog.
-- [ ] Description.
-- [ ] Date/time input.
-- [ ] Priority selection.
-- [ ] Completed state.
-- [ ] Overdue state.
-- [ ] Cancelled state.
-- [ ] Trash state.
-- [ ] Search.
-- [ ] Turkish-character search correctness.
-- [ ] Today view/filter.
-- [ ] Tomorrow view/filter.
-- [ ] Week view/filter.
-- [ ] Completed view/filter.
-- [ ] Useful empty states.
-- [ ] Stable scrolling and updates.
-- [ ] Visual customization where appropriate.
+- [10] Todo panel/page.
+- [11] Task cards.
+- [12] New Task dialog.
+- [13] Edit Task dialog.
+- [14] Description.
+- [15] Date/time input.
+- [16] Priority selection.
+- [17] Completed state.
+- [18] Overdue state.
+- [19] Cancelled state.
+- [20] Trash state.
+- [21] Search.
+- [22] Turkish-character search correctness.
+- [23] Today view/filter.
+- [24] Tomorrow view/filter.
+- [25] Week view/filter.
+- [26] Completed view/filter.
+- [27] Useful empty states.
+- [28] Stable scrolling and updates.
+- [29] Visual customization where appropriate.
+
+### [x] Integration
+
+- [30] TodoModel–SQLite–QML integration.
 
 ### Completion Criteria
 
@@ -622,7 +626,7 @@ Potential areas:
 
 # CURRENT POSITION
 
-**Current phase:** Phase 7 â€” Todo V1
+**Current phase:** Phase 8 â€” Reminder V1 Completion
 
 **Completed so far:**
 
@@ -651,7 +655,7 @@ Potential areas:
 - Phase 5 contextual Quick Actions component provides delayed hover hiding and Settings/Reminder/Todo action signals.
 - Phase 5 Settings Quick Action opens the existing settings context menu and is included in the input mask.
 - Phase 5 Reminder Quick Action opens a clear placeholder dialog until the Phase 8 Reminder system is implemented.
-- Phase 5 Todo Quick Action opens a clear placeholder dialog until the Phase 7 Todo system is implemented.
+- Phase 5 Todo Quick Action opens the Phase 7 Todo panel.
 - Phase 5 Quick Actions positioning uses the actual clock content bounds, flips at the right edge, and clamps vertically within the window.
 - Phase 5 Quick Actions source-to-panel transitions retain hover through a small bridge zone.
 - Phase 5 Quick Actions hide only after a 250 ms timer confirms that source and panel are no longer hovered.
@@ -659,8 +663,27 @@ Potential areas:
 - Phase 5 Quick Actions expose an independent icon-size property backed by the design token and are not coupled to module font scales.
 - Phase 5 Quick Actions use short opacity and scale animations for show/hide transitions.
 - Phase 5 Quick Actions no-flicker behavior is covered by the bridge zone, guarded hide timer, movement suppression, and reversible animations.
+- Phase 7 Todo panel/page, reusable task cards, and New Task dialog added and build-verified.
+- Phase 7 Edit Task dialog added and build-verified.
+- Phase 7 Description support added and build-verified.
+- Phase 7 Date/time input added and build-verified.
+- Phase 7 Priority selection added and build-verified.
+- Phase 7 Completed state added and build-verified.
+- Phase 7 Overdue state added and build-verified.
+- Phase 7 Cancelled state added and build-verified.
+- Phase 7 Trash state added and build-verified.
+- Phase 7 Search added and build-verified.
+- Phase 7 Turkish-character search correctness added and build-verified.
+- Phase 7 Today view/filter added and build-verified.
+- Phase 7 Tomorrow view/filter added and build-verified.
+- Phase 7 Week view/filter added and build-verified.
+- Phase 7 Completed view/filter added and build-verified.
+- Phase 7 Useful empty states added and build-verified.
+- Phase 7 Stable scrolling and updates added and build-verified.
+- Phase 7 Visual customization added and build-verified.
+- Phase 7 TodoModel–SQLite–QML integration added; CRUD, state transitions, and 6/6 CTest passed.
 
 **Immediate next step:**
 
-1. Implement and verify Todo panel/page.
+1. Finalize Reminder model.
 
