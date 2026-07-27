@@ -1,4 +1,4 @@
-﻿#include <QGuiApplication>
+#include <QGuiApplication>
 #include <QDateTime>
 #include <QFile>
 #include <QQmlApplicationEngine>
@@ -412,3 +412,4 @@ int main(int argc, char *argv[])
 
     return app.exec();
 }
+
