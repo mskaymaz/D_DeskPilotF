@@ -298,10 +298,6 @@ Phase 0 is complete when:
 - [28] Stable scrolling and updates.
 - [29] Visual customization where appropriate.
 
-### [x] Integration
-
-- [30] TodoModel–SQLite–QML integration.
-
 ### Completion Criteria
 
 - Todo reaches functional parity with intended Python V1 scope.
@@ -626,7 +622,7 @@ Potential areas:
 
 # CURRENT POSITION
 
-**Current phase:** Phase 8 â€” Reminder V1 Completion
+**Current phase:** Phase 7 â€” Todo V1
 
 **Completed so far:**
 
@@ -681,9 +677,8 @@ Potential areas:
 - Phase 7 Useful empty states added and build-verified.
 - Phase 7 Stable scrolling and updates added and build-verified.
 - Phase 7 Visual customization added and build-verified.
-- Phase 7 TodoModel–SQLite–QML integration added; CRUD, state transitions, and 6/6 CTest passed.
 
 **Immediate next step:**
 
-1. Finalize Reminder model.
+1. Finalize Phase 7 completion criteria before Phase 8.
 
