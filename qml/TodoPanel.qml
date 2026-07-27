@@ -1,5 +1,5 @@
 import QtQuick
-import QtQuick.Controls
+import QtQuick.Controls 2.15
 import QtQuick.Layouts
 
 Dialog {
@@ -237,7 +237,7 @@ Dialog {
             TextField {
                 id: searchField
                 placeholderText: "Görevlerde ara"
-                clearButtonEnabled: true
+
                 Layout.fillWidth: true
                 onTextChanged: root.searchQuery = text
             }

@@ -1,4 +1,4 @@
-﻿# DESKPILOTC AI AGENT WORKING PROTOCOL
+# DESKPILOTC AI AGENT WORKING PROTOCOL
 
 ## HARD RULES — BISMILLAH + EKO + EKO TEK MADDE + SPP
 
@@ -45,6 +45,9 @@ Do not use image generation or image editing tools for DeskPilotC development.
 
 ### 13. Communication
 Communicate with the user in Turkish unless explicitly requested otherwise. Default status responses should be one line.
+
+### 14. User-Executed Commands for Builds and Tests
+**CRITICAL AND MANDATORY:** For ANY builds, tests, or extensive local analyses, DO NOT RUN the commands in the background yourself. You MUST provide the exact PowerShell (PS) commands to the user. The user will execute them locally and paste the output/results back into the chat. You MUST STOP and wait for the user's report before proceeding. Any deviation from this rule is strictly prohibited.
 
 ## REQUIRED DOCUMENT READING ORDER
 

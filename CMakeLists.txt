@@ -86,13 +86,16 @@ qt_add_qml_module(DeskPilotC
         qml/GroupedLayout.qml
         qml/LayoutSettingsPopup.qml
         qml/Main.qml
+        qml/ModuleVisibilityController.qml
         qml/ModuleWindow.qml
+        qml/NewTaskDialog.qml
         qml/NotificationSettingsPopup.qml
         qml/QuickActions.qml
         qml/QuickActionsSettingsPopup.qml
-        qml/TodoPanel.qml
+        qml/ResponsiveMixin.qml
         qml/TodoCard.qml
-        qml/NewTaskDialog.qml
+        qml/TodoPanel.qml
+        qml/WindowStateManager.qml
         qml/EditTaskDialog.qml
     RESOURCES
         ${DESKPILOT_IMAGE_FILES}

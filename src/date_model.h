@@ -17,6 +17,7 @@ class DateModel final : public QObject
     Q_PROPERTY(bool showWeekNumber READ showWeekNumber WRITE setShowWeekNumber
                    NOTIFY showWeekNumberChanged)
     Q_PROPERTY(QString weekNumberText READ weekNumberText NOTIFY weekNumberTextChanged)
+    Q_PROPERTY(QString hijriWeekNumberText READ hijriWeekNumberText NOTIFY hijriWeekNumberTextChanged)
     Q_PROPERTY(bool gregorianFirst READ gregorianFirst WRITE setGregorianFirst
                    NOTIFY dateOrderChanged)
     Q_PROPERTY(QString fontFamily READ fontFamily WRITE setFontFamily NOTIFY fontFamilyChanged)
@@ -62,6 +63,7 @@ signals:
     void dateFormatChanged();
     void showWeekNumberChanged();
     void weekNumberTextChanged();
+    void hijriWeekNumberTextChanged();
     void dateOrderChanged();
     void fontFamilyChanged();
     void useEmbeddedFontChanged();
@@ -78,6 +80,7 @@ private:
     QString m_hijriText = QStringLiteral("--.--.----");
     QString m_dateFormat = QStringLiteral("dd.MM.yyyy");
     QString m_weekNumberText = QStringLiteral("--");
+    QString m_hijriWeekNumberText = QStringLiteral("--");
     bool m_showWeekNumber = false;
     bool m_gregorianFirst = true;
     QString m_fontFamily;

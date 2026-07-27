@@ -208,8 +208,15 @@ void DateModel::updateDateTexts()
     }
 
     // Hijri week number (approximate)
-    const QDate hijriDate = islamicCivilCalendar.dateFromJulianDay(m_currentDate.toJulianDay());
-    const int hijriWeekNumber = (hijriDate.dayOfYear() + 6) / 7; // simple week calc
+    int hijriWeekNumber = 0;
+    if (m_currentDate.isValid()) {
+        auto ymd = islamicCivilCalendar.partsFromDate(m_currentDate);
+        int dayOfYear = ymd.day;
+        for (int m = 1; m < ymd.month; ++m) {
+            dayOfYear += islamicCivilCalendar.daysInMonth(m, ymd.year);
+        }
+        hijriWeekNumber = (dayOfYear + 6) / 7; // simple week calc
+    }
     const QString nextHijriWeekNumberText = m_currentDate.isValid()
         ? QString::number(hijriWeekNumber)
         : QStringLiteral("--");
