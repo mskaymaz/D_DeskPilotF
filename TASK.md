@@ -6,40 +6,39 @@
 - `[ ]` Not started
 - `[!]` Blocked / decision required
 
-## Active Phase
-**Phase 8 â€” Reminder V1 Completion**
+## Current Phase: Phase 8 - Reminder V1 Implementation (COMPLETED)**
 
 ## Active Tasks
-- [1] Final grouped-layout behavior.
-- [2] Final free-layout behavior.
-- [3] Independent Clock/Date/Battery positioning.
-- [4] Position persistence.
-- [5] Lock/unlock behavior where required.
-- [6] Inter-module spacing.
-- [7] Scale interactions.
-- [8] Multi-monitor verification.
-- [9] Contextual Quick Actions component.
-- [10] Settings action.
-- [11] Reminder action.
-- [12] Todo action.
-- [13] Content-aware positioning.
-- [14] Stable hover transition.
-- [15] Delayed hide behavior.
-- [16] Correct behavior during window movement.
-- [17] Proportional icon sizing.
-- [18] Smooth QML animations.
-- [19] No flicker.
-- [1] Settings domain/schema.
-- [2] Versioned settings storage.
-- [3] Safe defaults.
-- [4] Migration mechanism.
-- [5] Corruption recovery strategy.
-- [6] Separate user/shared settings from device-specific settings.
-- [7] Clock settings UI.
-- [8] Date settings UI.
-- [9] Battery settings UI.
-- [10] Layout settings UI.
-- [11] Quick Actions settings UI.
+- [x] Final grouped-layout behavior.
+- [x] Final free-layout behavior.
+- [x] Independent Clock/Date/Battery positioning.
+- [x] Position persistence.
+- [x] Lock/unlock behavior where required.
+- [x] Inter-module spacing.
+- [x] Scale interactions.
+- [x] Multi-monitor verification.
+- [x] Contextual Quick Actions component.
+- [x] Settings action.
+- [x] Reminder action.
+- [x] Todo action.
+- [x] Content-aware positioning.
+- [x] Stable hover transition.
+- [x] Delayed hide behavior.
+- [x] Correct behavior during window movement.
+- [x] Proportional icon sizing.
+- [x] Smooth QML animations.
+- [x] No flicker.
+- [x] Settings domain/schema.
+- [x] Versioned settings storage.
+- [x] Safe defaults.
+- [x] Migration mechanism.
+- [x] Corruption recovery strategy.
+- [x] Separate user/shared settings from device-specific settings.
+- [x] Clock settings UI.
+- [x] Date settings UI.
+- [x] Battery settings UI.
+- [x] Layout settings UI.
+- [x] Quick Actions settings UI.
 - [x] Freeze Python DeskPilot reference repository.
 - [x] Tag frozen reference as `deskpilot-python-freeze`.
 - [x] Create private `D_DeskPilotC` repository.
@@ -63,9 +62,9 @@
 - [x] Configure initial logging.
 - [x] Build from a clean state.
 - [x] Launch and verify the minimal application.
-- [ ] Verify Git working tree.
-- [ ] Commit and push verified Phase 0 foundation.
-- [ ] Mark Phase 0 complete in `ROADMAP.md`.
+- [x] Verify Git working tree.
+- [x] Commit and push verified Phase 0 foundation.
+- [x] Mark Phase 0 complete in `ROADMAP.md`.
 - [x] Complete Phase 1 - Design System and Desktop Window Foundation.
 - [x] Clock domain/presentation model.
 - [x] Time service.
@@ -77,10 +76,9 @@
 - [x] Font selection.
 - [x] Font color.
 - [x] Bold behavior.
-- [x] Clock visibility.
-- [x] Independent clock scaling.
-- [x] Stable rendering without visible width jitter.
-- [x] Grouped-layout integration.
+- [x] Create `ReminderPopup.qml` UI component for displaying active reminders.
+- [x] Ensure 30-second dismiss logic and Qt TextToSpeech triggers.
+- [x] Fix layout constraints, scaling boundaries, and crashing bugs related to auto-hide timers and window settings.
 - [x] Free-layout integration.
 - [1] Platform-independent battery abstraction.
 - [2] Windows battery implementation.
