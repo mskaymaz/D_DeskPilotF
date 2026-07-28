@@ -6,9 +6,31 @@
 - `[ ]` Not started
 - `[!]` Blocked / decision required
 
-## Current Phase: Phase 8 - Reminder V1 Implementation (COMPLETED)**
+## Current Phase: Phase 8 - Reminder V1 Completion (IN PROGRESS)
 
 ## Active Tasks
+1. [x] Missed reminder recovery.
+2. [x] Duplicate firing prevention.
+3. [x] Application-restart recovery.
+4. [ ] Enable/disable behavior.
+5. [x] Snooze 5 minutes, 10 minutes, 60 minutes.
+6. [x] Remaining-time formatting.
+7. [x] Safe malformed-data handling.
+8. [x] Reminder list UI.
+9. [x] Add Reminder dialog.
+10. [x] Edit Reminder dialog.
+11. [x] Reminder cards.
+12. [x] Active/completed/missed states.
+13. [x] Validation.
+14. [x] Non-disruptive popup behavior.
+15. [x] Define native/offline TTS strategy.
+16. [x] Optional TTS.
+17. [x] Voice selection.
+18. [x] Spoken-text preview.
+19. [x] Non-blocking execution.
+20. [x] Respect silent mode.
+
+## Completed Tasks (Phase 8 Fixes & UI Foundations)
 - [x] Final grouped-layout behavior.
 - [x] Final free-layout behavior.
 - [x] Independent Clock/Date/Battery positioning.

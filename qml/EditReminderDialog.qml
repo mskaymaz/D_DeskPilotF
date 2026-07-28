@@ -17,16 +17,31 @@ Dialog {
     title: reminderId === "" ? "Yeni Hatırlatıcı" : "Hatırlatıcıyı Düzenle"
     modal: true
     width: DesignTokens.scaled(440)
-    height: DesignTokens.scaled(480)
-    standardButtons: Dialog.Save | Dialog.Cancel
+    height: DesignTokens.scaled(520)
+    
+    function isValidTime(value) {
+        if (value === "") return false
+        var match = /^(\d{4})-(\d{2})-(\d{2}) (\d{2}):(\d{2})$/.exec(value)
+        if (match === null) return false
+        var date = new Date(Number(match[1]), Number(match[2]) - 1, Number(match[3]), Number(match[4]), Number(match[5]))
+        return !isNaN(date.getTime())
+    }
 
-    onAccepted: {
+    function submitReminder() {
+        var timeStr = targetTimeField.dateTimeString
+        errorLabel.visible = false
+        if (!isValidTime(timeStr)) {
+            errorLabel.text = "Geçersiz veya eksik tarih formatı! Lütfen geçerli bir gün seçin."
+            errorLabel.visible = true
+            return
+        }
         root.reminderSubmitted(
-            titleField.text,
-            descriptionField.text,
-            targetTimeField.text,
+            titleField.text.trim(),
+            descriptionField.text.trim(),
+            timeStr,
             recurrenceField.currentValue
         )
+        root.close()
     }
 
     ColumnLayout {
@@ -80,13 +95,26 @@ Dialog {
                 font.bold: true
                 color: DesignTokens.text
             }
-            TextField {
+            DateTimePicker {
                 id: targetTimeField
                 Layout.fillWidth: true
-                text: root.targetTimeLabel
-                placeholderText: "Örn: 2026-12-31 15:30"
-                font.pixelSize: DesignTokens.bodyPixelSize
+                allowEmpty: false
+                
+                Component.onCompleted: {
+                    if (root.targetTimeLabel !== "") {
+                        targetTimeField.setDateTime(root.targetTimeLabel)
+                    }
+                }
             }
+        }
+        
+        Label {
+            id: errorLabel
+            color: DesignTokens.error
+            font.pixelSize: DesignTokens.captionPixelSize
+            visible: false
+            Layout.fillWidth: true
+            wrapMode: Label.WordWrap
         }
         
         ColumnLayout {
@@ -123,5 +151,21 @@ Dialog {
         }
 
         Item { Layout.fillHeight: true } // spacer
+        
+        RowLayout {
+            spacing: DesignTokens.space2
+            Layout.alignment: Qt.AlignRight
+
+            Button {
+                text: "İptal"
+                onClicked: root.close()
+            }
+
+            Button {
+                text: "Kaydet"
+                enabled: titleField.text.trim() !== ""
+                onClicked: root.submitReminder()
+            }
+        }
     }
 }

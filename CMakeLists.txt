@@ -105,6 +105,7 @@ qt_add_qml_module(DeskPilotC
         qml/ReminderCard.qml
         qml/ReminderPanel.qml
         qml/ReminderPopup.qml
+        qml/DateTimePicker.qml
     RESOURCES
         ${DESKPILOT_IMAGE_FILES}
         ${DESKPILOT_FONT_FILES}

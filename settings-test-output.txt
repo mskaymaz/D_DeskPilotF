@@ -1,0 +1,21 @@
+********* Start testing of SettingsSchemaTest *********
+Config: Using QtTest library 6.11.1, Qt 6.11.1 (x86_64-little_endian-llp64 shared (dynamic) debug build; by MSVC 2022), windows 10
+INFO   : SettingsSchemaTest::initTestCase() entering
+PASS   : SettingsSchemaTest::initTestCase()
+INFO   : SettingsSchemaTest::exposesSafeDefaults() entering
+PASS   : SettingsSchemaTest::exposesSafeDefaults()
+INFO   : SettingsSchemaTest::roundTripsAllSettings() entering
+PASS   : SettingsSchemaTest::roundTripsAllSettings()
+INFO   : SettingsSchemaTest::migratesLegacySettings() entering
+PASS   : SettingsSchemaTest::migratesLegacySettings()
+INFO   : SettingsSchemaTest::rejectsUnsupportedFutureVersion() entering
+PASS   : SettingsSchemaTest::rejectsUnsupportedFutureVersion()
+INFO   : SettingsSchemaTest::recoversCorruptedSettingsWithBackup() entering
+FAIL!  : SettingsSchemaTest::recoversCorruptedSettingsWithBackup() 'storage.status() == QSettings::NoError' returned FALSE. ()
+D:\Code\mskaymaz\D_DeskPilotC\tests\settings_schema_test.cpp(114) : failure location
+INFO   : SettingsSchemaTest::normalizesBoundedSettings() entering
+PASS   : SettingsSchemaTest::normalizesBoundedSettings()
+INFO   : SettingsSchemaTest::cleanupTestCase() entering
+PASS   : SettingsSchemaTest::cleanupTestCase()
+Totals: 7 passed, 1 failed, 0 skipped, 0 blacklisted, 60ms
+********* Finished testing of SettingsSchemaTest *********

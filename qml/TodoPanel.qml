@@ -1,6 +1,7 @@
 import QtQuick
 import QtQuick.Controls 2.15
 import QtQuick.Layouts
+import Qt.labs.settings
 
 Dialog {
     id: root
@@ -51,11 +52,57 @@ Dialog {
     onTaskTrashRequested: root.tasksModel.setTrashed(taskId, trashed)
     onTaskDeleteRequested: root.tasksModel.deleteTask(taskId)
 
+    Settings {
+        id: panelSettings
+        category: "TodoPanelPosition"
+        property real savedX: -1
+        property real savedY: -1
+    }
+
+    x: panelSettings.savedX === -1 ? (parent ? Math.round((parent.width - width) / 2) : 0) : panelSettings.savedX
+    y: panelSettings.savedY === -1 ? (parent ? Math.round((parent.height - height) / 2) : 0) : panelSettings.savedY
+
+    onXChanged: if (visible) panelSettings.savedX = x
+    onYChanged: if (visible) panelSettings.savedY = y
+
     title: "Todo"
     modal: true
     width: DesignTokens.scaled(520)
-    height: DesignTokens.scaled(360)
+    height: DesignTokens.scaled(400)
     standardButtons: Dialog.Close
+
+    header: Rectangle {
+        color: DesignTokens.surface
+        implicitHeight: DesignTokens.scaled(48)
+        radius: DesignTokens.radiusMedium
+        
+        BaseText {
+            anchors.centerIn: parent
+            text: root.title
+            font.weight: Font.Bold
+            font.pixelSize: DesignTokens.titlePixelSize
+            color: DesignTokens.text
+        }
+        
+        Rectangle {
+            width: parent.width
+            height: 1
+            color: DesignTokens.border
+            anchors.bottom: parent.bottom
+        }
+
+        MouseArea {
+            anchors.fill: parent
+            property point lastMousePos
+            onPressed: (mouse) => { lastMousePos = Qt.point(mouse.x, mouse.y) }
+            onPositionChanged: (mouse) => {
+                var dx = mouse.x - lastMousePos.x
+                var dy = mouse.y - lastMousePos.y
+                root.x += dx
+                root.y += dy
+            }
+        }
+    }
 
     function taskCount() {
         if (tasksModel === null || tasksModel === undefined) {
@@ -204,7 +251,7 @@ Dialog {
                 }
             }
 
-            visible: root.hasTasks
+            visible: root.hasTasks || root.todayOnly || root.tomorrowOnly || root.weekOnly || root.completedOnly || root.searchQuery !== ""
         }
 
         ScrollView {

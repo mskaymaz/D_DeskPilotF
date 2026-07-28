@@ -27,6 +27,7 @@ public:
         RecurrenceRole,
         StateRole,
         RemainingTimeRole,
+        EnabledRole,
     };
     Q_ENUM(Role)
 
@@ -39,6 +40,7 @@ public:
     Q_INVOKABLE QVariantMap get(int row) const;
 
     Q_INVOKABLE bool reload();
+    Q_INVOKABLE void refreshTimes();
     Q_INVOKABLE bool createReminder(
         const QString &title, const QString &description,
         const QString &targetTime, const QString &recurrenceToken);
@@ -49,6 +51,7 @@ public:
     Q_INVOKABLE bool snoozeReminder(const QString &reminderId, int minutes);
     Q_INVOKABLE bool completeReminder(const QString &reminderId);
     Q_INVOKABLE bool markMissed(const QString &reminderId);
+    Q_INVOKABLE bool toggleEnabled(const QString &reminderId);
 
     bool filterActive() const { return m_filterActive; }
     void setFilterActive(bool filter);

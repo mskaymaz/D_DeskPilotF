@@ -7,7 +7,7 @@ namespace DeskPilot {
 
 namespace {
 
-constexpr int kCurrentSchemaVersion = 1;
+constexpr int kCurrentSchemaVersion = 2;
 
 bool fail(QString *errorMessage, const QString &message)
 {
@@ -89,6 +89,8 @@ std::optional<Reminder> readItem(const QSqlQuery &query, QString *errorMessage)
         fail(errorMessage, QStringLiteral("Reminder lifecycle time could not be parsed."));
         return std::nullopt;
     }
+    
+    item.enabled = query.value(11).toInt() != 0;
 
     if (!item.isValid(errorMessage)) {
         return std::nullopt;
@@ -143,13 +145,13 @@ bool SQLiteReminderRepository::save(const Reminder &item, QString *errorMessage)
     QSqlQuery query(m_database);
     query.prepare(QStringLiteral(
         "INSERT INTO reminders (id, title, description, target_time, recurrence, state, "
-        "created_at, updated_at, completed_at, missed_at, snoozed_until) "
-        "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?) "
+        "created_at, updated_at, completed_at, missed_at, snoozed_until, enabled) "
+        "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?) "
         "ON CONFLICT(id) DO UPDATE SET title=excluded.title, description=excluded.description, "
         "target_time=excluded.target_time, recurrence=excluded.recurrence, state=excluded.state, "
         "created_at=excluded.created_at, updated_at=excluded.updated_at, "
         "completed_at=excluded.completed_at, missed_at=excluded.missed_at, "
-        "snoozed_until=excluded.snoozed_until"));
+        "snoozed_until=excluded.snoozed_until, enabled=excluded.enabled"));
     query.addBindValue(item.id.toString(QUuid::WithoutBraces));
     query.addBindValue(item.title);
     query.addBindValue(item.description.isNull() ? QStringLiteral("") : item.description);
@@ -161,6 +163,7 @@ bool SQLiteReminderRepository::save(const Reminder &item, QString *errorMessage)
     query.addBindValue(item.completedAt.has_value() ? QVariant(timestampText(item.completedAt.value())) : QVariant());
     query.addBindValue(item.missedAt.has_value() ? QVariant(timestampText(item.missedAt.value())) : QVariant());
     query.addBindValue(item.snoozedUntil.has_value() ? QVariant(timestampText(item.snoozedUntil.value())) : QVariant());
+    query.addBindValue(item.enabled ? 1 : 0);
 
     if (!query.exec()) {
         m_database.rollback();
@@ -180,7 +183,7 @@ std::optional<Reminder> SQLiteReminderRepository::find(const QUuid &id, QString 
     QSqlQuery query(m_database);
     query.prepare(QStringLiteral(
         "SELECT id, title, description, target_time, recurrence, state, created_at, updated_at, "
-        "completed_at, missed_at, snoozed_until FROM reminders WHERE id = ?"));
+        "completed_at, missed_at, snoozed_until, enabled FROM reminders WHERE id = ?"));
     query.addBindValue(id.toString(QUuid::WithoutBraces));
     if (!query.exec()) {
         fail(errorMessage, databaseError(query));
@@ -201,7 +204,7 @@ QList<Reminder> SQLiteReminderRepository::list(QString *errorMessage) const
     QSqlQuery query(m_database);
     if (!query.exec(QStringLiteral(
             "SELECT id, title, description, target_time, recurrence, state, created_at, "
-            "updated_at, completed_at, missed_at, snoozed_until FROM reminders "
+            "updated_at, completed_at, missed_at, snoozed_until, enabled FROM reminders "
             "ORDER BY target_time ASC"))) {
         fail(errorMessage, databaseError(query));
         return items;
@@ -226,8 +229,8 @@ QList<Reminder> SQLiteReminderRepository::listActive(QString *errorMessage) cons
     QSqlQuery query(m_database);
     query.prepare(QStringLiteral(
         "SELECT id, title, description, target_time, recurrence, state, created_at, "
-        "updated_at, completed_at, missed_at, snoozed_until FROM reminders "
-        "WHERE state = ? ORDER BY target_time ASC"));
+        "updated_at, completed_at, missed_at, snoozed_until, enabled FROM reminders "
+        "WHERE state = ? AND enabled = 1 ORDER BY target_time ASC"));
     query.addBindValue(static_cast<int>(ReminderState::Active));
     if (!query.exec()) {
         fail(errorMessage, databaseError(query));
@@ -285,19 +288,29 @@ bool SQLiteReminderRepository::migrateSchema(QString *errorMessage) const
         return fail(errorMessage, m_database.lastError().text());
     }
 
-    QSqlQuery schemaQuery(m_database);
-    if (!schemaQuery.exec(QStringLiteral(
-            "CREATE TABLE IF NOT EXISTS reminders ("
-            "id TEXT PRIMARY KEY, title TEXT NOT NULL, description TEXT NOT NULL DEFAULT '', "
-            "target_time TEXT NOT NULL, recurrence INTEGER NOT NULL, state INTEGER NOT NULL, "
-            "created_at TEXT NOT NULL, updated_at TEXT NOT NULL, completed_at TEXT NULL, "
-            "missed_at TEXT NULL, snoozed_until TEXT NULL)"))) {
-        m_database.rollback();
-        return fail(errorMessage, databaseError(schemaQuery));
+    if (schemaVersion == 0) {
+        QSqlQuery schemaQuery(m_database);
+        if (!schemaQuery.exec(QStringLiteral(
+                "CREATE TABLE IF NOT EXISTS reminders ("
+                "id TEXT PRIMARY KEY, title TEXT NOT NULL, description TEXT NOT NULL DEFAULT '', "
+                "target_time TEXT NOT NULL, recurrence INTEGER NOT NULL, state INTEGER NOT NULL, "
+                "created_at TEXT NOT NULL, updated_at TEXT NOT NULL, completed_at TEXT NULL, "
+                "missed_at TEXT NULL, snoozed_until TEXT NULL, enabled INTEGER NOT NULL DEFAULT 1)"))) {
+            m_database.rollback();
+            return fail(errorMessage, databaseError(schemaQuery));
+        }
+    }
+    
+    if (schemaVersion == 1) {
+        QSqlQuery alterQuery(m_database);
+        if (!alterQuery.exec(QStringLiteral("ALTER TABLE reminders ADD COLUMN enabled INTEGER NOT NULL DEFAULT 1"))) {
+            m_database.rollback();
+            return fail(errorMessage, databaseError(alterQuery));
+        }
     }
 
     QSqlQuery versionUpdate(m_database);
-    if (!versionUpdate.exec(QStringLiteral("PRAGMA user_version = 1"))) {
+    if (!versionUpdate.exec(QStringLiteral("PRAGMA user_version = 2"))) {
         m_database.rollback();
         return fail(errorMessage, databaseError(versionUpdate));
     }

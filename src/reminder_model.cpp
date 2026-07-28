@@ -40,6 +40,8 @@ QVariant ReminderModel::data(const QModelIndex &index, int role) const
         return reminderRecurrenceToken(item.recurrence);
     case StateRole:
         return static_cast<int>(item.state);
+    case EnabledRole:
+        return item.enabled;
     case RemainingTimeRole:
         return item.remainingTimeFormatted(QDateTime::currentDateTimeUtc());
     default:
@@ -56,6 +58,7 @@ QHash<int, QByteArray> ReminderModel::roleNames() const
         {TargetTimeRole, "targetTime"},
         {RecurrenceRole, "recurrence"},
         {StateRole, "state"},
+        {EnabledRole, "enabled"},
         {RemainingTimeRole, "remainingTime"},
     };
 }
@@ -72,8 +75,9 @@ QVariantMap ReminderModel::get(int row) const
     map["title"] = item.title;
     map["description"] = item.description;
     map["targetTime"] = item.effectiveTargetTime();
-    map["recurrence"] = reminderRecurrenceToken(item.recurrence);
-    map["state"] = static_cast<int>(item.state);
+    map.insert("recurrence", reminderRecurrenceToken(item.recurrence));
+    map.insert("state", static_cast<int>(item.state));
+    map.insert("enabled", item.enabled);
     map["remainingTime"] = item.remainingTimeFormatted(QDateTime::currentDateTimeUtc());
     return map;
 }
@@ -93,6 +97,12 @@ bool ReminderModel::reload()
 
     applyFilters();
     return true;
+}
+
+void ReminderModel::refreshTimes()
+{
+    if (m_items.isEmpty()) return;
+    emit dataChanged(index(0, 0), index(m_items.size() - 1, 0), {RemainingTimeRole});
 }
 
 void ReminderModel::applyFilters()
@@ -296,6 +306,32 @@ bool ReminderModel::markMissed(const QString &reminderId)
         return true;
     }
     emit errorOccurred(error);
+    return false;
+}
+
+bool ReminderModel::toggleEnabled(const QString &reminderId)
+{
+    if (!m_repository) {
+        return false;
+    }
+
+    const QUuid id(reminderId);
+    if (id.isNull()) {
+        return false;
+    }
+
+    auto item = m_repository->find(id);
+    if (!item.has_value()) {
+        return false;
+    }
+
+    item->enabled = !item->enabled;
+    item->updatedAt = QDateTime::currentDateTimeUtc();
+
+    if (m_repository->save(item.value())) {
+        reload();
+        return true;
+    }
     return false;
 }
 

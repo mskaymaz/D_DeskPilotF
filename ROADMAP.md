@@ -314,43 +314,38 @@ Phase 0 is complete when:
 
 ### [ ] Core
 
-- [x] Finalize Reminder model.
-- [x] SQLite Reminder repository.
-- [x] Reminder scheduler.
-- [x] One-time reminders.
-- [x] Daily recurrence.
-- [x] Weekly recurrence.
-- [ ] Missed reminder recovery.
-- [ ] Duplicate firing prevention.
-- [ ] Application-restart recovery.
-- [ ] Enable/disable behavior.
-- [ ] Snooze 5 minutes.
-- [ ] Snooze 10 minutes.
-- [ ] Snooze 60 minutes.
-- [ ] Remaining-time formatting.
-- [ ] `ZamanÄ± geldi` state.
-- [ ] Safe malformed-data handling.
+1. [x] Finalize Reminder model.
+2. [x] SQLite Reminder repository.
+3. [x] Reminder scheduler.
+4. [x] One-time reminders.
+5. [x] Daily recurrence.
+6. [x] Weekly recurrence.
+7. [x] Missed reminder recovery.
+8. [x] Duplicate firing prevention.
+9. [x] Application-restart recovery.
+10. [ ] Enable/disable behavior.
+11. [x] Snooze 5 minutes, 10 minutes, 60 minutes.
+12. [x] Remaining-time formatting.
+13. [x] Safe malformed-data handling.
 
 ### [ ] UI
 
-- [ ] Reminder list.
-- [ ] Add Reminder dialog.
-- [ ] Edit Reminder dialog.
-- [ ] Reminder cards.
-- [ ] Active/completed/missed states.
-- [ ] Reminder popup.
-- [ ] Validation.
-- [ ] Non-disruptive popup behavior.
+14. [x] Reminder list UI.
+15. [x] Add Reminder dialog.
+16. [x] Edit Reminder dialog.
+17. [x] Reminder cards.
+18. [x] Active/completed/missed states.
+19. [x] Validation.
+20. [x] Non-disruptive popup behavior.
 
 ### [ ] Voice / TTS
 
-- [ ] Define native/offline TTS strategy.
-- [ ] Optional TTS.
-- [ ] Voice selection.
-- [ ] Spoken-text preview.
-- [ ] Non-blocking execution.
-- [ ] Safe fallback.
-- [ ] Respect silent mode.
+21. [x] Define native/offline TTS strategy.
+22. [x] Optional TTS.
+23. [x] Voice selection.
+24. [x] Spoken-text preview.
+25. [x] Non-blocking execution.
+26. [x] Respect silent mode.
 
 ### Completion Criteria
 
@@ -361,7 +356,27 @@ Phase 0 is complete when:
 
 ---
 
-## [ ] Phase 9 â€” Alarm Module
+## [ ] Phase 9 — Advanced Todo Features
+
+**Goal:** Implement highly requested professional Todo enhancements.
+
+### Tasks
+
+- [ ] Sub-tasks / Checklist support.
+- [ ] Drag-and-drop reordering.
+- [ ] Task tags/labels.
+- [ ] "Project" or "Category" grouping.
+- [ ] Archiving old tasks.
+- [ ] Quick-add command bar.
+
+### Completion Criteria
+
+- Todo functionality feels professional and comparable to modern standards.
+- Data integrity maintained during complex transitions.
+
+---
+
+## [ ] Phase 10 — Alarm Module
 
 **Goal:** Finalize the Alarm capability without conflating it with Reminder.
 
@@ -385,7 +400,7 @@ Phase 0 is complete when:
 
 ---
 
-## [ ] Phase 10 â€” Unified Notifications, Tray, and Lifecycle
+## [ ] Phase 11 — Unified Notifications, Tray, and Lifecycle
 
 **Goal:** Complete core desktop integration.
 
@@ -430,7 +445,7 @@ Phase 0 is complete when:
 
 ---
 
-## [ ] Phase 11 â€” Localization Foundation and Turkish V1 Polish
+## [ ] Phase 12 — Localization Foundation and Turkish V1 Polish
 
 **Goal:** Finalize Turkish-first Desktop V1 while keeping future localization clean.
 
@@ -452,7 +467,42 @@ Phase 0 is complete when:
 
 ---
 
-## [ ] Phase 12 â€” Performance, Stability, and Quality Gate
+## [ ] Phase 13 — UI/UX Visual Overhaul and Enrichment
+
+**Goal:** After the core mechanics are complete, comprehensively enrich the aesthetic and visual experience of the entire application to achieve a premium, modern desktop feel.
+
+### [ ] Design Tokens and Architecture
+
+- [ ] Update primary color palettes (Light/Dark modes) to be modern, vibrant, and eye-friendly.
+- [ ] Improve typography hierarchy (better readability, elegant font weights).
+- [ ] Enhance shadow and depth perception to create realistic layering.
+
+### [ ] Visual Effects and Modern Styling
+
+- [ ] Implement Glassmorphism/Acrylic or blur effects for panel backgrounds (where supported by OS/Qt).
+- [ ] Standardize icon sets to a consistent, sharp, and modern style.
+
+### [ ] Component-Level Polish
+
+- [ ] Redesign Buttons, TextFields, and CheckBoxes with modern hover and press interactions.
+- [ ] Refine Task and Reminder "Card" layouts by applying golden ratio spacing (margin/padding) and corner radii.
+- [ ] Implement invisible/elegant scrollbars (similar to macOS or modern Windows 11).
+
+### [ ] Motion Design and Fluidity
+
+- [ ] Add micro-animations (e.g., subtle scale down on button press).
+- [ ] Implement smooth Fade/Scale transitions for panel visibility toggles.
+- [ ] Add sliding animations for adding/removing items from lists.
+- [ ] Add spring/bounce animations for Dialog appearances.
+
+### Completion Criteria
+
+- The application looks and feels like a premium desktop product rather than a functional prototype.
+- All corners, colors, and transitions are fully cohesive across the entire application.
+
+---
+
+## [ ] Phase 14 — Performance, Stability, and Quality Gate
 
 **Goal:** Prove that DeskPilotC is suitable for continuous daily desktop use.
 
@@ -499,7 +549,7 @@ Phase 0 is complete when:
 
 ---
 
-## [ ] Phase 13 â€” Desktop V1 Release
+## [ ] Phase 15 — Desktop V1 Release
 
 **Goal:** Produce the first production-ready DeskPilotC desktop release.
 
@@ -532,7 +582,7 @@ These phases must not block Desktop V1.
 
 ---
 
-## [ ] Phase 14 â€” Shared Account and Sync Architecture
+## [ ] Phase 16 — Shared Account and Sync Architecture
 
 **Goal:** Define and implement optional multi-device synchronization.
 
@@ -565,7 +615,7 @@ These phases must not block Desktop V1.
 
 ---
 
-## [ ] Phase 15 â€” Mobile Client
+## [ ] Phase 17 — Mobile Client
 
 **Current reference candidate:** Flutter + Dart.
 

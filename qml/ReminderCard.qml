@@ -12,12 +12,14 @@ Rectangle {
     property string remainingTimeLabel: ""
     property int reminderState: 0 // 0: Active, 1: Completed, 2: Missed
     property string recurrenceLabel: ""
+    property bool reminderEnabled: true
 
     signal editRequested(
         string reminderId, string title, string description, string targetTime, string recurrence)
     signal completeRequested()
     signal snoozeRequested(int minutes)
     signal deleteRequested()
+    signal toggleEnabledRequested()
 
     implicitHeight: cardLayout.implicitHeight + DesignTokens.space4 * 2
     color: DesignTokens.surface
@@ -28,7 +30,11 @@ Rectangle {
         return DesignTokens.border // Active
     }
     border.width: (reminderState === 1 || reminderState === 2) ? 2 : 1
-    opacity: (reminderState === 1) ? 0.72 : 1.0
+    opacity: {
+        if (!reminderEnabled) return 0.5
+        if (reminderState === 1) return 0.72
+        return 1.0
+    }
 
     RowLayout {
         id: cardLayout
@@ -99,6 +105,14 @@ Rectangle {
 
             RowLayout {
                 spacing: DesignTokens.space2
+                
+                Switch {
+                    checked: root.reminderEnabled
+                    onClicked: root.toggleEnabledRequested()
+                    ToolTip.text: checked ? "Açık" : "Kapalı"
+                    ToolTip.visible: hovered
+                    visible: root.reminderState !== 1 // Hide when completed
+                }
                 
                 Button {
                     text: "✓"

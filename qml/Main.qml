@@ -32,9 +32,11 @@ ModuleWindow {
         target: reminderScheduler
         function onReminderDue(id, title, description) {
             handleReminderNotification(id, title, description, false)
+            reminderModel.reload()
         }
         function onReminderMissed(id, title, description) {
             handleReminderNotification(id, title, description, true)
+            reminderModel.reload()
         }
     }
 

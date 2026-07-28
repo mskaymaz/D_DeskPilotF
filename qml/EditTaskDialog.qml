@@ -64,13 +64,15 @@ Dialog {
 
     function submitTask() {
         var title = titleField.text.trim()
-        var plannedTime = plannedTimeField.text.trim()
+        var plannedTime = plannedTimeField.dateTimeString
+        errorLabel.visible = false
         if (title === "") {
             titleField.forceActiveFocus()
             return
         }
         if (!root.isValidPlannedTime(plannedTime)) {
-            plannedTimeField.forceActiveFocus()
+            errorLabel.text = "Geçersiz veya eksik tarih formatı! Lütfen geçerli bir gün seçin."
+            errorLabel.visible = true
             return
         }
         root.taskSubmitted(
@@ -89,7 +91,7 @@ Dialog {
         root.taskCancelled = cancelled
         titleField.text = title
         descriptionField.text = description
-        plannedTimeField.text = plannedTime
+        plannedTimeField.setDateTime(plannedTime)
         priorityField.currentIndex = root.priorityIndex(priority)
         completedField.checked = completed
         cancelledField.checked = cancelled
@@ -146,12 +148,19 @@ Dialog {
             Layout.fillWidth: true
         }
 
-        TextField {
+        DateTimePicker {
             id: plannedTimeField
-            placeholderText: "YYYY-AA-GG SS:dd (isteğe bağlı)"
-            inputMethodHints: Qt.ImhDigitsOnly
-            selectByMouse: true
             Layout.fillWidth: true
+            allowEmpty: true
+        }
+
+        Label {
+            id: errorLabel
+            color: DesignTokens.error
+            font.pixelSize: DesignTokens.captionPixelSize
+            visible: false
+            Layout.fillWidth: true
+            wrapMode: Label.WordWrap
         }
 
         Label {

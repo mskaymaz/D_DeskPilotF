@@ -32,6 +32,7 @@ struct Reminder final
     QDateTime targetTime;
     ReminderRecurrence recurrence = ReminderRecurrence::None;
     ReminderState state = ReminderState::Active;
+    bool enabled = true;
 
     QDateTime createdAt;
     QDateTime updatedAt;
