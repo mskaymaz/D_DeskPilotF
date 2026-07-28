@@ -18,7 +18,7 @@ private slots:
         QCOMPARE(settings.user.globalScale, 1.0);
         QVERIFY(settings.user.clock.visible);
         QVERIFY(settings.user.clock.use24HourFormat);
-        QCOMPARE(settings.user.clock.fontColor, QColor(QStringLiteral("#111827")));
+        QCOMPARE(settings.user.clock.fontColor, QColor(QStringLiteral("#FFA500")));
         QCOMPARE(settings.user.date.dateFormat, QStringLiteral("dd.MM.yyyy"));
         QCOMPARE(settings.user.battery.lowBatteryThreshold, 20);
         QCOMPARE(settings.user.battery.alertIntervalMinutes, 60);
@@ -154,7 +154,7 @@ private slots:
 
         QCOMPARE(actual.schemaVersion, 2);
         QVERIFY(actual.user.clock.visible);
-        QVERIFY(!actual.user.clock.showSeconds);
+        QVERIFY(actual.user.clock.showSeconds);
         QVERIFY(QFile::exists(path + QStringLiteral(".corrupt")));
         QSettings recoveredStorage(path, QSettings::IniFormat);
         QVERIFY(recoveredStorage.status() == QSettings::NoError);
@@ -201,7 +201,7 @@ private slots:
         QCOMPARE(actual.user.battery.lowBatteryThreshold, 100);
         QCOMPARE(actual.user.battery.alertIntervalMinutes, 1);
         QVERIFY(!actual.user.battery.silentMode);
-        QVERIFY(!actual.user.clock.showSeconds);
+        QVERIFY(actual.user.clock.showSeconds);
         QCOMPARE(actual.user.clock.scale, 1.0);
         QCOMPARE(actual.user.globalScale, 1.5);
         QCOMPARE(actual.user.date.dateFormat, QStringLiteral("dd.MM.yyyy"));

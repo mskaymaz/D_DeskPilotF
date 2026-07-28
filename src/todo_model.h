@@ -30,6 +30,8 @@ public:
         CancelledRole,
         TrashedRole,
         StateRole,
+        SubtasksRole,
+        IsOverdueRole,
     };
     Q_ENUM(Role)
 

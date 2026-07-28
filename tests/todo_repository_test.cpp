@@ -181,7 +181,7 @@ private slots:
             QSqlQuery query(verifier);
             QVERIFY(query.exec(QStringLiteral("PRAGMA user_version")));
             QVERIFY(query.next());
-            QCOMPARE(query.value(0).toInt(), 1);
+            QCOMPARE(query.value(0).toInt(), 2);
         }
         verifier.close();
         verifier = QSqlDatabase();

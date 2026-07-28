@@ -16,7 +16,7 @@ ApplicationWindow {
         x = winSettings.winX
         y = winSettings.winY
         // Clamp to current screen bounds
-        var screenGeom = Screen.availableGeometry
+        var screenGeom = root.screen ? root.screen.availableGeometry : Qt.rect(0, 0, 1920, 1080)
         if (x < screenGeom.x || y < screenGeom.y ||
             x > screenGeom.x + screenGeom.width - width ||
             y > screenGeom.y + screenGeom.height - height) {

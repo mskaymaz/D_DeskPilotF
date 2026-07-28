@@ -54,4 +54,5 @@ QtObject {
     readonly property color accent: "#3B82F6"
     readonly property color success: "#22C55E"
     readonly property color warning: "#F97316"
+    readonly property color error: "#EF4444"
 }

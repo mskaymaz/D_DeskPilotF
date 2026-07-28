@@ -83,6 +83,18 @@ QVariant TodoModel::data(const QModelIndex &index, int role) const
         return item.state == TodoState::Trashed;
     case StateRole:
         return stateToken(item.state);
+    case SubtasksRole: {
+        QVariantList list;
+        for (const auto &st : item.subtasks) {
+            QVariantMap map;
+            map[QStringLiteral("title")] = st.title;
+            map[QStringLiteral("completed")] = st.completed;
+            list.append(map);
+        }
+        return list;
+    }
+    case IsOverdueRole:
+        return item.isOverdue(QDateTime::currentDateTime());
     default:
         return {};
     }
@@ -100,6 +112,8 @@ QHash<int, QByteArray> TodoModel::roleNames() const
         {CancelledRole, "cancelled"},
         {TrashedRole, "trashed"},
         {StateRole, "state"},
+        {SubtasksRole, "subtasks"},
+        {IsOverdueRole, "isOverdue"},
     };
 }
 

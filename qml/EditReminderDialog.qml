@@ -18,6 +18,39 @@ Dialog {
     modal: true
     width: DesignTokens.scaled(440)
     height: DesignTokens.scaled(520)
+
+    header: Rectangle {
+        color: DesignTokens.surface
+        implicitHeight: DesignTokens.scaled(48)
+        radius: DesignTokens.radiusMedium
+        
+        BaseText {
+            anchors.centerIn: parent
+            text: root.title
+            font.weight: Font.Bold
+            font.pixelSize: DesignTokens.headingPixelSize * 0.6
+            color: DesignTokens.primaryText
+        }
+        
+        Rectangle {
+            width: parent.width
+            height: 1
+            color: DesignTokens.border
+            anchors.bottom: parent.bottom
+        }
+
+        MouseArea {
+            anchors.fill: parent
+            property point lastMousePos
+            onPressed: (mouse) => { lastMousePos = Qt.point(mouse.x, mouse.y) }
+            onPositionChanged: (mouse) => {
+                var dx = mouse.x - lastMousePos.x
+                var dy = mouse.y - lastMousePos.y
+                root.x += dx
+                root.y += dy
+            }
+        }
+    }
     
     function isValidTime(value) {
         if (value === "") return false
@@ -55,7 +88,7 @@ Dialog {
             BaseText {
                 text: "Başlık"
                 font.bold: true
-                color: DesignTokens.text
+                color: DesignTokens.primaryText
             }
             TextField {
                 id: titleField
@@ -73,7 +106,7 @@ Dialog {
             BaseText {
                 text: "Açıklama"
                 font.bold: true
-                color: DesignTokens.text
+                color: DesignTokens.primaryText
             }
             TextArea {
                 id: descriptionField
@@ -124,7 +157,7 @@ Dialog {
             BaseText {
                 text: "Tekrar"
                 font.bold: true
-                color: DesignTokens.text
+                color: DesignTokens.primaryText
             }
             ComboBox {
                 id: recurrenceField

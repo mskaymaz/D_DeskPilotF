@@ -23,6 +23,12 @@ enum class TodoState
     Trashed,
 };
 
+struct SubTask final
+{
+    QString title;
+    bool completed = false;
+};
+
 struct TodoItem final
 {
     static constexpr int kMaximumTitleLength = 200;
@@ -39,6 +45,8 @@ struct TodoItem final
     std::optional<QDateTime> completedAt;
     std::optional<QDateTime> cancelledAt;
     std::optional<QDateTime> trashedAt;
+    
+    QList<SubTask> subtasks;
 
     bool isValid(QString *errorMessage = nullptr) const;
     bool isDue(const QDateTime &now) const;

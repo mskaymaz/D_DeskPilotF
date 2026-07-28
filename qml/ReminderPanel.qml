@@ -69,8 +69,8 @@ Dialog {
             anchors.centerIn: parent
             text: root.title
             font.weight: Font.Bold
-            font.pixelSize: DesignTokens.titlePixelSize
-            color: DesignTokens.text
+            font.pixelSize: DesignTokens.headingPixelSize * 0.55
+            color: DesignTokens.primaryText
         }
         
         Rectangle {

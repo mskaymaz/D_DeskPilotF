@@ -2,6 +2,9 @@
 
 #include <QSqlError>
 #include <QSqlQuery>
+#include <QJsonDocument>
+#include <QJsonArray>
+#include <QJsonObject>
 
 #include <utility>
 
@@ -9,7 +12,7 @@ namespace DeskPilot {
 
 namespace {
 
-constexpr int kCurrentSchemaVersion = 1;
+constexpr int kCurrentSchemaVersion = 2;
 
 bool fail(QString *errorMessage, const QString &message)
 {
@@ -93,6 +96,23 @@ std::optional<TodoItem> readItem(const QSqlQuery &query, QString *errorMessage)
         return std::nullopt;
     }
 
+    if (!query.value(11).isNull()) {
+        const QByteArray jsonBytes = query.value(11).toByteArray();
+        const QJsonDocument doc = QJsonDocument::fromJson(jsonBytes);
+        if (doc.isArray()) {
+            const QJsonArray arr = doc.array();
+            for (const QJsonValue &val : arr) {
+                if (val.isObject()) {
+                    const QJsonObject obj = val.toObject();
+                    SubTask st;
+                    st.title = obj.value(QStringLiteral("title")).toString();
+                    st.completed = obj.value(QStringLiteral("completed")).toBool();
+                    item.subtasks.append(st);
+                }
+            }
+        }
+    }
+
     if (!item.isValid(errorMessage)) {
         return std::nullopt;
     }
@@ -147,13 +167,13 @@ bool SQLiteTodoRepository::save(const TodoItem &item, QString *errorMessage)
     QSqlQuery query(m_database);
     query.prepare(QStringLiteral(
         "INSERT INTO todo_items (id, title, description, planned_at, priority, state, "
-        "created_at, updated_at, completed_at, cancelled_at, trashed_at) "
-        "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?) "
+        "created_at, updated_at, completed_at, cancelled_at, trashed_at, subtasks) "
+        "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?) "
         "ON CONFLICT(id) DO UPDATE SET title=excluded.title, description=excluded.description, "
         "planned_at=excluded.planned_at, priority=excluded.priority, state=excluded.state, "
         "created_at=excluded.created_at, updated_at=excluded.updated_at, "
         "completed_at=excluded.completed_at, cancelled_at=excluded.cancelled_at, "
-        "trashed_at=excluded.trashed_at"));
+        "trashed_at=excluded.trashed_at, subtasks=excluded.subtasks"));
     query.addBindValue(item.id.toString(QUuid::WithoutBraces));
     query.addBindValue(item.title);
     query.addBindValue(item.description.isNull() ? QStringLiteral("") : item.description);
@@ -173,6 +193,16 @@ bool SQLiteTodoRepository::save(const TodoItem &item, QString *errorMessage)
     query.addBindValue(item.trashedAt.has_value()
                            ? QVariant(timestampText(item.trashedAt.value()))
                            : QVariant());
+    
+    QJsonArray subtasksArray;
+    for (const auto &st : item.subtasks) {
+        QJsonObject obj;
+        obj[QStringLiteral("title")] = st.title;
+        obj[QStringLiteral("completed")] = st.completed;
+        subtasksArray.append(obj);
+    }
+    const QByteArray subtasksJson = QJsonDocument(subtasksArray).toJson(QJsonDocument::Compact);
+    query.addBindValue(QString::fromUtf8(subtasksJson));
 
     if (!query.exec()) {
         m_database.rollback();
@@ -224,7 +254,7 @@ std::optional<TodoItem> SQLiteTodoRepository::find(
     QSqlQuery query(m_database);
     query.prepare(QStringLiteral(
         "SELECT id, title, description, planned_at, priority, state, created_at, updated_at, "
-        "completed_at, cancelled_at, trashed_at FROM todo_items WHERE id = ?"));
+        "completed_at, cancelled_at, trashed_at, subtasks FROM todo_items WHERE id = ?"));
     query.addBindValue(id.toString(QUuid::WithoutBraces));
     if (!query.exec()) {
         fail(errorMessage, databaseError(query));
@@ -245,7 +275,7 @@ QList<TodoItem> SQLiteTodoRepository::list(QString *errorMessage) const
     QSqlQuery query(m_database);
     if (!query.exec(QStringLiteral(
             "SELECT id, title, description, planned_at, priority, state, created_at, "
-            "updated_at, completed_at, cancelled_at, trashed_at FROM todo_items "
+            "updated_at, completed_at, cancelled_at, trashed_at, subtasks FROM todo_items "
             "ORDER BY state ASC, CASE WHEN planned_at IS NULL THEN 1 ELSE 0 END ASC, "
             "planned_at ASC, priority DESC, created_at ASC, id ASC"))) {
         fail(errorMessage, databaseError(query));
@@ -314,13 +344,21 @@ bool SQLiteTodoRepository::migrateSchema(QString *errorMessage) const
             "id TEXT PRIMARY KEY, title TEXT NOT NULL, description TEXT NOT NULL DEFAULT '', "
             "planned_at TEXT NULL, priority INTEGER NOT NULL, state INTEGER NOT NULL, "
             "created_at TEXT NOT NULL, updated_at TEXT NOT NULL, completed_at TEXT NULL, "
-            "cancelled_at TEXT NULL, trashed_at TEXT NULL)"))) {
+            "cancelled_at TEXT NULL, trashed_at TEXT NULL, subtasks TEXT NULL)"))) {
         m_database.rollback();
         return fail(errorMessage, databaseError(schemaQuery));
     }
+    
+    if (schemaVersion == 1) {
+        QSqlQuery alterQuery(m_database);
+        if (!alterQuery.exec(QStringLiteral("ALTER TABLE todo_items ADD COLUMN subtasks TEXT NULL"))) {
+            m_database.rollback();
+            return fail(errorMessage, databaseError(alterQuery));
+        }
+    }
 
     QSqlQuery versionUpdate(m_database);
-    if (!versionUpdate.exec(QStringLiteral("PRAGMA user_version = 1"))) {
+    if (!versionUpdate.exec(QStringLiteral("PRAGMA user_version = 2"))) {
         m_database.rollback();
         return fail(errorMessage, databaseError(versionUpdate));
     }
