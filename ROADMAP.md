@@ -318,8 +318,8 @@ Phase 0 is complete when:
 - [x] SQLite Reminder repository.
 - [x] Reminder scheduler.
 - [x] One-time reminders.
-- [ ] Daily recurrence.
-- [ ] Weekly recurrence.
+- [x] Daily recurrence.
+- [x] Weekly recurrence.
 - [ ] Missed reminder recovery.
 - [ ] Duplicate firing prevention.
 - [ ] Application-restart recovery.
@@ -684,7 +684,11 @@ Potential areas:
 - Phase 8 Reminder scheduler created and verified with tests.
 - Phase 8 One-time reminders implemented and verified with tests.
 
+- Phase 8 Daily recurrence implemented and verified with tests.
+
+- Phase 8 Weekly recurrence implemented and verified with tests.
+
 **Immediate next step:**
 
-1. Daily recurrence.
+1. Missed reminder recovery.
 

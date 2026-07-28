@@ -44,6 +44,8 @@ struct Reminder final
     bool isDue(const QDateTime &now) const;
     bool transitionTo(ReminderState target, const QDateTime &at, QString *errorMessage = nullptr);
     QDateTime effectiveTargetTime() const;
+    bool snooze(int minutes, const QDateTime &now, QString *errorMessage = nullptr);
+    QString remainingTimeFormatted(const QDateTime &now) const;
 };
 
 bool isValidReminderRecurrence(ReminderRecurrence recurrence);

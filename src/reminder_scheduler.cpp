@@ -27,21 +27,38 @@ void ReminderScheduler::checkDueReminders()
         return;
     }
     
-    QList<Reminder> allReminders = m_repository->list();
+    QList<Reminder> activeReminders = m_repository->listActive();
     QDateTime now = QDateTime::currentDateTimeUtc();
 
-    for (const Reminder &r : allReminders) {
+    for (const Reminder &r : activeReminders) {
         if (r.state == ReminderState::Active) {
             if (r.isDue(now)) {
                 if (!m_currentlyDue.contains(r.id)) {
-                    m_currentlyDue.insert(r.id);
-                    emit reminderDue(r);
-
-                    if (r.recurrence == ReminderRecurrence::None) {
+                    // Check if it's too old (e.g. app was offline and missed it by > 5 minutes)
+                    bool isVeryOld = r.effectiveTargetTime().addSecs(300) < now;
+                    
+                    if (isVeryOld) {
                         Reminder updated = r;
-                        updated.transitionTo(ReminderState::Completed, now);
-                        m_repository->save(updated);
-                        m_currentlyDue.remove(r.id);
+                        if (r.recurrence == ReminderRecurrence::None) {
+                            updated.transitionTo(ReminderState::Missed, now);
+                            m_repository->save(updated);
+                            emit reminderMissed(updated.id.toString(QUuid::WithoutBraces), updated.title, updated.description);
+                        } else if (r.recurrence == ReminderRecurrence::Daily) {
+                            while (updated.targetTime <= now) {
+                                updated.targetTime = updated.targetTime.addDays(1);
+                            }
+                            updated.updatedAt = now;
+                            m_repository->save(updated);
+                        } else if (r.recurrence == ReminderRecurrence::Weekly) {
+                            while (updated.targetTime <= now) {
+                                updated.targetTime = updated.targetTime.addDays(7);
+                            }
+                            updated.updatedAt = now;
+                            m_repository->save(updated);
+                        }
+                    } else {
+                        m_currentlyDue.insert(r.id);
+                        emit reminderDue(r.id.toString(QUuid::WithoutBraces), r.title, r.description);
                     }
                 }
             } else {

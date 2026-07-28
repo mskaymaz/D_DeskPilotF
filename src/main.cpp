@@ -29,6 +29,10 @@
 #include "todo_model.h"
 #include "todo_repository.h"
 #include "window_input_mask_controller.h"
+#include "reminder_repository.h"
+#include "reminder_model.h"
+#include "reminder_scheduler.h"
+#include "tts_service.h"
 
 namespace {
 
@@ -80,6 +84,8 @@ int main(int argc, char *argv[])
         qInstallMessageHandler(deskPilotMessageHandler);
     }
 
+    app.setQuitOnLastWindowClosed(false);
+
     qmlRegisterType<DeskPilot::ClockModel>("DeskPilot.Clock", 1, 0, "ClockModel");
     DeskPilot::ClockService clockService;
     DeskPilot::ClockModel clockModel;
@@ -94,13 +100,7 @@ int main(int argc, char *argv[])
     DeskPilot::BatteryModel batteryModel(nullptr);
 #endif
     batteryModel.refresh();
-    auto *batteryRefreshTimer = new QTimer(&app);
-    batteryRefreshTimer->setInterval(kBatteryRefreshIntervalMs);
-    batteryRefreshTimer->setTimerType(Qt::CoarseTimer);
-    QObject::connect(batteryRefreshTimer, &QTimer::timeout,
-        [&batteryModel]() { batteryModel.refresh(); });
-    batteryRefreshTimer->start();
-    qInfo() << "DeskPilotC battery refresh interval:" << kBatteryRefreshIntervalMs << "ms";
+
     QSettings settings(QGuiApplication::applicationDirPath() + "/DeskPilotC.ini",
         QSettings::IniFormat);
     qInfo() << "DeskPilotC settings file:" << settings.fileName();
@@ -158,6 +158,16 @@ int main(int argc, char *argv[])
     if (!todoModel.reload()) {
         qWarning() << "DeskPilotC todo model could not be loaded.";
     }
+
+    DeskPilot::SQLiteReminderRepository reminderRepository(todoDataDirectory + "/reminders.sqlite");
+    DeskPilot::ReminderModel reminderModel(&reminderRepository);
+    if (!reminderModel.reload()) {
+        qWarning() << "DeskPilotC reminder model could not be loaded.";
+    }
+
+    DeskPilot::ReminderScheduler reminderScheduler(&reminderRepository);
+    DeskPilot::TtsService ttsService;
+    ttsService.setUseFemaleVoice(false); // Can be linked to settings later if requested.
 
     qInfo() << "DeskPilotC settings loaded:"
             << "clock=" << clockModel.visible() << clockModel.showSeconds()
@@ -327,6 +337,9 @@ int main(int argc, char *argv[])
     engine.rootContext()->setContextProperty("inputMaskController", &inputMaskController);
     engine.rootContext()->setContextProperty("startupService", &startupService);
     engine.rootContext()->setContextProperty("todoModel", &todoModel);
+    engine.rootContext()->setContextProperty("reminderModel", &reminderModel);
+    engine.rootContext()->setContextProperty("reminderScheduler", &reminderScheduler);
+    engine.rootContext()->setContextProperty("ttsService", &ttsService);
     engine.loadFromModule("DeskPilot", "Main");
 
     if (engine.rootObjects().isEmpty()) {
@@ -409,6 +422,9 @@ int main(int argc, char *argv[])
             saveSettings);
         inputMaskController.setWindow(window);
     }
+
+    // Start scheduler after everything is ready
+    reminderScheduler.start();
 
     return app.exec();
 }

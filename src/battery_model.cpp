@@ -6,6 +6,9 @@ BatteryModel::BatteryModel(IBatteryService *service, QObject *parent)
     : QObject(parent)
     , m_service(service)
 {
+    if (m_service != nullptr) {
+        m_service->setCallback([this]() { this->updateState(); });
+    }
     updateState();
 }
 

@@ -37,21 +37,10 @@ ApplicationWindow {
     color: "transparent"
     background: null
 
-    // Idle timer to auto‑hide after 60 s of visibility
-    Timer {
-        id: idleTimer
-        interval: 60000 // 60 seconds
-        repeat: false
-        onTriggered: hideModule()
-    }
-
     onVisibleChanged: {
         if (visible) {
             raise()
             requestActivate()
-            idleTimer.start()
-        } else {
-            idleTimer.stop()
         }
     }
 

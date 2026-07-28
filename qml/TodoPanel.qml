@@ -6,18 +6,21 @@ Dialog {
     id: root
 
     property var tasksModel: todoModel
-    property string searchQuery: ""
+
+    Binding { target: tasksModel; property: "searchQuery"; value: root.searchQuery }
+    Binding { target: tasksModel; property: "filterToday"; value: root.todayOnly }
+    Binding { target: tasksModel; property: "filterTomorrow"; value: root.tomorrowOnly }
+    Binding { target: tasksModel; property: "filterWeek"; value: root.weekOnly }
+    Binding { target: tasksModel; property: "filterCompleted"; value: root.completedOnly }
+
     property bool todayOnly: false
     property bool tomorrowOnly: false
     property bool weekOnly: false
     property bool completedOnly: false
-    property int modelRevision: 0
-    readonly property bool hasTasks: taskCount() > 0
-    readonly property var filteredTasks: {
-        modelRevision
-        return filteredTaskList()
-    }
-    readonly property bool hasVisibleTasks: filteredTasks.length > 0
+    property string searchQuery: ""
+
+    readonly property bool hasTasks: tasksModel ? tasksModel.count > 0 : false
+    readonly property bool hasVisibleTasks: hasTasks
     signal newTaskRequested(
         string title, string description, string plannedTime, string priority)
     signal taskEditRequested(
@@ -25,6 +28,7 @@ Dialog {
         string plannedTime, string priority, bool completed, bool cancelled)
     signal taskCompletionRequested(string taskId, bool completed)
     signal taskTrashRequested(string taskId, bool trashed)
+    signal taskDeleteRequested(string taskId)
 
     onNewTaskRequested: root.tasksModel.createTask(title, description, plannedTime, priority)
     onTaskEditRequested: {
@@ -45,6 +49,7 @@ Dialog {
     }
     onTaskCompletionRequested: root.tasksModel.setCompleted(taskId, completed)
     onTaskTrashRequested: root.tasksModel.setTrashed(taskId, trashed)
+    onTaskDeleteRequested: root.tasksModel.deleteTask(taskId)
 
     title: "Todo"
     modal: true
@@ -68,83 +73,6 @@ Dialog {
         }
         return tasksModel[index]
     }
-
-    function isCompletedTask(task) {
-        return task.completed === true || task.state === "completed"
-    }
-
-    function normalizeSearchText(value) {
-        return String(value)
-            .replace(/İ/g, "i")
-            .replace(/I/g, "ı")
-            .toLowerCase()
-    }
-
-    function isTodayPlannedTime(value) {
-        var match = /^(\d{4})-(\d{2})-(\d{2})/.exec(String(value || ""))
-        if (match === null) {
-            return false
-        }
-        var plannedYear = Number(match[1])
-        var plannedMonth = Number(match[2]) - 1
-        var plannedDay = Number(match[3])
-        var now = new Date()
-        return plannedYear === now.getFullYear()
-            && plannedMonth === now.getMonth()
-            && plannedDay === now.getDate()
-    }
-
-    function isTomorrowPlannedTime(value) {
-        var match = /^(\d{4})-(\d{2})-(\d{2})/.exec(String(value || ""))
-        if (match === null) {
-            return false
-        }
-        var tomorrow = new Date()
-        tomorrow.setDate(tomorrow.getDate() + 1)
-        return Number(match[1]) === tomorrow.getFullYear()
-            && Number(match[2]) - 1 === tomorrow.getMonth()
-            && Number(match[3]) === tomorrow.getDate()
-    }
-
-    function isThisWeekPlannedTime(value) {
-        var match = /^(\d{4})-(\d{2})-(\d{2})/.exec(String(value || ""))
-        if (match === null) {
-            return false
-        }
-        var planned = new Date(
-            Number(match[1]), Number(match[2]) - 1, Number(match[3]))
-        var start = new Date()
-        start.setHours(0, 0, 0, 0)
-        start.setDate(start.getDate() - ((start.getDay() + 6) % 7))
-        var end = new Date(start)
-        end.setDate(end.getDate() + 7)
-        return planned >= start && planned < end
-    }
-
-    function filteredTaskList() {
-        var result = []
-        var query = root.normalizeSearchText(searchQuery.trim())
-        for (var index = 0; index < taskCount(); ++index) {
-            var task = taskAt(index)
-            var title = root.normalizeSearchText(task.title || "")
-            var description = root.normalizeSearchText(task.description || "")
-            var matchesQuery = query === ""
-                    || title.indexOf(query) !== -1
-                    || description.indexOf(query) !== -1
-            var matchesToday = !todayOnly || root.isTodayPlannedTime(task.plannedTime)
-            var matchesTomorrow = !tomorrowOnly
-                    || root.isTomorrowPlannedTime(task.plannedTime)
-            var matchesWeek = !weekOnly
-                    || root.isThisWeekPlannedTime(task.plannedTime)
-            var matchesCompleted = !completedOnly || root.isCompletedTask(task)
-            if (matchesQuery && matchesToday && matchesTomorrow
-                    && matchesWeek && matchesCompleted) {
-                result.push(task)
-            }
-        }
-        return result
-    }
-
     function emptyStateMessage() {
         if (!hasTasks) {
             return "Henüz görev yok."
@@ -182,26 +110,6 @@ Dialog {
     Connections {
         target: root.tasksModel
         ignoreUnknownSignals: true
-
-        function refreshModel() {
-            root.modelRevision += 1
-        }
-
-        function onDataChanged() {
-            refreshModel()
-        }
-
-        function onRowsInserted() {
-            refreshModel()
-        }
-
-        function onRowsRemoved() {
-            refreshModel()
-        }
-
-        function onCountChanged() {
-            refreshModel()
-        }
     }
 
     background: Rectangle {
@@ -313,7 +221,7 @@ Dialog {
                 spacing: DesignTokens.space2
 
                 Repeater {
-                    model: root.filteredTasks
+                    model: root.tasksModel
 
                     delegate: TodoCard {
                         required property string title
@@ -338,8 +246,9 @@ Dialog {
                         taskCancelled: modelCancelled
                         taskTrashed: modelTrashed
                         Layout.fillWidth: true
-                        onCompletionToggled: root.taskCompletionRequested(title, completed)
-                        onTrashToggled: root.taskTrashRequested(title, trashed)
+                        onCompletionToggled: root.taskCompletionRequested(taskId, completed)
+                        onTrashToggled: root.taskTrashRequested(taskId, trashed)
+                        onDeleteRequested: root.taskDeleteRequested(taskId)
                         onEditRequested: editTaskDialog.openForTask(
                             taskId, title, description, plannedTime, priority,
                             taskCompleted, taskCancelled)

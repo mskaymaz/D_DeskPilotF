@@ -3,8 +3,6 @@ import QtQuick.Controls
 
 ModuleWindow {
     id: rootWindow
-    width: DesignTokens.windowWidth
-    height: DesignTokens.windowHeight
     visible: true
     title: "DeskPilotC"
     property bool freeLayoutEnabled: false
@@ -30,6 +28,47 @@ ModuleWindow {
     onNotificationSilentModeChanged: batteryModel.silentMode = notificationSilentMode
     onGlobalScaleChanged: DesignTokens.globalScale = globalScale
 
+    Connections {
+        target: reminderScheduler
+        function onReminderDue(id, title, description) {
+            handleReminderNotification(id, title, description, false)
+        }
+        function onReminderMissed(id, title, description) {
+            handleReminderNotification(id, title, description, true)
+        }
+    }
+
+    function handleReminderNotification(id, title, description, isMissed) {
+        if (!notificationSilentMode && notificationTtsEnabled) {
+            ttsService.speak((isMissed ? "Kaçırılan hatırlatıcı: " : "") + title + ". " + description)
+        }
+        if (notificationVisualEnabled) {
+            var popup = Qt.createComponent("ReminderPopup.qml").createObject(rootWindow, {
+                "reminderId": id,
+                "reminderTitle": title,
+                "reminderDescription": description,
+                "isMissed": isMissed
+            })
+            popup.snoozeRequested.connect(function(rId, mins) {
+                reminderModel.snoozeReminder(rId, mins)
+                reminderScheduler.acknowledge(rId)
+                ttsService.stop()
+            })
+            popup.completeRequested.connect(function(rId) {
+                reminderModel.completeReminder(rId)
+                reminderScheduler.acknowledge(rId)
+                ttsService.stop()
+            })
+            popup.closedRequested.connect(function() {
+                reminderScheduler.acknowledge(id)
+                ttsService.stop()
+            })
+            popup.show()
+        } else {
+            reminderScheduler.acknowledge(id)
+        }
+    }
+
     Timer {
         id: layoutSettingsSaveTimer
         interval: 250
@@ -44,19 +83,8 @@ ModuleWindow {
         onTriggered: Qt.quit()
     }
 
-    Dialog {
-        id: reminderDialog
-        title: "Hatırlatıcı"
-        modal: true
-        standardButtons: Dialog.Ok
-        width: 360
-
-        contentItem: Label {
-            text: "Hatırlatıcı ekranı Faz 8 kapsamında etkinleştirilecek."
-            wrapMode: Text.WordWrap
-            padding: DesignTokens.space4
-        }
-
+    ReminderPanel {
+        id: reminderPanel
         onClosed: {
             rootWindow.contextMenuOpen = false
             rootWindow.updateInputMask()
@@ -238,21 +266,21 @@ ModuleWindow {
         startupService.enabled = false
 
         clockModel.visible = true
-        clockModel.showSeconds = false
+        clockModel.showSeconds = true
         clockModel.use24HourFormat = true
-        clockModel.fontFamily = ""
-        clockModel.fontColor = DesignTokens.primaryText
+        clockModel.fontFamily = "Stencil"
+        clockModel.fontColor = "#FFA500"
         clockModel.bold = false
         clockModel.useEmbeddedFont = true
-        clockModel.scale = 1.0
-        clockModel.secondsScale = 1.0
+        clockModel.scale = 1.25
+        clockModel.secondsScale = 0.75
 
         dateModel.visible = true
         dateModel.dateFormat = "dd.MM.yyyy"
         dateModel.showWeekNumber = false
         dateModel.gregorianFirst = true
-        dateModel.fontFamily = ""
-        dateModel.fontColor = DesignTokens.secondaryText
+        dateModel.fontFamily = "Digital-7"
+        dateModel.fontColor = "#0000FF"
         dateModel.bold = false
         dateModel.useEmbeddedFont = true
         dateModel.scale = 1.0
@@ -265,7 +293,7 @@ ModuleWindow {
         batteryModel.alertSoundEnabled = true
         batteryModel.silentMode = false
         batteryModel.fontFamily = ""
-        batteryModel.fontColor = DesignTokens.secondaryText
+        batteryModel.fontColor = "#000000"
         batteryModel.bold = false
         batteryModel.scale = 1.0
 
@@ -280,7 +308,7 @@ ModuleWindow {
         if (actionKey === "reminder") {
             contextMenuOpen = true
             updateInputMask()
-            reminderDialog.open()
+            reminderPanel.open()
             return
         }
 
@@ -480,73 +508,13 @@ ModuleWindow {
     }
 
     function reflowGroupedModules() {
-        if (freeLayoutEnabled || !modulePositionsInitialized) {
-            return
-        }
-
-        var layout = layoutLoader.item
-        if (layout === null || layout.inputItems === undefined) {
-            return
-        }
-
-        var visibleLoaders = []
-        var minX = rootWindow.width
-        var minY = rootWindow.height
-        var maxX = 0
-        var maxY = 0
-        var totalHeight = 0
-        for (var index = 0; index < layout.inputItems.length; ++index) {
-            var loader = layout.inputItems[index]
-            if (loader === null || !loader.visible || loader.width <= 0 || loader.height <= 0) {
-                continue
-            }
-
-            var position = loader.mapToItem(rootWindow.contentItem, 0, 0)
-            minX = Math.min(minX, position.x)
-            minY = Math.min(minY, position.y)
-            maxX = Math.max(maxX, position.x + loader.width)
-            maxY = Math.max(maxY, position.y + loader.height)
-            totalHeight += loader.height
-            visibleLoaders.push({ loader: loader, key: moduleKey(index) })
-        }
-
-        if (visibleLoaders.length === 0) {
-            return
-        }
-
-        totalHeight += moduleSpacing * (visibleLoaders.length - 1)
-        var groupWidth = maxX - minX
-        var groupCenterX = (minX + maxX) / 2
-        var groupCenterY = (minY + maxY) / 2
-        groupCenterX = Math.max(groupWidth / 2,
-            Math.min(rootWindow.width - groupWidth / 2, groupCenterX))
-        groupCenterY = Math.max(totalHeight / 2,
-            Math.min(rootWindow.height - totalHeight / 2, groupCenterY))
-
-        var nextPositions = {}
-        for (var key in modulePositions) {
-            nextPositions[key] = modulePositions[key]
-        }
-
-        var currentY = groupCenterY - totalHeight / 2
-        for (var visibleIndex = 0; visibleIndex < visibleLoaders.length; ++visibleIndex) {
-            var visibleLoader = visibleLoaders[visibleIndex]
-            nextPositions[visibleLoader.key] = {
-                x: groupCenterX - visibleLoader.loader.width / 2,
-                y: currentY
-            }
-            currentY += visibleLoader.loader.height + moduleSpacing
-        }
-
-        modulePositions = nextPositions
-        scheduleLayoutSettingsSave()
-        updateInputMask()
+        // Kullanıcı modülleri istediği gibi dağıtmak ve o haliyle grup olarak hareket 
+        // ettirmek istediği için, otomatik alt alta dizme (hizalama) mantığı tamamen iptal edildi.
+        return
     }
 
     function handleModuleScaleChanged() {
-        if (!freeLayoutEnabled) {
-            Qt.callLater(function() { rootWindow.reflowGroupedModules() })
-        }
+        Qt.callLater(function() { rootWindow.applySavedModulePositions() })
         updateInputMask()
     }
 
@@ -690,13 +658,13 @@ ModuleWindow {
 
     onFreeLayoutEnabledChanged: {
         updateInputMask()
+        scheduleLayoutSettingsSave()
         if (freeLayoutEnabled) {
             Qt.callLater(function() { rootWindow.applySavedModulePositions() })
         } else {
             modulePositionsInitialized = false
             Qt.callLater(function() { rootWindow.initializeGroupedPositions() })
         }
-        scheduleLayoutSettingsSave()
     }
     onLayoutLockedChanged: scheduleLayoutSettingsSave()
     onXChanged: hideQuickActionsForWindowMovement()
@@ -1038,8 +1006,12 @@ ModuleWindow {
                         rootWindow.updateInputMask()
                         rootWindow.updateQuickActionsPosition()
                     }
-                    onWidthChanged: rootWindow.updateInputMask()
-                    onHeightChanged: rootWindow.updateInputMask()
+                    onWidthChanged: {
+                        rootWindow.updateInputMask()
+                    }
+                    onHeightChanged: {
+                        rootWindow.updateInputMask()
+                    }
                 }
 
                 Loader {
@@ -1051,8 +1023,12 @@ ModuleWindow {
                     onVisibleChanged: rootWindow.updateInputMask()
                     onXChanged: rootWindow.updateInputMask()
                     onYChanged: rootWindow.updateInputMask()
-                    onWidthChanged: rootWindow.updateInputMask()
-                    onHeightChanged: rootWindow.updateInputMask()
+                    onWidthChanged: {
+                        rootWindow.updateInputMask()
+                    }
+                    onHeightChanged: {
+                        rootWindow.updateInputMask()
+                    }
                 }
 
                 Loader {
@@ -1064,8 +1040,12 @@ ModuleWindow {
                     onVisibleChanged: rootWindow.updateInputMask()
                     onXChanged: rootWindow.updateInputMask()
                     onYChanged: rootWindow.updateInputMask()
-                    onWidthChanged: rootWindow.updateInputMask()
-                    onHeightChanged: rootWindow.updateInputMask()
+                    onWidthChanged: {
+                        rootWindow.updateInputMask()
+                    }
+                    onHeightChanged: {
+                        rootWindow.updateInputMask()
+                    }
                 }
             }
         }
@@ -2047,7 +2027,7 @@ ModuleWindow {
         MenuSeparator {}
 
         MenuItem {
-            text: "Kapat"
+            text: "Uygulamadan Çık"
             onTriggered: rootWindow.saveAndClose()
         }
     }

@@ -146,7 +146,7 @@ Work on one verified task at a time. Do not begin later phases early. Do not mec
 - [30*] TodoModel–SQLite–QML integration.
 
 ## Next Immediate Task
-Daily recurrence.
+Missed reminder recovery.
 
 
 

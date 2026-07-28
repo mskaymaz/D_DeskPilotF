@@ -48,6 +48,7 @@ Rectangle {
         string priority, bool completed, bool cancelled)
     signal completionToggled(bool completed)
     signal trashToggled(bool trashed)
+    signal deleteRequested()
 
     implicitHeight: cardLayout.implicitHeight + DesignTokens.space4 * 2
     color: DesignTokens.surface
@@ -106,6 +107,14 @@ Rectangle {
                 onClicked: {
                     root.taskTrashed = !root.taskTrashed
                     root.trashToggled(root.taskTrashed)
+                }
+            }
+
+            Button {
+                text: "Kalıcı Olarak Sil"
+                visible: root.taskTrashed
+                onClicked: {
+                    root.deleteRequested()
                 }
             }
         }

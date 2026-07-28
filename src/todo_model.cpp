@@ -34,6 +34,14 @@ QString stateToken(TodoState state)
     return {};
 }
 
+QString normalizeSearchText(const QString &text)
+{
+    QString result = text;
+    result.replace(QStringLiteral("İ"), QStringLiteral("i"));
+    result.replace(QStringLiteral("I"), QStringLiteral("ı"));
+    return result.toLower();
+}
+
 } // namespace
 
 TodoModel::TodoModel(ITodoRepository *repository, QObject *parent)
@@ -112,19 +120,15 @@ QVariantMap TodoModel::get(int row) const
 bool TodoModel::reload()
 {
     if (m_repository == nullptr) {
-        return fail(QStringLiteral("Todo repository is not configured."));
+        return false;
     }
 
     QString errorMessage;
-    const QList<TodoItem> items = m_repository->list(&errorMessage);
+    m_allItems = m_repository->list(&errorMessage);
     if (!errorMessage.isEmpty()) {
         return fail(errorMessage);
     }
-
-    beginResetModel();
-    m_items = items;
-    endResetModel();
-    emit countChanged();
+    applyFilters();
     return true;
 }
 
@@ -232,10 +236,114 @@ bool TodoModel::setTrashed(const QString &taskId, bool trashed)
     if (current->state != TodoState::Trashed) {
         return fail(QStringLiteral("Only trashed todos can be restored."));
     }
-    if (!m_repository->restore(current->id, QDateTime::currentDateTime(), &errorMessage)) {
+    return saveTransition(current.value(), TodoState::Active, &errorMessage)
+        ? reload()
+        : fail(errorMessage);
+}
+
+bool TodoModel::deleteTask(const QString &taskId)
+{
+    if (m_repository == nullptr) {
+        return false;
+    }
+    QUuid id(taskId);
+    if (id.isNull()) {
+        return fail(QStringLiteral("Invalid task id."));
+    }
+    QString errorMessage;
+    if (!m_repository->permanentlyRemove(id, &errorMessage)) {
         return fail(errorMessage);
     }
     return reload();
+}
+
+void TodoModel::setSearchQuery(const QString &query)
+{
+    if (m_searchQuery != query) {
+        m_searchQuery = query;
+        emit filterChanged();
+        applyFilters();
+    }
+}
+
+void TodoModel::setFilterToday(bool filter)
+{
+    if (m_filterToday != filter) {
+        m_filterToday = filter;
+        emit filterChanged();
+        applyFilters();
+    }
+}
+
+void TodoModel::setFilterTomorrow(bool filter)
+{
+    if (m_filterTomorrow != filter) {
+        m_filterTomorrow = filter;
+        emit filterChanged();
+        applyFilters();
+    }
+}
+
+void TodoModel::setFilterWeek(bool filter)
+{
+    if (m_filterWeek != filter) {
+        m_filterWeek = filter;
+        emit filterChanged();
+        applyFilters();
+    }
+}
+
+void TodoModel::setFilterCompleted(bool filter)
+{
+    if (m_filterCompleted != filter) {
+        m_filterCompleted = filter;
+        emit filterChanged();
+        applyFilters();
+    }
+}
+
+void TodoModel::applyFilters()
+{
+    beginResetModel();
+    m_items.clear();
+
+    QString query = normalizeSearchText(m_searchQuery.trimmed());
+    
+    QDateTime now = QDateTime::currentDateTime();
+    QDateTime startOfToday = now;
+    startOfToday.setTime(QTime(0, 0));
+    QDateTime startOfThisWeek = startOfToday.addDays(-(startOfToday.date().dayOfWeek() - 1)); // Monday
+    QDateTime endOfThisWeek = startOfThisWeek.addDays(7);
+    QDate today = now.date();
+    QDate tomorrow = today.addDays(1);
+
+    for (const auto &item : m_allItems) {
+        if (!query.isEmpty()) {
+            if (!normalizeSearchText(item.title).contains(query) &&
+                !normalizeSearchText(item.description).contains(query)) {
+                continue;
+            }
+        }
+
+        if (m_filterCompleted) {
+            if (item.state != TodoState::Completed) continue;
+        } else {
+            if (m_filterToday) {
+                if (!item.plannedAt.has_value() || item.plannedAt->date() != today) continue;
+            }
+            if (m_filterTomorrow) {
+                if (!item.plannedAt.has_value() || item.plannedAt->date() != tomorrow) continue;
+            }
+            if (m_filterWeek) {
+                if (!item.plannedAt.has_value() || item.plannedAt.value() < startOfThisWeek || item.plannedAt.value() >= endOfThisWeek) continue;
+            }
+        }
+        
+        m_items.append(item);
+    }
+
+    endResetModel();
+    emit countChanged();
 }
 
 bool TodoModel::saveTransition(TodoItem item, TodoState target, QString *errorMessage)

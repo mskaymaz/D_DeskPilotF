@@ -217,6 +217,33 @@ QList<Reminder> SQLiteReminderRepository::list(QString *errorMessage) const
     return items;
 }
 
+QList<Reminder> SQLiteReminderRepository::listActive(QString *errorMessage) const
+{
+    QList<Reminder> items;
+    if (!ensureOpen(errorMessage)) {
+        return items;
+    }
+    QSqlQuery query(m_database);
+    query.prepare(QStringLiteral(
+        "SELECT id, title, description, target_time, recurrence, state, created_at, "
+        "updated_at, completed_at, missed_at, snoozed_until FROM reminders "
+        "WHERE state = ? ORDER BY target_time ASC"));
+    query.addBindValue(static_cast<int>(ReminderState::Active));
+    if (!query.exec()) {
+        fail(errorMessage, databaseError(query));
+        return items;
+    }
+    while (query.next()) {
+        const auto item = readItem(query, errorMessage);
+        if (!item.has_value()) {
+            items.clear();
+            return items;
+        }
+        items.append(item.value());
+    }
+    return items;
+}
+
 bool SQLiteReminderRepository::remove(const QUuid &id, QString *errorMessage)
 {
     if (id.isNull() || !ensureOpen(errorMessage)) {

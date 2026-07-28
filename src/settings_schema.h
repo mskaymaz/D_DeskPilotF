@@ -10,14 +10,14 @@ namespace DeskPilot {
 struct ClockSettings final
 {
     bool visible = true;
-    bool showSeconds = false;
+    bool showSeconds = true;
     bool use24HourFormat = true;
-    QString fontFamily;
-    QColor fontColor = QColor(QStringLiteral("#111827"));
+    QString fontFamily = QStringLiteral("Stencil");
+    QColor fontColor = QColor(QStringLiteral("#FFA500"));
     bool bold = false;
     bool useEmbeddedFont = true;
-    qreal scale = 1.0;
-    qreal secondsScale = 1.0;
+    qreal scale = 1.25;
+    qreal secondsScale = 0.75;
 };
 
 struct DateSettings final
@@ -26,8 +26,8 @@ struct DateSettings final
     QString dateFormat = QStringLiteral("dd.MM.yyyy");
     bool showWeekNumber = false;
     bool gregorianFirst = true;
-    QString fontFamily;
-    QColor fontColor = QColor(QStringLiteral("#6B7280"));
+    QString fontFamily = QStringLiteral("Digital-7");
+    QColor fontColor = QColor(QStringLiteral("#0000FF"));
     bool bold = false;
     bool useEmbeddedFont = true;
     qreal scale = 1.0;
@@ -42,8 +42,8 @@ struct BatterySettings final
     int alertIntervalMinutes = 60;
     bool alertSoundEnabled = true;
     bool silentMode = false;
-    QString fontFamily;
-    QColor fontColor = QColor(QStringLiteral("#6B7280"));
+    QString fontFamily = QStringLiteral("");
+    QColor fontColor = QColor(QStringLiteral("#000000"));
     bool bold = false;
     qreal scale = 1.0;
 };

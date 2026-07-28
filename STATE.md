@@ -131,6 +131,8 @@ Module settings persistence, including stable layout, placement, and visual sett
 - Stable scrolling and model-update refresh handling added and build-verified.
 - Todo card visual customization added for status/priority states and build-verified.
 - TodoModel–SQLite–QML integration added with CRUD, state transitions, and 6/6 CTest coverage.
+- Phase 8 Daily recurrence implemented and verified with tests.
+- Phase 8 Weekly recurrence implemented and verified with tests.
 
 ## Clock Performance Verification
 - Debug build completed successfully.
@@ -175,7 +177,7 @@ Use the SPP-style workflow:
 Commands and patches should be concise and fail-fast. When working interactively with the user, provide one implementation step at a time and wait for the result when later steps depend on it.
 
 ## Immediate Next Steps
-1. Daily recurrence.
+1. Missed reminder recovery.
 
 ## AI Agent Continuation Instruction
 Before modifying this repository, read in this order:

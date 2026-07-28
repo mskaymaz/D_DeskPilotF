@@ -23,7 +23,8 @@ public:
     void acknowledge(const QUuid &id);
 
 signals:
-    void reminderDue(const DeskPilot::Reminder &reminder);
+    void reminderDue(const QString &id, const QString &title, const QString &description);
+    void reminderMissed(const QString &id, const QString &title, const QString &description);
 
 private slots:
     void onTick();

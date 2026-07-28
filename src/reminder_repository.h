@@ -17,6 +17,7 @@ public:
     virtual bool save(const Reminder &item, QString *errorMessage = nullptr) = 0;
     virtual std::optional<Reminder> find(const QUuid &id, QString *errorMessage = nullptr) const = 0;
     virtual QList<Reminder> list(QString *errorMessage = nullptr) const = 0;
+    virtual QList<Reminder> listActive(QString *errorMessage = nullptr) const = 0;
     virtual bool remove(const QUuid &id, QString *errorMessage = nullptr) = 0;
 };
 
@@ -30,6 +31,7 @@ public:
     bool save(const Reminder &item, QString *errorMessage = nullptr) override;
     std::optional<Reminder> find(const QUuid &id, QString *errorMessage = nullptr) const override;
     QList<Reminder> list(QString *errorMessage = nullptr) const override;
+    QList<Reminder> listActive(QString *errorMessage = nullptr) const override;
     bool remove(const QUuid &id, QString *errorMessage = nullptr) override;
 
 private:

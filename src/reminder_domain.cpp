@@ -141,4 +141,38 @@ bool Reminder::transitionTo(ReminderState target, const QDateTime &at, QString *
     return true;
 }
 
+bool Reminder::snooze(int minutes, const QDateTime &now, QString *errorMessage)
+{
+    if (!isValid(errorMessage)) {
+        return false;
+    }
+    if (!now.isValid()) {
+        return failValidation(errorMessage, QStringLiteral("Snooze time is invalid."));
+    }
+    snoozedUntil = now.addSecs(minutes * 60);
+    updatedAt = now;
+    return true;
+}
+
+QString Reminder::remainingTimeFormatted(const QDateTime &now) const
+{
+    const QDateTime target = effectiveTargetTime();
+    if (!target.isValid() || !now.isValid() || target <= now) {
+        return QStringLiteral("Zamanı geldi");
+    }
+    
+    qint64 secs = now.secsTo(target);
+    qint64 mins = secs / 60;
+    qint64 hours = mins / 60;
+    qint64 days = hours / 24;
+
+    if (days > 0) {
+        return QStringLiteral("%1 gün").arg(days);
+    } else if (hours > 0) {
+        return QStringLiteral("%1 saat %2 dk").arg(hours).arg(mins % 60);
+    } else {
+        return QStringLiteral("%1 dk").arg(mins);
+    }
+}
+
 } // namespace DeskPilot

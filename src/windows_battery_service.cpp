@@ -1,17 +1,33 @@
 #include "windows_battery_service.h"
 
 #include <windows.h>
+#include <QCoreApplication>
 
 namespace DeskPilot {
 
 WindowsBatteryService::WindowsBatteryService()
 {
+    if (QCoreApplication::instance()) {
+        QCoreApplication::instance()->installNativeEventFilter(this);
+    }
     refresh();
+}
+
+WindowsBatteryService::~WindowsBatteryService()
+{
+    if (QCoreApplication::instance()) {
+        QCoreApplication::instance()->removeNativeEventFilter(this);
+    }
 }
 
 BatteryState WindowsBatteryService::currentState() const
 {
     return m_state;
+}
+
+void WindowsBatteryService::setCallback(std::function<void()> cb)
+{
+    m_callback = std::move(cb);
 }
 
 void WindowsBatteryService::refresh()
@@ -53,6 +69,22 @@ BatteryState WindowsBatteryService::stateFromPowerStatus(
     }
 
     return nextState;
+}
+
+bool WindowsBatteryService::nativeEventFilter(const QByteArray &eventType, void *message, qintptr *result)
+{
+    Q_UNUSED(result)
+    
+    if (eventType == "windows_generic_MSG" || eventType == "windows_dispatcher_MSG") {
+        auto *msg = static_cast<MSG *>(message);
+        if (msg->message == WM_POWERBROADCAST) {
+            refresh();
+            if (m_callback) {
+                m_callback();
+            }
+        }
+    }
+    return false;
 }
 
 } // namespace DeskPilot

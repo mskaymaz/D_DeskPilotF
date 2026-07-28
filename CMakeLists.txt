@@ -39,6 +39,10 @@ target_sources(DeskPilotC
         src/reminder_repository.h
         src/reminder_scheduler.cpp
         src/reminder_scheduler.h
+        src/reminder_model.cpp
+        src/reminder_model.h
+        src/tts_service.cpp
+        src/tts_service.h
         src/todo_domain.cpp
         src/todo_domain.h
         src/todo_model.cpp
@@ -97,6 +101,10 @@ qt_add_qml_module(DeskPilotC
         qml/TodoPanel.qml
         qml/WindowStateManager.qml
         qml/EditTaskDialog.qml
+        qml/EditReminderDialog.qml
+        qml/ReminderCard.qml
+        qml/ReminderPanel.qml
+        qml/ReminderPopup.qml
     RESOURCES
         ${DESKPILOT_IMAGE_FILES}
         ${DESKPILOT_FONT_FILES}
