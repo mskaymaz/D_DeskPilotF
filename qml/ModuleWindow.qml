@@ -5,8 +5,10 @@ import QtQuick.Window 2.0
 
 ApplicationWindow {
     id: root
+    property string settingsCategory: "ModuleWindow"
     Settings {
         id: winSettings
+        category: root.settingsCategory
         property int winX: 0
         property int winY: 0
     }

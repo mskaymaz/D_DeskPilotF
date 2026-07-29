@@ -70,9 +70,11 @@ void ReminderScheduler::checkDueReminders()
     }
 }
 
-void ReminderScheduler::acknowledge(const QUuid &id)
+void ReminderScheduler::acknowledge(const QString &id)
 {
-    m_currentlyDue.remove(id);
+    // Intentionally keep in m_currentlyDue so the alarm is not re-triggered.
+    // It will be removed naturally when isDue() returns false on next tick.
+    Q_UNUSED(id);
 }
 
 void ReminderScheduler::onTick()

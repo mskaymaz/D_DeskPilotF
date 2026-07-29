@@ -316,6 +316,15 @@ void TodoModel::setFilterCompleted(bool filter)
     }
 }
 
+void TodoModel::setFilterTrashed(bool filter)
+{
+    if (m_filterTrashed != filter) {
+        m_filterTrashed = filter;
+        emit filterChanged();
+        applyFilters();
+    }
+}
+
 void TodoModel::applyFilters()
 {
     beginResetModel();
@@ -339,9 +348,13 @@ void TodoModel::applyFilters()
             }
         }
 
-        if (m_filterCompleted) {
+        if (m_filterTrashed) {
+            if (item.state != TodoState::Trashed) continue;
+        } else if (m_filterCompleted) {
             if (item.state != TodoState::Completed) continue;
         } else {
+            if (item.state == TodoState::Trashed) continue; // default hide trashed unless explicitly asked
+            
             if (m_filterToday) {
                 if (!item.plannedAt.has_value() || item.plannedAt->date() != today) continue;
             }

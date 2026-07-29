@@ -4,16 +4,45 @@ import QtQuick.Layouts
 
 Popup {
     id: root
+    closePolicy: Popup.NoAutoClose
 
     property string stencilFontName: ""
     property string digitalFontName: ""
     property string technologyFontName: ""
 
+    // Draft properties
+    property bool visibleDraft: false
+    property bool showIconDraft: false
+    property int fontIndexDraft: 0
+    property int colorIndexDraft: 0
+    property bool boldDraft: false
+    property real scaleDraft: 1.0
+    property int lowBatteryThresholdDraft: 20
+    property int fullChargeThresholdDraft: 100
+    property int alertIntervalMinutesDraft: 15
+    property bool alertSoundEnabledDraft: true
+    property bool silentModeDraft: false
+
     width: DesignTokens.scaled(480)
     height: DesignTokens.scaled(700)
-    modal: true
+    modal: false
     focus: true
     padding: DesignTokens.space5
+
+    onOpened: {
+        visibleDraft = batteryModel.visible
+        showIconDraft = batteryModel.showIcon
+        fontIndexDraft = fontIndex()
+        colorIndexDraft = colorIndex()
+        boldDraft = batteryModel.bold
+        scaleDraft = batteryModel.scale
+        lowBatteryThresholdDraft = batteryModel.lowBatteryThreshold
+        fullChargeThresholdDraft = batteryModel.fullChargeThreshold
+        alertIntervalMinutesDraft = batteryModel.alertIntervalMinutes
+        alertSoundEnabledDraft = batteryModel.alertSoundEnabled
+        silentModeDraft = rootWindow.notificationSilentMode
+        if (typeof rootWindow !== "undefined") rootWindow.updateInputMask()
+    }
 
     function fontIndex() {
         if (batteryModel.fontFamily === digitalFontName) {
@@ -60,6 +89,21 @@ Popup {
         }
     }
 
+    function applyChanges() {
+        batteryModel.visible = visibleDraft
+        batteryModel.showIcon = showIconDraft
+        selectFont(fontIndexDraft)
+        selectColor(colorIndexDraft)
+        batteryModel.bold = boldDraft
+        batteryModel.scale = scaleDraft
+        batteryModel.lowBatteryThreshold = lowBatteryThresholdDraft
+        batteryModel.fullChargeThreshold = fullChargeThresholdDraft
+        batteryModel.alertIntervalMinutes = alertIntervalMinutesDraft
+        batteryModel.alertSoundEnabled = alertSoundEnabledDraft
+        rootWindow.notificationSilentMode = silentModeDraft
+        if (typeof rootWindow !== "undefined") rootWindow.scheduleLayoutSettingsSave()
+    }
+
     background: Rectangle {
         color: DesignTokens.surface
         radius: DesignTokens.radiusLarge
@@ -79,7 +123,7 @@ Popup {
         }
 
         Label {
-            text: "Değişiklikler anında uygulanır ve kaydedilir."
+            text: "Ayarları düzenleyin ve uygulamak için Kaydet veya Uygula butonuna basın."
             color: DesignTokens.secondaryText
             font.pixelSize: DesignTokens.captionPixelSize
             Layout.fillWidth: true
@@ -87,15 +131,15 @@ Popup {
 
         CheckBox {
             text: "Pili göster"
-            checked: batteryModel.visible
-            onToggled: batteryModel.visible = checked
+            checked: root.visibleDraft
+            onToggled: root.visibleDraft = checked
             Layout.fillWidth: true
         }
 
         CheckBox {
             text: "Pil ikonunu göster"
-            checked: batteryModel.showIcon
-            onToggled: batteryModel.showIcon = checked
+            checked: root.showIconDraft
+            onToggled: root.showIconDraft = checked
             Layout.fillWidth: true
         }
 
@@ -103,8 +147,8 @@ Popup {
 
         ComboBox {
             model: ["Stencil", "Digital-7", "Technology", "Sistem fontu"]
-            currentIndex: root.fontIndex()
-            onActivated: root.selectFont(currentIndex)
+            currentIndex: root.fontIndexDraft
+            onActivated: root.fontIndexDraft = currentIndex
             Layout.fillWidth: true
         }
 
@@ -112,15 +156,15 @@ Popup {
 
         ComboBox {
             model: ["Gri", "Mavi", "Turuncu"]
-            currentIndex: root.colorIndex()
-            onActivated: root.selectColor(currentIndex)
+            currentIndex: root.colorIndexDraft
+            onActivated: root.colorIndexDraft = currentIndex
             Layout.fillWidth: true
         }
 
         CheckBox {
             text: "Kalın yazı"
-            checked: batteryModel.bold
-            onToggled: batteryModel.bold = checked
+            checked: root.boldDraft
+            onToggled: root.boldDraft = checked
             Layout.fillWidth: true
         }
 
@@ -129,8 +173,8 @@ Popup {
             Label { text: "Pil boyutu"; color: DesignTokens.secondaryText; Layout.fillWidth: true }
             ComboBox {
                 model: ["50%", "75%", "100%", "125%", "150%"]
-                currentIndex: Math.max(0, [0.5, 0.75, 1.0, 1.25, 1.5].indexOf(batteryModel.scale))
-                onActivated: batteryModel.scale = [0.5, 0.75, 1.0, 1.25, 1.5][currentIndex]
+                currentIndex: Math.max(0, [0.5, 0.75, 1.0, 1.25, 1.5].indexOf(root.scaleDraft))
+                onActivated: root.scaleDraft = [0.5, 0.75, 1.0, 1.25, 1.5][currentIndex]
                 Layout.preferredWidth: DesignTokens.scaled(120)
             }
         }
@@ -140,8 +184,8 @@ Popup {
             Label { text: "Düşük pil eşiği"; color: DesignTokens.secondaryText; Layout.fillWidth: true }
             ComboBox {
                 model: ["%10", "%15", "%20", "%25", "%30"]
-                currentIndex: Math.max(0, [10, 15, 20, 25, 30].indexOf(batteryModel.lowBatteryThreshold))
-                onActivated: batteryModel.lowBatteryThreshold = [10, 15, 20, 25, 30][currentIndex]
+                currentIndex: Math.max(0, [10, 15, 20, 25, 30].indexOf(root.lowBatteryThresholdDraft))
+                onActivated: root.lowBatteryThresholdDraft = [10, 15, 20, 25, 30][currentIndex]
                 Layout.preferredWidth: DesignTokens.scaled(120)
             }
         }
@@ -151,8 +195,8 @@ Popup {
             Label { text: "Tam dolu pil eşiği"; color: DesignTokens.secondaryText; Layout.fillWidth: true }
             ComboBox {
                 model: ["%80", "%85", "%90", "%95", "%100"]
-                currentIndex: Math.max(0, [80, 85, 90, 95, 100].indexOf(batteryModel.fullChargeThreshold))
-                onActivated: batteryModel.fullChargeThreshold = [80, 85, 90, 95, 100][currentIndex]
+                currentIndex: Math.max(0, [80, 85, 90, 95, 100].indexOf(root.fullChargeThresholdDraft))
+                onActivated: root.fullChargeThresholdDraft = [80, 85, 90, 95, 100][currentIndex]
                 Layout.preferredWidth: DesignTokens.scaled(120)
             }
         }
@@ -162,32 +206,49 @@ Popup {
             Label { text: "Uyarı aralığı"; color: DesignTokens.secondaryText; Layout.fillWidth: true }
             ComboBox {
                 model: ["5 dakika", "15 dakika", "30 dakika", "60 dakika", "120 dakika"]
-                currentIndex: Math.max(0, [5, 15, 30, 60, 120].indexOf(batteryModel.alertIntervalMinutes))
-                onActivated: batteryModel.alertIntervalMinutes = [5, 15, 30, 60, 120][currentIndex]
+                currentIndex: Math.max(0, [5, 15, 30, 60, 120].indexOf(root.alertIntervalMinutesDraft))
+                onActivated: root.alertIntervalMinutesDraft = [5, 15, 30, 60, 120][currentIndex]
                 Layout.preferredWidth: DesignTokens.scaled(140)
             }
         }
 
         CheckBox {
             text: "Sesli uyarıları etkinleştir"
-            checked: batteryModel.alertSoundEnabled
-            onToggled: batteryModel.alertSoundEnabled = checked
+            checked: root.alertSoundEnabledDraft
+            onToggled: root.alertSoundEnabledDraft = checked
             Layout.fillWidth: true
         }
 
         CheckBox {
             text: "Sessiz mod"
-            checked: rootWindow.notificationSilentMode
-            onToggled: rootWindow.notificationSilentMode = checked
+            checked: root.silentModeDraft
+            onToggled: root.silentModeDraft = checked
             Layout.fillWidth: true
         }
 
         Item { Layout.fillHeight: true; Layout.fillWidth: true }
 
-        Button {
-            text: "Kapat"
-            onClicked: root.close()
+        RowLayout {
             Layout.alignment: Qt.AlignRight
+            spacing: DesignTokens.space2
+
+            Button {
+                text: "İptal"
+                onClicked: root.close()
+            }
+
+            Button {
+                text: "Uygula"
+                onClicked: root.applyChanges()
+            }
+
+            Button {
+                text: "Kaydet"
+                onClicked: {
+                    root.applyChanges()
+                    root.close()
+                }
+            }
         }
     }
 }

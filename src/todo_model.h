@@ -17,6 +17,7 @@ class TodoModel final : public QAbstractListModel
     Q_PROPERTY(bool filterTomorrow READ filterTomorrow WRITE setFilterTomorrow NOTIFY filterChanged)
     Q_PROPERTY(bool filterWeek READ filterWeek WRITE setFilterWeek NOTIFY filterChanged)
     Q_PROPERTY(bool filterCompleted READ filterCompleted WRITE setFilterCompleted NOTIFY filterChanged)
+    Q_PROPERTY(bool filterTrashed READ filterTrashed WRITE setFilterTrashed NOTIFY filterChanged)
 
 public:
     enum Role
@@ -68,7 +69,10 @@ public:
     void setFilterWeek(bool filter);
 
     bool filterCompleted() const { return m_filterCompleted; }
-    void setFilterCompleted(bool filter);
+    void setFilterCompleted(bool enabled);
+
+    bool filterTrashed() const { return m_filterTrashed; }
+    void setFilterTrashed(bool enabled);
 
 signals:
     void countChanged();
@@ -94,6 +98,7 @@ private:
     bool m_filterTomorrow = false;
     bool m_filterWeek = false;
     bool m_filterCompleted = false;
+    bool m_filterTrashed = false;
 };
 
 } // namespace DeskPilot

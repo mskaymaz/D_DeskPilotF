@@ -36,6 +36,19 @@ Rectangle {
         return 1.0
     }
 
+    TapHandler {
+        acceptedButtons: Qt.LeftButton
+        onDoubleTapped: {
+            root.editRequested(
+                root.reminderId,
+                root.reminderTitle,
+                root.reminderDescription,
+                root.targetTimeLabel,
+                root.recurrenceLabel
+            )
+        }
+    }
+
     RowLayout {
         id: cardLayout
         anchors.fill: parent
@@ -53,7 +66,7 @@ Rectangle {
                 BaseText {
                     text: root.reminderTitle
                     font.weight: Font.Bold
-                    color: DesignTokens.text
+                    color: DesignTokens.primaryText
                     Layout.fillWidth: true
                     elide: Text.ElideRight
                 }

@@ -47,10 +47,10 @@ target_sources(DeskPilotC
         src/todo_domain.h
         src/todo_model.cpp
         src/todo_model.h
-        src/todo_model.cpp
-        src/todo_model.h
         src/todo_repository.cpp
         src/todo_repository.h
+        src/sound_service.h
+        src/sound_service.cpp
 )
 
 if(WIN32)
@@ -59,6 +59,7 @@ if(WIN32)
             src/windows_battery_service.cpp
             src/windows_battery_service.h
     )
+    target_link_libraries(DeskPilotC PRIVATE winmm)
 endif()
 
 set_source_files_properties(qml/DesignTokens.qml
@@ -74,6 +75,11 @@ file(GLOB DESKPILOT_IMAGE_FILES CONFIGURE_DEPENDS
     RELATIVE "${CMAKE_CURRENT_SOURCE_DIR}"
     "${CMAKE_CURRENT_SOURCE_DIR}/img/icons/*"
     "${CMAKE_CURRENT_SOURCE_DIR}/img/logos/*"
+)
+
+file(GLOB DESKPILOT_AUDIO_FILES CONFIGURE_DEPENDS
+    RELATIVE "${CMAKE_CURRENT_SOURCE_DIR}"
+    "${CMAKE_CURRENT_SOURCE_DIR}/assets/audio/*"
 )
 
 qt_add_qml_module(DeskPilotC
@@ -107,8 +113,9 @@ qt_add_qml_module(DeskPilotC
         qml/ReminderPopup.qml
         qml/DateTimePicker.qml
     RESOURCES
-        ${DESKPILOT_IMAGE_FILES}
         ${DESKPILOT_FONT_FILES}
+        ${DESKPILOT_IMAGE_FILES}
+        ${DESKPILOT_AUDIO_FILES}
 )
 
 set_target_properties(DeskPilotC PROPERTIES
@@ -116,10 +123,19 @@ set_target_properties(DeskPilotC PROPERTIES
 )
 
 target_link_libraries(DeskPilotC
-    PRIVATE Qt6::Quick Qt6::Sql
+    PRIVATE
+    Qt6::Quick
+    Qt6::Sql
 )
 
 include(CTest)
+enable_testing()
+
+add_custom_command(TARGET DeskPilotC POST_BUILD
+    COMMAND ${CMAKE_COMMAND} -E copy_directory
+        "${CMAKE_CURRENT_SOURCE_DIR}/assets/audio"
+        "$<TARGET_FILE_DIR:DeskPilotC>/assets/audio"
+)
 
 if(BUILD_TESTING)
     qt_add_executable(BatteryModelTest

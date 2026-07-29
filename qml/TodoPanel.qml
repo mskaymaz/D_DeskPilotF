@@ -5,8 +5,20 @@ import Qt.labs.settings
 
 Dialog {
     id: root
+    closePolicy: Popup.NoAutoClose
 
     property var tasksModel: todoModel
+
+    property alias newTaskDialogVisible: newTaskDialog.visible
+    property alias editTaskDialogVisible: editTaskDialog.visible
+    property alias newTaskDialogX: newTaskDialog.x
+    property alias newTaskDialogY: newTaskDialog.y
+    property alias newTaskDialogWidth: newTaskDialog.width
+    property alias newTaskDialogHeight: newTaskDialog.height
+    property alias editTaskDialogX: editTaskDialog.x
+    property alias editTaskDialogY: editTaskDialog.y
+    property alias editTaskDialogWidth: editTaskDialog.width
+    property alias editTaskDialogHeight: editTaskDialog.height
 
     Binding { target: tasksModel; property: "searchQuery"; value: root.searchQuery }
     Binding { target: tasksModel; property: "filterToday"; value: root.todayOnly }
@@ -18,6 +30,7 @@ Dialog {
     property bool tomorrowOnly: false
     property bool weekOnly: false
     property bool completedOnly: false
+    property bool trashedOnly: false
     property string searchQuery: ""
 
     readonly property bool hasTasks: tasksModel ? tasksModel.count > 0 : false
@@ -66,7 +79,7 @@ Dialog {
     onYChanged: if (visible) panelSettings.savedY = y
 
     title: "Todo"
-    modal: true
+    modal: false
     width: DesignTokens.scaled(520)
     height: DesignTokens.scaled(400)
     standardButtons: Dialog.Close
@@ -145,6 +158,8 @@ Dialog {
     NewTaskDialog {
         id: newTaskDialog
         onTaskSubmitted: root.newTaskRequested(title, description, plannedTime, priority)
+        onOpened: if (typeof rootWindow !== "undefined") rootWindow.updateInputMask()
+        onClosed: if (typeof rootWindow !== "undefined") rootWindow.updateInputMask()
     }
 
     EditTaskDialog {
@@ -152,6 +167,8 @@ Dialog {
         onTaskSubmitted: root.taskEditRequested(
             editTaskDialog.taskId, title, description, plannedTime,
             priority, completed, cancelled)
+        onOpened: if (typeof rootWindow !== "undefined") rootWindow.updateInputMask()
+        onClosed: if (typeof rootWindow !== "undefined") rootWindow.updateInputMask()
     }
 
     Connections {
@@ -206,6 +223,7 @@ Dialog {
                     if (checked) {
                         tomorrowField.checked = false
                         weekField.checked = false
+                        trashedField.checked = false
                     }
                 }
             }
@@ -219,6 +237,7 @@ Dialog {
                     if (checked) {
                         todayField.checked = false
                         weekField.checked = false
+                        trashedField.checked = false
                     }
                 }
             }
@@ -233,6 +252,7 @@ Dialog {
                         todayField.checked = false
                         tomorrowField.checked = false
                         completedField.checked = false
+                        trashedField.checked = false
                     }
                 }
             }
@@ -247,11 +267,27 @@ Dialog {
                         todayField.checked = false
                         tomorrowField.checked = false
                         weekField.checked = false
+                        trashedField.checked = false
                     }
                 }
             }
-
-            visible: root.hasTasks || root.todayOnly || root.tomorrowOnly || root.weekOnly || root.completedOnly || root.searchQuery !== ""
+            
+            CheckBox {
+                id: trashedField
+                text: "Çöp Kutusu"
+                checked: root.trashedOnly
+                onToggled: {
+                    root.trashedOnly = checked
+                    if (checked) {
+                        todayField.checked = false
+                        tomorrowField.checked = false
+                        weekField.checked = false
+                        completedField.checked = false
+                    }
+                }
+            }
+            
+            visible: root.hasTasks || root.todayOnly || root.tomorrowOnly || root.weekOnly || root.completedOnly || root.trashedOnly || root.searchQuery !== ""
         }
 
         ScrollView {
@@ -284,6 +320,7 @@ Dialog {
                         property bool modelTrashed:
                             (typeof trashed !== "undefined" && trashed === true)
                             || (typeof state !== "undefined" && state === "trashed")
+                        property var modelSubtasks: typeof subtasks !== "undefined" ? subtasks : []
 
                         taskTitle: title
                         taskDescription: description
@@ -292,6 +329,7 @@ Dialog {
                         taskCompleted: modelCompleted
                         taskCancelled: modelCancelled
                         taskTrashed: modelTrashed
+                        taskSubtasks: modelSubtasks
                         Layout.fillWidth: true
                         onCompletionToggled: root.taskCompletionRequested(taskId, completed)
                         onTrashToggled: root.taskTrashRequested(taskId, trashed)

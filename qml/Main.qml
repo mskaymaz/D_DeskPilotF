@@ -1,10 +1,15 @@
 import QtQuick
 import QtQuick.Controls
+import QtQuick.Window
 
 ModuleWindow {
     id: rootWindow
     visible: true
     title: "DeskPilotC"
+    width: Screen.desktopAvailableWidth
+    height: Screen.desktopAvailableHeight
+    x: Screen.virtualX
+    y: Screen.virtualY
     property bool freeLayoutEnabled: false
     property bool layoutLocked: false
     property int moduleSpacing: DesignTokens.space4
@@ -116,7 +121,6 @@ ModuleWindow {
         }
 
         onOpened: {
-            rootWindow.contextMenuOpen = true
             rootWindow.updateInputMask()
         }
 
@@ -137,12 +141,10 @@ ModuleWindow {
         technologyFontName: technologyFont.name
 
         onOpened: {
-            rootWindow.contextMenuOpen = true
             rootWindow.updateInputMask()
         }
 
         onClosed: {
-            rootWindow.contextMenuOpen = false
             rootWindow.updateInputMask()
         }
     }
@@ -156,12 +158,10 @@ ModuleWindow {
         technologyFontName: technologyFont.name
 
         onOpened: {
-            rootWindow.contextMenuOpen = true
             rootWindow.updateInputMask()
         }
 
         onClosed: {
-            rootWindow.contextMenuOpen = false
             rootWindow.updateInputMask()
         }
     }
@@ -175,12 +175,10 @@ ModuleWindow {
         technologyFontName: technologyFont.name
 
         onOpened: {
-            rootWindow.contextMenuOpen = true
             rootWindow.updateInputMask()
         }
 
         onClosed: {
-            rootWindow.contextMenuOpen = false
             rootWindow.updateInputMask()
         }
     }
@@ -191,12 +189,10 @@ ModuleWindow {
         y: Math.round((rootWindow.height - height) / 2)
 
         onOpened: {
-            rootWindow.contextMenuOpen = true
             rootWindow.updateInputMask()
         }
 
         onClosed: {
-            rootWindow.contextMenuOpen = false
             rootWindow.updateInputMask()
         }
     }
@@ -207,12 +203,10 @@ ModuleWindow {
         y: Math.round((rootWindow.height - height) / 2)
 
         onOpened: {
-            rootWindow.contextMenuOpen = true
             rootWindow.updateInputMask()
         }
 
         onClosed: {
-            rootWindow.contextMenuOpen = false
             rootWindow.updateInputMask()
         }
     }
@@ -223,12 +217,10 @@ ModuleWindow {
         y: Math.round((rootWindow.height - height) / 2)
 
         onOpened: {
-            rootWindow.contextMenuOpen = true
             rootWindow.updateInputMask()
         }
 
         onClosed: {
-            rootWindow.contextMenuOpen = false
             rootWindow.updateInputMask()
         }
     }
@@ -308,15 +300,11 @@ ModuleWindow {
 
     function handleQuickAction(actionKey) {
         if (actionKey === "reminder") {
-            contextMenuOpen = true
-            updateInputMask()
             reminderPanel.open()
             return
         }
 
         if (actionKey === "todo") {
-            contextMenuOpen = true
-            updateInputMask()
             todoPanel.open()
             return
         }
@@ -367,6 +355,17 @@ ModuleWindow {
         return position === undefined ? { x: fallbackX, y: fallbackY } : position
     }
 
+    function saveFreeModulePosition(key, x, y) {
+        var current = ({})
+        for (var k in modulePositions) {
+            current[k] = modulePositions[k]
+        }
+        current[key] = { x: x, y: y }
+        modulePositions = current
+        modulePositionsInitialized = true
+        scheduleLayoutSettingsSave()
+    }
+
     function applySavedModulePositions() {
         if (!freeLayoutEnabled) {
             updateInputMask()
@@ -380,14 +379,17 @@ ModuleWindow {
 
         for (var index = 0; index < layout.inputItems.length; ++index) {
             var loader = layout.inputItems[index]
-            var position = modulePositions[moduleKey(index)]
-            if (loader === null || position === undefined || loader.width <= 0 || loader.height <= 0) {
+            var key = moduleKey(index)
+            var position = modulePositions[key]
+            if (loader === null || position === undefined) {
                 continue
             }
 
             loader.positionInitialized = true
-            loader.x = Math.max(0, Math.min(rootWindow.width - loader.width, position.x))
-            loader.y = Math.max(0, Math.min(rootWindow.height - loader.height, position.y))
+            var w = loader.width > 0 ? loader.width : 100
+            var h = loader.height > 0 ? loader.height : 50
+            loader.x = Math.max(0, Math.min(rootWindow.width - w, position.x))
+            loader.y = Math.max(0, Math.min(rootWindow.height - h, position.y))
         }
 
         updateInputMask()
@@ -410,8 +412,7 @@ ModuleWindow {
     function setModuleSpacing(value) {
         moduleSpacing = Math.max(0, Math.min(64, value))
         if (!freeLayoutEnabled) {
-            modulePositionsInitialized = false
-            centerGroupedModules()
+            modulePositionsInitialized = true
         }
         scheduleLayoutSettingsSave()
     }
@@ -427,7 +428,20 @@ ModuleWindow {
             return
         }
 
-        centerGroupedModules()
+        var layout = layoutLoader.item
+        if (layout === null || layout.inputItems === undefined) {
+            return
+        }
+        for (var index = 0; index < layout.inputItems.length; ++index) {
+            var loader = layout.inputItems[index]
+            if (loader === null) continue
+            var module = loader.item
+            if (loader.visible && (module === null || loader.width <= 0 || loader.height <= 0)) {
+                return
+            }
+        }
+
+        centerGroupedModules(true)
     }
 
     function clampGroupedPositions() {
@@ -471,7 +485,7 @@ ModuleWindow {
         }
     }
 
-    function centerGroupedModules() {
+    function centerGroupedModules(forceCenter) {
         var layout = layoutLoader.item
         if (layout === null || layout.inputItems === undefined) {
             return
@@ -494,11 +508,22 @@ ModuleWindow {
 
         totalHeight += moduleSpacing * (visibleLoaders.length - 1)
         var nextPositions = {}
+        
+        var anchorX = rootWindow.width / 2
         var currentY = Math.max(0, (rootWindow.height - totalHeight) / 2)
+        
+        if (!forceCenter) {
+            var firstPos = modulePositions[visibleLoaders[0].key]
+            if (firstPos !== undefined) {
+                anchorX = firstPos.x + visibleLoaders[0].loader.width / 2
+                currentY = firstPos.y
+            }
+        }
+
         for (var visibleIndex = 0; visibleIndex < visibleLoaders.length; ++visibleIndex) {
             var visibleLoader = visibleLoaders[visibleIndex]
             nextPositions[visibleLoader.key] = {
-                x: Math.max(0, (rootWindow.width - visibleLoader.loader.width) / 2),
+                x: Math.max(0, anchorX - visibleLoader.loader.width / 2),
                 y: currentY
             }
             currentY += visibleLoader.loader.height + moduleSpacing
@@ -598,6 +623,7 @@ ModuleWindow {
                 currentPositions[existingKey] = modulePositions[existingKey]
             }
         }
+
         for (var index = 0; index < layout.inputItems.length; ++index) {
             var loader = layout.inputItems[index]
             var module = loader === null ? null : loader.item
@@ -609,7 +635,6 @@ ModuleWindow {
                 continue
             }
 
-            var modulePosition = loader.mapToItem(rootWindow.contentItem, 0, 0)
             if (freeLayoutPositionsReady) {
                 currentPositions[moduleKey(index)] = {
                     x: loader.x,
@@ -624,28 +649,39 @@ ModuleWindow {
 
             for (var renderedIndex = 0; renderedIndex < renderedItems.length; ++renderedIndex) {
                 var renderedItem = renderedItems[renderedIndex]
-                if (renderedItem === null || !renderedItem.visible
-                    || renderedItem.paintedWidth <= 0 || renderedItem.paintedHeight <= 0) {
+                if (renderedItem === null || !renderedItem.visible) {
                     continue
                 }
 
-                var horizontalOffset = renderedItem.horizontalAlignment === Text.AlignRight
-                    ? renderedItem.width - renderedItem.paintedWidth
-                    : renderedItem.horizontalAlignment === Text.AlignHCenter
-                        ? (renderedItem.width - renderedItem.paintedWidth) / 2
-                        : 0
-                var verticalOffset = renderedItem.verticalAlignment === Text.AlignBottom
-                    ? renderedItem.height - renderedItem.paintedHeight
-                    : renderedItem.verticalAlignment === Text.AlignVCenter
-                        ? (renderedItem.height - renderedItem.paintedHeight) / 2
-                        : 0
+                var itemWidth = renderedItem.paintedWidth !== undefined ? renderedItem.paintedWidth : renderedItem.width
+                var itemHeight = renderedItem.paintedHeight !== undefined ? renderedItem.paintedHeight : renderedItem.height
+
+                if (itemWidth <= 0 || itemHeight <= 0) {
+                    continue
+                }
+
+                var horizontalOffset = 0
+                var verticalOffset = 0
+                if (renderedItem.paintedWidth !== undefined) {
+                    horizontalOffset = renderedItem.horizontalAlignment === Text.AlignRight
+                        ? renderedItem.width - itemWidth
+                        : renderedItem.horizontalAlignment === Text.AlignHCenter
+                            ? (renderedItem.width - itemWidth) / 2
+                            : 0
+                    verticalOffset = renderedItem.verticalAlignment === Text.AlignBottom
+                        ? renderedItem.height - itemHeight
+                        : renderedItem.verticalAlignment === Text.AlignVCenter
+                            ? (renderedItem.height - itemHeight) / 2
+                            : 0
+                }
+
                 var position = renderedItem.mapToItem(
                     rootWindow.contentItem, horizontalOffset, verticalOffset)
                 regions.push({
                     x: position.x,
                     y: position.y,
-                    width: renderedItem.paintedWidth,
-                    height: renderedItem.paintedHeight
+                    width: itemWidth,
+                    height: itemHeight
                 })
             }
         }
@@ -653,6 +689,60 @@ ModuleWindow {
         if (freeLayoutPositionsReady) {
             modulePositions = currentPositions
             scheduleLayoutSettingsSave()
+        }
+
+        // Add regions for open panels, dialogs, and settings popups
+        var overlays = [
+            reminderPanel,
+            todoPanel,
+            resetSettingsDialog,
+            clockSettingsPopup,
+            dateSettingsPopup,
+            batterySettingsPopup,
+            layoutSettingsPopup,
+            quickActionsSettingsPopup,
+            notificationSettingsPopup
+        ]
+        for (var i = 0; i < overlays.length; ++i) {
+            var overlay = overlays[i]
+            if (overlay && overlay.visible) {
+                regions.push({
+                    x: overlay.x,
+                    y: overlay.y,
+                    width: overlay.width,
+                    height: overlay.height
+                })
+
+                // Track dynamic dialogs in ReminderPanel
+                if (overlay === reminderPanel && reminderPanel.activeDialog && reminderPanel.activeDialog.visible) {
+                    regions.push({
+                        x: reminderPanel.activeDialog.x,
+                        y: reminderPanel.activeDialog.y,
+                        width: reminderPanel.activeDialog.width,
+                        height: reminderPanel.activeDialog.height
+                    })
+                }
+
+                // Track static child dialogs in TodoPanel
+                if (overlay === todoPanel) {
+                    if (todoPanel.newTaskDialogVisible) {
+                        regions.push({
+                            x: todoPanel.newTaskDialogX,
+                            y: todoPanel.newTaskDialogY,
+                            width: todoPanel.newTaskDialogWidth,
+                            height: todoPanel.newTaskDialogHeight
+                        })
+                    }
+                    if (todoPanel.editTaskDialogVisible) {
+                        regions.push({
+                            x: todoPanel.editTaskDialogX,
+                            y: todoPanel.editTaskDialogY,
+                            width: todoPanel.editTaskDialogWidth,
+                            height: todoPanel.editTaskDialogHeight
+                        })
+                    }
+                }
+            }
         }
 
         inputMaskController.setRegions(regions)
@@ -664,8 +754,8 @@ ModuleWindow {
         if (freeLayoutEnabled) {
             Qt.callLater(function() { rootWindow.applySavedModulePositions() })
         } else {
-            modulePositionsInitialized = false
-            Qt.callLater(function() { rootWindow.initializeGroupedPositions() })
+            modulePositionsInitialized = true
+            Qt.callLater(function() { rootWindow.updateInputMask() })
         }
     }
     onLayoutLockedChanged: scheduleLayoutSettingsSave()
@@ -1009,9 +1099,13 @@ ModuleWindow {
                         rootWindow.updateQuickActionsPosition()
                     }
                     onWidthChanged: {
+                        rootWindow.initializeGroupedPositions()
+                        rootWindow.clampGroupedPositions()
                         rootWindow.updateInputMask()
                     }
                     onHeightChanged: {
+                        rootWindow.initializeGroupedPositions()
+                        rootWindow.clampGroupedPositions()
                         rootWindow.updateInputMask()
                     }
                 }
@@ -1026,9 +1120,13 @@ ModuleWindow {
                     onXChanged: rootWindow.updateInputMask()
                     onYChanged: rootWindow.updateInputMask()
                     onWidthChanged: {
+                        rootWindow.initializeGroupedPositions()
+                        rootWindow.clampGroupedPositions()
                         rootWindow.updateInputMask()
                     }
                     onHeightChanged: {
+                        rootWindow.initializeGroupedPositions()
+                        rootWindow.clampGroupedPositions()
                         rootWindow.updateInputMask()
                     }
                 }
@@ -1043,9 +1141,13 @@ ModuleWindow {
                     onXChanged: rootWindow.updateInputMask()
                     onYChanged: rootWindow.updateInputMask()
                     onWidthChanged: {
+                        rootWindow.initializeGroupedPositions()
+                        rootWindow.clampGroupedPositions()
                         rootWindow.updateInputMask()
                     }
                     onHeightChanged: {
+                        rootWindow.initializeGroupedPositions()
+                        rootWindow.clampGroupedPositions()
                         rootWindow.updateInputMask()
                     }
                 }
@@ -1258,8 +1360,6 @@ ModuleWindow {
             text: "Hızlı eylem ayarlarını aç"
             onTriggered: {
                 contextMenu.close()
-                rootWindow.contextMenuOpen = true
-                rootWindow.updateInputMask()
                 quickActionsSettingsPopup.open()
             }
         }
@@ -1268,8 +1368,6 @@ ModuleWindow {
             text: "Bildirim ayarlarını aç"
             onTriggered: {
                 contextMenu.close()
-                rootWindow.contextMenuOpen = true
-                rootWindow.updateInputMask()
                 notificationSettingsPopup.open()
             }
         }
@@ -1292,8 +1390,6 @@ ModuleWindow {
             text: "Ayarları varsayılana döndür"
             onTriggered: {
                 contextMenu.close()
-                rootWindow.contextMenuOpen = true
-                rootWindow.updateInputMask()
                 resetSettingsDialog.open()
             }
         }
@@ -1337,8 +1433,6 @@ ModuleWindow {
                 text: "Ayar panelini aç"
                 onTriggered: {
                     contextMenu.close()
-                    rootWindow.contextMenuOpen = true
-                    rootWindow.updateInputMask()
                     clockSettingsPopup.open()
                 }
             }
@@ -1507,8 +1601,6 @@ ModuleWindow {
                 text: "Ayar panelini aç"
                 onTriggered: {
                     contextMenu.close()
-                    rootWindow.contextMenuOpen = true
-                    rootWindow.updateInputMask()
                     dateSettingsPopup.open()
                 }
             }
@@ -1685,8 +1777,6 @@ ModuleWindow {
                 text: "Ayar panelini aç"
                 onTriggered: {
                     contextMenu.close()
-                    rootWindow.contextMenuOpen = true
-                    rootWindow.updateInputMask()
                     batterySettingsPopup.open()
                 }
             }
@@ -1960,8 +2050,6 @@ ModuleWindow {
             text: "Yerleşim ayarlarını aç"
             onTriggered: {
                 contextMenu.close()
-                rootWindow.contextMenuOpen = true
-                rootWindow.updateInputMask()
                 layoutSettingsPopup.open()
             }
         }

@@ -4,12 +4,41 @@ import QtQuick.Layouts
 
 Popup {
     id: root
+    closePolicy: Popup.NoAutoClose
+
+    // Draft properties
+    property bool quickActionsVisibleDraft: false
+    property bool quickActionsSettingsEnabledDraft: false
+    property bool quickActionsReminderEnabledDraft: false
+    property bool quickActionsTodoEnabledDraft: false
+    property int quickActionsIconSizeDraft: 24
+    property int quickActionsSpacingDraft: 8
 
     width: DesignTokens.scaled(440)
     height: DesignTokens.scaled(500)
-    modal: true
+    modal: false
     focus: true
     padding: DesignTokens.space5
+
+    onOpened: {
+        quickActionsVisibleDraft = rootWindow.quickActionsVisible
+        quickActionsSettingsEnabledDraft = rootWindow.quickActionsSettingsEnabled
+        quickActionsReminderEnabledDraft = rootWindow.quickActionsReminderEnabled
+        quickActionsTodoEnabledDraft = rootWindow.quickActionsTodoEnabled
+        quickActionsIconSizeDraft = rootWindow.quickActionsIconSize
+        quickActionsSpacingDraft = rootWindow.quickActionsSpacing
+        if (typeof rootWindow !== "undefined") rootWindow.updateInputMask()
+    }
+
+    function applyChanges() {
+        rootWindow.quickActionsVisible = quickActionsVisibleDraft
+        rootWindow.quickActionsSettingsEnabled = quickActionsSettingsEnabledDraft
+        rootWindow.quickActionsReminderEnabled = quickActionsReminderEnabledDraft
+        rootWindow.quickActionsTodoEnabled = quickActionsTodoEnabledDraft
+        rootWindow.quickActionsIconSize = quickActionsIconSizeDraft
+        rootWindow.quickActionsSpacing = quickActionsSpacingDraft
+        if (typeof rootWindow !== "undefined") rootWindow.scheduleLayoutSettingsSave()
+    }
 
     background: Rectangle {
         color: DesignTokens.surface
@@ -30,7 +59,7 @@ Popup {
         }
 
         Label {
-            text: "Panel ve eylemler anında uygulanır ve kaydedilir."
+            text: "Ayarları düzenleyin ve uygulamak için Kaydet veya Uygula butonuna basın."
             color: DesignTokens.secondaryText
             font.pixelSize: DesignTokens.captionPixelSize
             Layout.fillWidth: true
@@ -38,8 +67,8 @@ Popup {
 
         CheckBox {
             text: "Hızlı eylem panelini göster"
-            checked: rootWindow.quickActionsVisible
-            onToggled: rootWindow.quickActionsVisible = checked
+            checked: root.quickActionsVisibleDraft
+            onToggled: root.quickActionsVisibleDraft = checked
             Layout.fillWidth: true
         }
 
@@ -50,22 +79,22 @@ Popup {
 
         CheckBox {
             text: "Ayarlar"
-            checked: rootWindow.quickActionsSettingsEnabled
-            onToggled: rootWindow.quickActionsSettingsEnabled = checked
+            checked: root.quickActionsSettingsEnabledDraft
+            onToggled: root.quickActionsSettingsEnabledDraft = checked
             Layout.fillWidth: true
         }
 
         CheckBox {
             text: "Hatırlatıcı"
-            checked: rootWindow.quickActionsReminderEnabled
-            onToggled: rootWindow.quickActionsReminderEnabled = checked
+            checked: root.quickActionsReminderEnabledDraft
+            onToggled: root.quickActionsReminderEnabledDraft = checked
             Layout.fillWidth: true
         }
 
         CheckBox {
             text: "Todo"
-            checked: rootWindow.quickActionsTodoEnabled
-            onToggled: rootWindow.quickActionsTodoEnabled = checked
+            checked: root.quickActionsTodoEnabledDraft
+            onToggled: root.quickActionsTodoEnabledDraft = checked
             Layout.fillWidth: true
         }
 
@@ -73,8 +102,8 @@ Popup {
 
         ComboBox {
             model: [16, 20, 24, 28, 32]
-            currentIndex: Math.max(0, model.indexOf(rootWindow.quickActionsIconSize))
-            onActivated: rootWindow.quickActionsIconSize = model[currentIndex]
+            currentIndex: Math.max(0, model.indexOf(root.quickActionsIconSizeDraft))
+            onActivated: root.quickActionsIconSizeDraft = model[currentIndex]
             Layout.fillWidth: true
         }
 
@@ -82,18 +111,34 @@ Popup {
 
         ComboBox {
             model: ["0 px", "4 px", "8 px", "12 px", "16 px"]
-            currentIndex: Math.max(0, [0, 4, 8, 12, 16].indexOf(
-                rootWindow.quickActionsSpacing))
-            onActivated: rootWindow.quickActionsSpacing = [0, 4, 8, 12, 16][currentIndex]
+            currentIndex: Math.max(0, [0, 4, 8, 12, 16].indexOf(root.quickActionsSpacingDraft))
+            onActivated: root.quickActionsSpacingDraft = [0, 4, 8, 12, 16][currentIndex]
             Layout.fillWidth: true
         }
 
         Item { Layout.fillHeight: true; Layout.fillWidth: true }
 
-        Button {
-            text: "Kapat"
-            onClicked: root.close()
+        RowLayout {
             Layout.alignment: Qt.AlignRight
+            spacing: DesignTokens.space2
+
+            Button {
+                text: "İptal"
+                onClicked: root.close()
+            }
+
+            Button {
+                text: "Uygula"
+                onClicked: root.applyChanges()
+            }
+
+            Button {
+                text: "Kaydet"
+                onClicked: {
+                    root.applyChanges()
+                    root.close()
+                }
+            }
         }
     }
 }

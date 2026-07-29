@@ -2,6 +2,7 @@
 
 #include <QColor>
 #include <QFile>
+#include <QFileInfo>
 
 namespace DeskPilot {
 
@@ -165,270 +166,321 @@ SettingsSnapshot SettingsSchema::load(QSettings &settings)
 {
     SettingsSnapshot result = defaults();
 
-    if (!recoverCorrupted(settings)) {
-        return result;
+    QString baseDir = QFileInfo(settings.fileName()).absolutePath() + "/";
+    QSettings clockSettings(baseDir + "DeskPilotC_clock.ini", QSettings::IniFormat);
+    QSettings dateSettings(baseDir + "DeskPilotC_date.ini", QSettings::IniFormat);
+    QSettings batterySettings(baseDir + "DeskPilotC_battery.ini", QSettings::IniFormat);
+    QSettings layoutSettings(baseDir + "DeskPilotC_layout.ini", QSettings::IniFormat);
+    QSettings notificationSettings(baseDir + "DeskPilotC_notifications.ini", QSettings::IniFormat);
+
+    // One-time migration from main DeskPilotC.ini to split files
+    const QStringList allLegacyKeys = settings.allKeys();
+    if (!allLegacyKeys.isEmpty()) {
+        // We have legacy settings in DeskPilotC.ini.
+        // Migrate to split files if they are empty (schema version 0)
+        const QList<QPair<QString, QSettings*>> legacyMappings = {
+            {QStringLiteral("user/clock"), &clockSettings},
+            {QStringLiteral("user/date"), &dateSettings},
+            {QStringLiteral("user/battery"), &batterySettings},
+            {QStringLiteral("device/layout"), &layoutSettings},
+            {QStringLiteral("device/window"), &layoutSettings},
+            {QStringLiteral("device/startup"), &layoutSettings},
+            {QStringLiteral("user/display"), &layoutSettings},
+            {QStringLiteral("user/quickActions"), &notificationSettings},
+            {QStringLiteral("user/notifications"), &notificationSettings},
+        };
+
+        const QStringList allLegacyKeys = settings.allKeys();
+        for (const auto &[legacyGroup, targetSettings] : legacyMappings) {
+            if (readSchemaVersion(*targetSettings, 0) == 0) {
+                // Target is empty, copy from legacy
+                for (const QString &key : allLegacyKeys) {
+                    if (key.startsWith(legacyGroup + QStringLiteral("/"))) {
+                        targetSettings->setValue(key, settings.value(key));
+                    }
+                }
+                // Mark as migrated
+                targetSettings->beginGroup(QStringLiteral("meta"));
+                targetSettings->setValue(QStringLiteral("schemaVersion"), kCurrentSchemaVersion);
+                targetSettings->endGroup();
+                targetSettings->sync();
+            }
+        }
+        
+        // Clear the main settings so we don't migrate again
+        settings.clear();
+        settings.sync();
     }
-    migrate(settings);
-    const int storedSchemaVersion = readSchemaVersion(settings, result.schemaVersion);
-    if (storedSchemaVersion > 0) {
-        result.schemaVersion = storedSchemaVersion;
+
+    for (auto *s : {&clockSettings, &dateSettings, &batterySettings, &layoutSettings, &notificationSettings}) {
+        recoverCorrupted(*s);
+        migrate(*s);
     }
-    settings.beginGroup(QStringLiteral("user/display"));
+
+    layoutSettings.beginGroup(QStringLiteral("user/display"));
     result.user.globalScale = qBound(
         kMinimumGlobalScale,
-        readReal(settings, QStringLiteral("globalScale"), result.user.globalScale),
+        readReal(layoutSettings, QStringLiteral("globalScale"), result.user.globalScale),
         kMaximumGlobalScale);
-    settings.endGroup();
+    layoutSettings.endGroup();
 
-    settings.beginGroup(QStringLiteral("user/clock"));
+    clockSettings.beginGroup(QStringLiteral("user/clock"));
     result.user.clock.visible = readBool(
-        settings, QStringLiteral("visible"), result.user.clock.visible);
+        clockSettings, QStringLiteral("visible"), result.user.clock.visible);
     result.user.clock.showSeconds = readBool(
-        settings, QStringLiteral("showSeconds"), result.user.clock.showSeconds);
+        clockSettings, QStringLiteral("showSeconds"), result.user.clock.showSeconds);
     result.user.clock.use24HourFormat = readBool(
-        settings, QStringLiteral("use24HourFormat"), result.user.clock.use24HourFormat);
+        clockSettings, QStringLiteral("use24HourFormat"), result.user.clock.use24HourFormat);
     result.user.clock.fontFamily = readString(
-        settings, QStringLiteral("fontFamily"), result.user.clock.fontFamily);
+        clockSettings, QStringLiteral("fontFamily"), result.user.clock.fontFamily);
     result.user.clock.fontColor = readColor(
-        settings, QStringLiteral("fontColor"), result.user.clock.fontColor);
+        clockSettings, QStringLiteral("fontColor"), result.user.clock.fontColor);
     result.user.clock.bold = readBool(
-        settings, QStringLiteral("bold"), result.user.clock.bold);
+        clockSettings, QStringLiteral("bold"), result.user.clock.bold);
     result.user.clock.useEmbeddedFont = readBool(
-        settings, QStringLiteral("useEmbeddedFont"), result.user.clock.useEmbeddedFont);
+        clockSettings, QStringLiteral("useEmbeddedFont"), result.user.clock.useEmbeddedFont);
     result.user.clock.scale = readReal(
-        settings, QStringLiteral("scale"), result.user.clock.scale);
+        clockSettings, QStringLiteral("scale"), result.user.clock.scale);
     result.user.clock.secondsScale = readReal(
-        settings, QStringLiteral("secondsScale"), result.user.clock.secondsScale);
-    settings.endGroup();
+        clockSettings, QStringLiteral("secondsScale"), result.user.clock.secondsScale);
+    clockSettings.endGroup();
 
-    settings.beginGroup(QStringLiteral("user/date"));
+    dateSettings.beginGroup(QStringLiteral("user/date"));
     result.user.date.visible = readBool(
-        settings, QStringLiteral("visible"), result.user.date.visible);
+        dateSettings, QStringLiteral("visible"), result.user.date.visible);
     result.user.date.dateFormat = readDateFormat(
-        settings, QStringLiteral("dateFormat"), result.user.date.dateFormat);
+        dateSettings, QStringLiteral("dateFormat"), result.user.date.dateFormat);
     result.user.date.showWeekNumber = readBool(
-        settings, QStringLiteral("showWeekNumber"), result.user.date.showWeekNumber);
+        dateSettings, QStringLiteral("showWeekNumber"), result.user.date.showWeekNumber);
     result.user.date.gregorianFirst = readBool(
-        settings, QStringLiteral("gregorianFirst"), result.user.date.gregorianFirst);
+        dateSettings, QStringLiteral("gregorianFirst"), result.user.date.gregorianFirst);
     result.user.date.fontFamily = readString(
-        settings, QStringLiteral("fontFamily"), result.user.date.fontFamily);
+        dateSettings, QStringLiteral("fontFamily"), result.user.date.fontFamily);
     result.user.date.fontColor = readColor(
-        settings, QStringLiteral("fontColor"), result.user.date.fontColor);
+        dateSettings, QStringLiteral("fontColor"), result.user.date.fontColor);
     result.user.date.bold = readBool(
-        settings, QStringLiteral("bold"), result.user.date.bold);
+        dateSettings, QStringLiteral("bold"), result.user.date.bold);
     result.user.date.useEmbeddedFont = readBool(
-        settings, QStringLiteral("useEmbeddedFont"), result.user.date.useEmbeddedFont);
+        dateSettings, QStringLiteral("useEmbeddedFont"), result.user.date.useEmbeddedFont);
     result.user.date.scale = readReal(
-        settings, QStringLiteral("scale"), result.user.date.scale);
-    settings.endGroup();
+        dateSettings, QStringLiteral("scale"), result.user.date.scale);
+    dateSettings.endGroup();
 
-    settings.beginGroup(QStringLiteral("user/battery"));
+    batterySettings.beginGroup(QStringLiteral("user/battery"));
     result.user.battery.visible = readBool(
-        settings, QStringLiteral("visible"), result.user.battery.visible);
+        batterySettings, QStringLiteral("visible"), result.user.battery.visible);
     result.user.battery.showIcon = readBool(
-        settings, QStringLiteral("showIcon"), result.user.battery.showIcon);
+        batterySettings, QStringLiteral("showIcon"), result.user.battery.showIcon);
     result.user.battery.lowBatteryThreshold = readBoundedInt(
-        settings, QStringLiteral("lowBatteryThreshold"),
+        batterySettings, QStringLiteral("lowBatteryThreshold"),
         result.user.battery.lowBatteryThreshold, 0, 100);
     result.user.battery.fullChargeThreshold = readBoundedInt(
-        settings, QStringLiteral("fullChargeThreshold"),
+        batterySettings, QStringLiteral("fullChargeThreshold"),
         result.user.battery.fullChargeThreshold, 0, 100);
     result.user.battery.alertIntervalMinutes = readBoundedInt(
-        settings, QStringLiteral("alertIntervalMinutes"),
+        batterySettings, QStringLiteral("alertIntervalMinutes"),
         result.user.battery.alertIntervalMinutes, 1, 1440);
     result.user.battery.alertSoundEnabled = readBool(
-        settings, QStringLiteral("alertSoundEnabled"), result.user.battery.alertSoundEnabled);
+        batterySettings, QStringLiteral("alertSoundEnabled"), result.user.battery.alertSoundEnabled);
     result.user.battery.silentMode = readBool(
-        settings, QStringLiteral("silentMode"), result.user.battery.silentMode);
+        batterySettings, QStringLiteral("silentMode"), result.user.battery.silentMode);
     result.user.battery.fontFamily = readString(
-        settings, QStringLiteral("fontFamily"), result.user.battery.fontFamily);
+        batterySettings, QStringLiteral("fontFamily"), result.user.battery.fontFamily);
     result.user.battery.fontColor = readColor(
-        settings, QStringLiteral("fontColor"), result.user.battery.fontColor);
+        batterySettings, QStringLiteral("fontColor"), result.user.battery.fontColor);
     result.user.battery.bold = readBool(
-        settings, QStringLiteral("bold"), result.user.battery.bold);
+        batterySettings, QStringLiteral("bold"), result.user.battery.bold);
     result.user.battery.scale = readReal(
-        settings, QStringLiteral("scale"), result.user.battery.scale);
-    settings.endGroup();
+        batterySettings, QStringLiteral("scale"), result.user.battery.scale);
+    batterySettings.endGroup();
 
-    settings.beginGroup(QStringLiteral("user/quickActions"));
+    notificationSettings.beginGroup(QStringLiteral("user/quickActions"));
     result.user.quickActions.visible = readBool(
-        settings, QStringLiteral("visible"), result.user.quickActions.visible);
+        notificationSettings, QStringLiteral("visible"), result.user.quickActions.visible);
     result.user.quickActions.settingsEnabled = readBool(
-        settings, QStringLiteral("settingsEnabled"), result.user.quickActions.settingsEnabled);
+        notificationSettings, QStringLiteral("settingsEnabled"), result.user.quickActions.settingsEnabled);
     result.user.quickActions.reminderEnabled = readBool(
-        settings, QStringLiteral("reminderEnabled"), result.user.quickActions.reminderEnabled);
+        notificationSettings, QStringLiteral("reminderEnabled"), result.user.quickActions.reminderEnabled);
     result.user.quickActions.todoEnabled = readBool(
-        settings, QStringLiteral("todoEnabled"), result.user.quickActions.todoEnabled);
+        notificationSettings, QStringLiteral("todoEnabled"), result.user.quickActions.todoEnabled);
     result.user.quickActions.iconSize = readBoundedInt(
-        settings, QStringLiteral("iconSize"), result.user.quickActions.iconSize,
+        notificationSettings, QStringLiteral("iconSize"), result.user.quickActions.iconSize,
         kMinimumQuickActionIconSize, kMaximumQuickActionIconSize);
     result.user.quickActions.actionSpacing = readBoundedInt(
-        settings, QStringLiteral("actionSpacing"), result.user.quickActions.actionSpacing,
+        notificationSettings, QStringLiteral("actionSpacing"), result.user.quickActions.actionSpacing,
         kMinimumQuickActionSpacing, kMaximumQuickActionSpacing);
-    settings.endGroup();
+    notificationSettings.endGroup();
 
-    settings.beginGroup(QStringLiteral("user/notifications"));
+    notificationSettings.beginGroup(QStringLiteral("user/notifications"));
     result.user.notifications.visualEnabled = readBool(
-        settings, QStringLiteral("visualEnabled"), result.user.notifications.visualEnabled);
+        notificationSettings, QStringLiteral("visualEnabled"), result.user.notifications.visualEnabled);
     result.user.notifications.soundEnabled = readBool(
-        settings, QStringLiteral("soundEnabled"), result.user.notifications.soundEnabled);
+        notificationSettings, QStringLiteral("soundEnabled"), result.user.notifications.soundEnabled);
     result.user.notifications.ttsEnabled = readBool(
-        settings, QStringLiteral("ttsEnabled"), result.user.notifications.ttsEnabled);
+        notificationSettings, QStringLiteral("ttsEnabled"), result.user.notifications.ttsEnabled);
     result.user.notifications.cooldownMinutes = readBoundedInt(
-        settings, QStringLiteral("cooldownMinutes"), result.user.notifications.cooldownMinutes,
+        notificationSettings, QStringLiteral("cooldownMinutes"), result.user.notifications.cooldownMinutes,
         kMinimumNotificationCooldown, kMaximumNotificationCooldown);
     result.user.notifications.silentMode = readBool(
-        settings, QStringLiteral("silentMode"), result.user.battery.silentMode);
-    settings.endGroup();
+        notificationSettings, QStringLiteral("silentMode"), result.user.notifications.silentMode);
+    notificationSettings.endGroup();
 
-    settings.beginGroup(QStringLiteral("device/window"));
+    layoutSettings.beginGroup(QStringLiteral("device/window"));
     result.device.alwaysOnTop = readBool(
-        settings, QStringLiteral("alwaysOnTop"), result.device.alwaysOnTop);
-    settings.endGroup();
+        layoutSettings, QStringLiteral("alwaysOnTop"), result.device.alwaysOnTop);
+    layoutSettings.endGroup();
 
-    settings.beginGroup(QStringLiteral("device/startup"));
+    layoutSettings.beginGroup(QStringLiteral("device/startup"));
     result.device.startAtLogin = readBool(
-        settings, QStringLiteral("startAtLogin"), result.device.startAtLogin);
-    settings.endGroup();
+        layoutSettings, QStringLiteral("startAtLogin"), result.device.startAtLogin);
+    layoutSettings.endGroup();
 
-    settings.beginGroup(QStringLiteral("device/layout"));
+    layoutSettings.beginGroup(QStringLiteral("device/layout"));
     result.device.layout.freeLayoutEnabled = readBool(
-        settings, QStringLiteral("freeLayoutEnabled"), result.device.layout.freeLayoutEnabled);
+        layoutSettings, QStringLiteral("freeLayoutEnabled"), result.device.layout.freeLayoutEnabled);
     result.device.layout.layoutLocked = readBool(
-        settings, QStringLiteral("layoutLocked"), result.device.layout.layoutLocked);
+        layoutSettings, QStringLiteral("layoutLocked"), result.device.layout.layoutLocked);
     result.device.layout.moduleSpacing = readBoundedInt(
-        settings, QStringLiteral("moduleSpacing"), result.device.layout.moduleSpacing,
+        layoutSettings, QStringLiteral("moduleSpacing"), result.device.layout.moduleSpacing,
         kMinimumSpacing, kMaximumSpacing);
     for (const auto &key : {QStringLiteral("clock"), QStringLiteral("date"),
                             QStringLiteral("battery")}) {
-        settings.beginGroup(key);
-        if (settings.contains(QStringLiteral("x")) && settings.contains(QStringLiteral("y"))) {
+        layoutSettings.beginGroup(key);
+        if (layoutSettings.contains(QStringLiteral("x")) && layoutSettings.contains(QStringLiteral("y"))) {
             bool xOk = false;
             bool yOk = false;
-            const qreal x = settings.value(QStringLiteral("x")).toDouble(&xOk);
-            const qreal y = settings.value(QStringLiteral("y")).toDouble(&yOk);
+            const qreal x = layoutSettings.value(QStringLiteral("x")).toDouble(&xOk);
+            const qreal y = layoutSettings.value(QStringLiteral("y")).toDouble(&yOk);
             if (xOk && yOk && qIsFinite(x) && qIsFinite(y)) {
                 result.device.layout.modulePositions.insert(key, QVariantMap{
                     {QStringLiteral("x"), x}, {QStringLiteral("y"), y}});
             }
         }
-        settings.endGroup();
+        layoutSettings.endGroup();
     }
-    settings.endGroup();
+    layoutSettings.endGroup();
 
     return result;
 }
 
 bool SettingsSchema::save(QSettings &settings, const SettingsSnapshot &snapshot)
 {
-    settings.beginGroup(QStringLiteral("meta"));
-    settings.setValue(QStringLiteral("schemaVersion"), qMax(1, snapshot.schemaVersion));
-    settings.endGroup();
+    QString baseDir = QFileInfo(settings.fileName()).absolutePath() + "/";
+    QSettings clockSettings(baseDir + "DeskPilotC_clock.ini", QSettings::IniFormat);
+    QSettings dateSettings(baseDir + "DeskPilotC_date.ini", QSettings::IniFormat);
+    QSettings batterySettings(baseDir + "DeskPilotC_battery.ini", QSettings::IniFormat);
+    QSettings layoutSettings(baseDir + "DeskPilotC_layout.ini", QSettings::IniFormat);
+    QSettings notificationSettings(baseDir + "DeskPilotC_notifications.ini", QSettings::IniFormat);
 
-    settings.beginGroup(QStringLiteral("user/display"));
-    settings.setValue(QStringLiteral("globalScale"), qBound(
+    for (auto *s : {&clockSettings, &dateSettings, &batterySettings, &layoutSettings, &notificationSettings}) {
+        s->beginGroup(QStringLiteral("meta"));
+        s->setValue(QStringLiteral("schemaVersion"), qMax(1, snapshot.schemaVersion));
+        s->endGroup();
+    }
+
+    layoutSettings.beginGroup(QStringLiteral("user/display"));
+    layoutSettings.setValue(QStringLiteral("globalScale"), qBound(
         kMinimumGlobalScale, snapshot.user.globalScale, kMaximumGlobalScale));
-    settings.endGroup();
+    layoutSettings.endGroup();
 
-    settings.beginGroup(QStringLiteral("user/clock"));
-    settings.setValue(QStringLiteral("visible"), snapshot.user.clock.visible);
-    settings.setValue(QStringLiteral("showSeconds"), snapshot.user.clock.showSeconds);
-    settings.setValue(QStringLiteral("use24HourFormat"), snapshot.user.clock.use24HourFormat);
-    settings.setValue(QStringLiteral("fontFamily"), snapshot.user.clock.fontFamily);
-    settings.setValue(QStringLiteral("fontColor"), snapshot.user.clock.fontColor.name(QColor::HexArgb));
-    settings.setValue(QStringLiteral("bold"), snapshot.user.clock.bold);
-    settings.setValue(QStringLiteral("useEmbeddedFont"), snapshot.user.clock.useEmbeddedFont);
-    settings.setValue(QStringLiteral("scale"), snapshot.user.clock.scale);
-    settings.setValue(QStringLiteral("secondsScale"), snapshot.user.clock.secondsScale);
-    settings.endGroup();
+    clockSettings.beginGroup(QStringLiteral("user/clock"));
+    clockSettings.setValue(QStringLiteral("visible"), snapshot.user.clock.visible);
+    clockSettings.setValue(QStringLiteral("showSeconds"), snapshot.user.clock.showSeconds);
+    clockSettings.setValue(QStringLiteral("use24HourFormat"), snapshot.user.clock.use24HourFormat);
+    clockSettings.setValue(QStringLiteral("fontFamily"), snapshot.user.clock.fontFamily);
+    clockSettings.setValue(QStringLiteral("fontColor"), snapshot.user.clock.fontColor.name(QColor::HexArgb));
+    clockSettings.setValue(QStringLiteral("bold"), snapshot.user.clock.bold);
+    clockSettings.setValue(QStringLiteral("useEmbeddedFont"), snapshot.user.clock.useEmbeddedFont);
+    clockSettings.setValue(QStringLiteral("scale"), snapshot.user.clock.scale);
+    clockSettings.setValue(QStringLiteral("secondsScale"), snapshot.user.clock.secondsScale);
+    clockSettings.endGroup();
 
-    settings.beginGroup(QStringLiteral("user/date"));
-    settings.setValue(QStringLiteral("visible"), snapshot.user.date.visible);
-    settings.setValue(QStringLiteral("dateFormat"), snapshot.user.date.dateFormat);
-    settings.setValue(QStringLiteral("showWeekNumber"), snapshot.user.date.showWeekNumber);
-    settings.setValue(QStringLiteral("gregorianFirst"), snapshot.user.date.gregorianFirst);
-    settings.setValue(QStringLiteral("fontFamily"), snapshot.user.date.fontFamily);
-    settings.setValue(QStringLiteral("fontColor"), snapshot.user.date.fontColor.name(QColor::HexArgb));
-    settings.setValue(QStringLiteral("bold"), snapshot.user.date.bold);
-    settings.setValue(QStringLiteral("useEmbeddedFont"), snapshot.user.date.useEmbeddedFont);
-    settings.setValue(QStringLiteral("scale"), snapshot.user.date.scale);
-    settings.endGroup();
+    dateSettings.beginGroup(QStringLiteral("user/date"));
+    dateSettings.setValue(QStringLiteral("visible"), snapshot.user.date.visible);
+    dateSettings.setValue(QStringLiteral("dateFormat"), snapshot.user.date.dateFormat);
+    dateSettings.setValue(QStringLiteral("showWeekNumber"), snapshot.user.date.showWeekNumber);
+    dateSettings.setValue(QStringLiteral("gregorianFirst"), snapshot.user.date.gregorianFirst);
+    dateSettings.setValue(QStringLiteral("fontFamily"), snapshot.user.date.fontFamily);
+    dateSettings.setValue(QStringLiteral("fontColor"), snapshot.user.date.fontColor.name(QColor::HexArgb));
+    dateSettings.setValue(QStringLiteral("bold"), snapshot.user.date.bold);
+    dateSettings.setValue(QStringLiteral("useEmbeddedFont"), snapshot.user.date.useEmbeddedFont);
+    dateSettings.setValue(QStringLiteral("scale"), snapshot.user.date.scale);
+    dateSettings.endGroup();
 
-    settings.beginGroup(QStringLiteral("user/battery"));
-    settings.setValue(QStringLiteral("visible"), snapshot.user.battery.visible);
-    settings.setValue(QStringLiteral("showIcon"), snapshot.user.battery.showIcon);
-    settings.setValue(QStringLiteral("lowBatteryThreshold"), snapshot.user.battery.lowBatteryThreshold);
-    settings.setValue(QStringLiteral("fullChargeThreshold"), snapshot.user.battery.fullChargeThreshold);
-    settings.setValue(QStringLiteral("alertIntervalMinutes"), snapshot.user.battery.alertIntervalMinutes);
-    settings.setValue(QStringLiteral("alertSoundEnabled"), snapshot.user.battery.alertSoundEnabled);
-    settings.setValue(QStringLiteral("silentMode"), snapshot.user.battery.silentMode);
-    settings.setValue(QStringLiteral("fontFamily"), snapshot.user.battery.fontFamily);
-    settings.setValue(QStringLiteral("fontColor"), snapshot.user.battery.fontColor.name(QColor::HexArgb));
-    settings.setValue(QStringLiteral("bold"), snapshot.user.battery.bold);
-    settings.setValue(QStringLiteral("scale"), snapshot.user.battery.scale);
-    settings.endGroup();
+    batterySettings.beginGroup(QStringLiteral("user/battery"));
+    batterySettings.setValue(QStringLiteral("visible"), snapshot.user.battery.visible);
+    batterySettings.setValue(QStringLiteral("showIcon"), snapshot.user.battery.showIcon);
+    batterySettings.setValue(QStringLiteral("lowBatteryThreshold"), snapshot.user.battery.lowBatteryThreshold);
+    batterySettings.setValue(QStringLiteral("fullChargeThreshold"), snapshot.user.battery.fullChargeThreshold);
+    batterySettings.setValue(QStringLiteral("alertIntervalMinutes"), snapshot.user.battery.alertIntervalMinutes);
+    batterySettings.setValue(QStringLiteral("alertSoundEnabled"), snapshot.user.battery.alertSoundEnabled);
+    batterySettings.setValue(QStringLiteral("silentMode"), snapshot.user.battery.silentMode);
+    batterySettings.setValue(QStringLiteral("fontFamily"), snapshot.user.battery.fontFamily);
+    batterySettings.setValue(QStringLiteral("fontColor"), snapshot.user.battery.fontColor.name(QColor::HexArgb));
+    batterySettings.setValue(QStringLiteral("bold"), snapshot.user.battery.bold);
+    batterySettings.setValue(QStringLiteral("scale"), snapshot.user.battery.scale);
+    batterySettings.endGroup();
 
-    settings.beginGroup(QStringLiteral("user/quickActions"));
-    settings.setValue(QStringLiteral("visible"), snapshot.user.quickActions.visible);
-    settings.setValue(QStringLiteral("settingsEnabled"), snapshot.user.quickActions.settingsEnabled);
-    settings.setValue(QStringLiteral("reminderEnabled"), snapshot.user.quickActions.reminderEnabled);
-    settings.setValue(QStringLiteral("todoEnabled"), snapshot.user.quickActions.todoEnabled);
-    settings.setValue(QStringLiteral("iconSize"), qBound(
+    notificationSettings.beginGroup(QStringLiteral("user/quickActions"));
+    notificationSettings.setValue(QStringLiteral("visible"), snapshot.user.quickActions.visible);
+    notificationSettings.setValue(QStringLiteral("settingsEnabled"), snapshot.user.quickActions.settingsEnabled);
+    notificationSettings.setValue(QStringLiteral("reminderEnabled"), snapshot.user.quickActions.reminderEnabled);
+    notificationSettings.setValue(QStringLiteral("todoEnabled"), snapshot.user.quickActions.todoEnabled);
+    notificationSettings.setValue(QStringLiteral("iconSize"), qBound(
         kMinimumQuickActionIconSize, snapshot.user.quickActions.iconSize,
         kMaximumQuickActionIconSize));
-    settings.setValue(QStringLiteral("actionSpacing"), qBound(
+    notificationSettings.setValue(QStringLiteral("actionSpacing"), qBound(
         kMinimumQuickActionSpacing, snapshot.user.quickActions.actionSpacing,
         kMaximumQuickActionSpacing));
-    settings.endGroup();
+    notificationSettings.endGroup();
 
-    settings.beginGroup(QStringLiteral("user/notifications"));
-    settings.setValue(QStringLiteral("visualEnabled"), snapshot.user.notifications.visualEnabled);
-    settings.setValue(QStringLiteral("soundEnabled"), snapshot.user.notifications.soundEnabled);
-    settings.setValue(QStringLiteral("ttsEnabled"), snapshot.user.notifications.ttsEnabled);
-    settings.setValue(QStringLiteral("cooldownMinutes"), qBound(
+    notificationSettings.beginGroup(QStringLiteral("user/notifications"));
+    notificationSettings.setValue(QStringLiteral("visualEnabled"), snapshot.user.notifications.visualEnabled);
+    notificationSettings.setValue(QStringLiteral("soundEnabled"), snapshot.user.notifications.soundEnabled);
+    notificationSettings.setValue(QStringLiteral("ttsEnabled"), snapshot.user.notifications.ttsEnabled);
+    notificationSettings.setValue(QStringLiteral("cooldownMinutes"), qBound(
         kMinimumNotificationCooldown, snapshot.user.notifications.cooldownMinutes,
         kMaximumNotificationCooldown));
-    settings.setValue(QStringLiteral("silentMode"), snapshot.user.notifications.silentMode);
-    settings.endGroup();
+    notificationSettings.setValue(QStringLiteral("silentMode"), snapshot.user.notifications.silentMode);
+    notificationSettings.endGroup();
 
-    settings.beginGroup(QStringLiteral("device/window"));
-    settings.setValue(QStringLiteral("alwaysOnTop"), snapshot.device.alwaysOnTop);
-    settings.endGroup();
+    layoutSettings.beginGroup(QStringLiteral("device/window"));
+    layoutSettings.setValue(QStringLiteral("alwaysOnTop"), snapshot.device.alwaysOnTop);
+    layoutSettings.endGroup();
 
-    settings.beginGroup(QStringLiteral("device/startup"));
-    settings.setValue(QStringLiteral("startAtLogin"), snapshot.device.startAtLogin);
-    settings.endGroup();
+    layoutSettings.beginGroup(QStringLiteral("device/startup"));
+    layoutSettings.setValue(QStringLiteral("startAtLogin"), snapshot.device.startAtLogin);
+    layoutSettings.endGroup();
 
-    settings.beginGroup(QStringLiteral("device/layout"));
-    settings.setValue(QStringLiteral("freeLayoutEnabled"), snapshot.device.layout.freeLayoutEnabled);
-    settings.setValue(QStringLiteral("layoutLocked"), snapshot.device.layout.layoutLocked);
-    settings.setValue(QStringLiteral("moduleSpacing"),
+    layoutSettings.beginGroup(QStringLiteral("device/layout"));
+    layoutSettings.setValue(QStringLiteral("freeLayoutEnabled"), snapshot.device.layout.freeLayoutEnabled);
+    layoutSettings.setValue(QStringLiteral("layoutLocked"), snapshot.device.layout.layoutLocked);
+    layoutSettings.setValue(QStringLiteral("moduleSpacing"),
                       qBound(kMinimumSpacing, snapshot.device.layout.moduleSpacing, kMaximumSpacing));
-    settings.remove(QStringLiteral("clock"));
-    settings.remove(QStringLiteral("date"));
-    settings.remove(QStringLiteral("battery"));
+    layoutSettings.remove(QStringLiteral("clock"));
+    layoutSettings.remove(QStringLiteral("date"));
+    layoutSettings.remove(QStringLiteral("battery"));
     for (const auto &key : {QStringLiteral("clock"), QStringLiteral("date"),
                             QStringLiteral("battery")}) {
         const QVariantMap position = snapshot.device.layout.modulePositions.value(key).toMap();
         if (position.isEmpty()) {
             continue;
         }
-        settings.beginGroup(key);
-        settings.setValue(QStringLiteral("x"), position.value(QStringLiteral("x")));
-        settings.setValue(QStringLiteral("y"), position.value(QStringLiteral("y")));
-        settings.endGroup();
+        layoutSettings.beginGroup(key);
+        layoutSettings.setValue(QStringLiteral("x"), position.value(QStringLiteral("x")));
+        layoutSettings.setValue(QStringLiteral("y"), position.value(QStringLiteral("y")));
+        layoutSettings.endGroup();
     }
-    settings.endGroup();
+    layoutSettings.endGroup();
 
-    settings.sync();
-    if (settings.status() == QSettings::NoError) {
-        return true;
+    bool ok = true;
+    for (auto *s : {&clockSettings, &dateSettings, &batterySettings, &layoutSettings, &notificationSettings}) {
+        s->sync();
+        if (s->status() != QSettings::NoError) {
+            ok = false;
+        }
     }
-    if (settings.status() != QSettings::FormatError) {
-        return false;
-    }
-    QSettings verifiedSettings(settings.fileName(), settings.format());
-    return verifiedSettings.status() == QSettings::NoError;
+    return ok;
 }
 
 } // namespace DeskPilot

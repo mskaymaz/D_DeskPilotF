@@ -20,7 +20,7 @@ public:
     void stop();
     void checkDueReminders();
 
-    void acknowledge(const QUuid &id);
+    Q_INVOKABLE void acknowledge(const QString &id);
 
 signals:
     void reminderDue(const QString &id, const QString &title, const QString &description);

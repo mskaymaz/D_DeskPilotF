@@ -37,6 +37,13 @@ QVariant ReminderModel::data(const QModelIndex &index, int role) const
     case TargetTimeRole:
         return item.effectiveTargetTime();
     case RecurrenceRole:
+        switch (item.recurrence) {
+        case ReminderRecurrence::None: return QStringLiteral("Tek seferlik");
+        case ReminderRecurrence::Daily: return QStringLiteral("Her gün");
+        case ReminderRecurrence::Weekly: return QStringLiteral("Her hafta");
+        }
+        return {};
+    case RecurrenceTokenRole:
         return reminderRecurrenceToken(item.recurrence);
     case StateRole:
         return static_cast<int>(item.state);
@@ -57,6 +64,7 @@ QHash<int, QByteArray> ReminderModel::roleNames() const
         {DescriptionRole, "description"},
         {TargetTimeRole, "targetTime"},
         {RecurrenceRole, "recurrence"},
+        {RecurrenceTokenRole, "recurrenceToken"},
         {StateRole, "state"},
         {EnabledRole, "enabled"},
         {RemainingTimeRole, "remainingTime"},
@@ -132,7 +140,10 @@ bool ReminderModel::createReminder(const QString &title, const QString &descript
     item.title = title.trimmed();
     item.description = description.trimmed();
     
-    QDateTime parsedTime = QDateTime::fromString(targetTime, Qt::ISODate);
+    QDateTime parsedTime = QDateTime::fromString(targetTime, "yyyy-MM-dd HH:mm");
+    if (!parsedTime.isValid()) {
+        parsedTime = QDateTime::fromString(targetTime, Qt::ISODate);
+    }
     if (!parsedTime.isValid()) {
         emit errorOccurred(QStringLiteral("Invalid date format."));
         return false;
@@ -144,6 +155,16 @@ bool ReminderModel::createReminder(const QString &title, const QString &descript
     item.state = ReminderState::Active;
 
     const auto now = QDateTime::currentDateTimeUtc();
+    if (item.recurrence == ReminderRecurrence::Daily) {
+        while (item.targetTime <= now) {
+            item.targetTime = item.targetTime.addDays(1);
+        }
+    } else if (item.recurrence == ReminderRecurrence::Weekly) {
+        while (item.targetTime <= now) {
+            item.targetTime = item.targetTime.addDays(7);
+        }
+    }
+
     item.createdAt = now;
     item.updatedAt = now;
 
@@ -181,7 +202,10 @@ bool ReminderModel::updateReminder(const QString &reminderId, const QString &tit
     item.title = title.trimmed();
     item.description = description.trimmed();
     
-    QDateTime parsedTime = QDateTime::fromString(targetTime, Qt::ISODate);
+    QDateTime parsedTime = QDateTime::fromString(targetTime, "yyyy-MM-dd HH:mm");
+    if (!parsedTime.isValid()) {
+        parsedTime = QDateTime::fromString(targetTime, Qt::ISODate);
+    }
     if (!parsedTime.isValid()) {
         emit errorOccurred(QStringLiteral("Invalid date format."));
         return false;
@@ -190,7 +214,20 @@ bool ReminderModel::updateReminder(const QString &reminderId, const QString &tit
     
     auto rec = reminderRecurrenceFromToken(recurrenceToken);
     item.recurrence = rec.value_or(ReminderRecurrence::None);
-    item.updatedAt = QDateTime::currentDateTimeUtc();
+    item.state = ReminderState::Active;
+    item.snoozedUntil.reset();
+
+    const auto now = QDateTime::currentDateTimeUtc();
+    if (item.recurrence == ReminderRecurrence::Daily) {
+        while (item.targetTime <= now) {
+            item.targetTime = item.targetTime.addDays(1);
+        }
+    } else if (item.recurrence == ReminderRecurrence::Weekly) {
+        while (item.targetTime <= now) {
+            item.targetTime = item.targetTime.addDays(7);
+        }
+    }
+    item.updatedAt = now;
 
     if (!m_repository->save(item, &error)) {
         emit errorOccurred(error);
@@ -272,7 +309,27 @@ bool ReminderModel::saveTransition(const QString &reminderId, ReminderState next
     }
 
     Reminder item = optItem.value();
-    if (item.state == nextState) {
+    if (item.state == nextState && item.recurrence == ReminderRecurrence::None) {
+        return true;
+    }
+
+    if (item.recurrence != ReminderRecurrence::None && (nextState == ReminderState::Completed || nextState == ReminderState::Missed)) {
+        const auto now = QDateTime::currentDateTimeUtc();
+        if (item.recurrence == ReminderRecurrence::Daily) {
+            while (item.targetTime <= now) {
+                item.targetTime = item.targetTime.addDays(1);
+            }
+        } else if (item.recurrence == ReminderRecurrence::Weekly) {
+            while (item.targetTime <= now) {
+                item.targetTime = item.targetTime.addDays(7);
+            }
+        }
+        item.state = ReminderState::Active;
+        item.updatedAt = now;
+        item.snoozedUntil.reset();
+        if (!m_repository->save(item, errorMessage)) {
+            return false;
+        }
         return true;
     }
 

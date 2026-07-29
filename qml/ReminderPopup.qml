@@ -26,6 +26,9 @@ Window {
 
     Component.onCompleted: {
         flags = Qt.FramelessWindowHint | Qt.WindowStaysOnTopHint | Qt.Tool
+        if (!root.isMissed) {
+            soundService.playAlarm()
+        }
     }
 
     Rectangle {
@@ -48,7 +51,7 @@ Window {
                 BaseText {
                     text: root.reminderTitle
                     font.weight: Font.Bold
-                    color: DesignTokens.text
+                    color: DesignTokens.primaryText
                     Layout.fillWidth: true
                     wrapMode: Text.WordWrap
                 }
@@ -72,6 +75,7 @@ Window {
                         text: "✓ Tamamla"
                         Layout.fillWidth: true
                         onClicked: {
+                            soundService.stopAlarm()
                             root.completeRequested(root.reminderId)
                             root.close()
                         }
@@ -81,7 +85,18 @@ Window {
                         text: "💤 Ertele"
                         Layout.fillWidth: true
                         onClicked: {
+                            soundService.stopAlarm()
                             root.snoozeRequested(root.reminderId, 15)
+                            root.close()
+                        }
+                    }
+
+                    Button {
+                        text: "Kapat"
+                        Layout.fillWidth: true
+                        onClicked: {
+                            soundService.stopAlarm()
+                            root.closedRequested()
                             root.close()
                         }
                     }
@@ -102,6 +117,7 @@ Window {
                         verticalAlignment: Text.AlignVCenter
                     }
                     onClicked: {
+                        soundService.stopAlarm()
                         root.closedRequested()
                         root.close()
                     }

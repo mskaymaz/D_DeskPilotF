@@ -25,6 +25,7 @@
 #include "date_model.h"
 #include "date_service.h"
 #include "settings_schema.h"
+#include "sound_service.h"
 #include "startup_service.h"
 #include "todo_model.h"
 #include "todo_repository.h"
@@ -89,6 +90,7 @@ int main(int argc, char *argv[])
     qmlRegisterType<DeskPilot::ClockModel>("DeskPilot.Clock", 1, 0, "ClockModel");
     DeskPilot::ClockService clockService;
     DeskPilot::ClockModel clockModel;
+    DeskPilot::SoundService soundService;
     DeskPilot::DateService dateService;
     DeskPilot::DateModel dateModel;
     DeskPilot::WindowInputMaskController inputMaskController;
@@ -228,20 +230,23 @@ int main(int argc, char *argv[])
         }
 
         if (layoutWindow != nullptr) {
-            snapshot.device.layout.freeLayoutEnabled =
-                layoutWindow->property("freeLayoutEnabled").toBool();
-            snapshot.device.layout.layoutLocked = layoutWindow->property("layoutLocked").toBool();
-            snapshot.device.layout.moduleSpacing = layoutWindow->property("moduleSpacing").toInt();
-            snapshot.device.layout.modulePositions.clear();
-            const QJSValue positions =
-                layoutWindow->property("modulePositions").value<QJSValue>();
-            for (const auto &key : {QStringLiteral("clock"), QStringLiteral("date"),
-                                    QStringLiteral("battery")}) {
-                const QJSValue position = positions.property(key);
-                if (position.isObject()) {
-                    snapshot.device.layout.modulePositions.insert(key, QVariantMap{
-                        {QStringLiteral("x"), position.property("x").toNumber()},
-                        {QStringLiteral("y"), position.property("y").toNumber()}});
+            const bool initialized = layoutWindow->property("modulePositionsInitialized").toBool();
+            if (initialized) {
+                snapshot.device.layout.freeLayoutEnabled =
+                    layoutWindow->property("freeLayoutEnabled").toBool();
+                snapshot.device.layout.layoutLocked = layoutWindow->property("layoutLocked").toBool();
+                snapshot.device.layout.moduleSpacing = layoutWindow->property("moduleSpacing").toInt();
+                snapshot.device.layout.modulePositions.clear();
+                const QJSValue positions =
+                    layoutWindow->property("modulePositions").value<QJSValue>();
+                for (const auto &key : {QStringLiteral("clock"), QStringLiteral("date"),
+                                        QStringLiteral("battery")}) {
+                    const QJSValue position = positions.property(key);
+                    if (position.isObject()) {
+                        snapshot.device.layout.modulePositions.insert(key, QVariantMap{
+                            {QStringLiteral("x"), position.property("x").toNumber()},
+                            {QStringLiteral("y"), position.property("y").toNumber()}});
+                    }
                 }
             }
         }
@@ -339,6 +344,7 @@ int main(int argc, char *argv[])
     engine.rootContext()->setContextProperty("todoModel", &todoModel);
     engine.rootContext()->setContextProperty("reminderModel", &reminderModel);
     engine.rootContext()->setContextProperty("reminderScheduler", &reminderScheduler);
+    engine.rootContext()->setContextProperty("soundService", &soundService);
     engine.rootContext()->setContextProperty("ttsService", &ttsService);
     engine.loadFromModule("DeskPilot", "Main");
 

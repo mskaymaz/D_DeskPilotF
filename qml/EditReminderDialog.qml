@@ -4,6 +4,7 @@ import QtQuick.Layouts
 
 Dialog {
     id: root
+    closePolicy: Popup.NoAutoClose
 
     property string reminderId: ""
     property string reminderTitle: ""
@@ -18,6 +19,10 @@ Dialog {
     modal: true
     width: DesignTokens.scaled(440)
     height: DesignTokens.scaled(520)
+
+    parent: Overlay.overlay
+    x: Math.round((parent.width - width) / 2)
+    y: Math.round((parent.height - height) / 2)
 
     header: Rectangle {
         color: DesignTokens.surface
@@ -51,10 +56,16 @@ Dialog {
             }
         }
     }
+
+    onOpened: {
+        if (root.targetTimeLabel !== "") {
+            targetTimeField.setDateTime(root.targetTimeLabel)
+        }
+    }
     
     function isValidTime(value) {
         if (value === "") return false
-        var match = /^(\d{4})-(\d{2})-(\d{2}) (\d{2}):(\d{2})$/.exec(value)
+        var match = /^(\d{4})-(\d{2})-(\d{2})[T ](\d{2}):(\d{2})(:\d{2})?(\.\d+)?(Z|[+-]\d{2}:\d{2})?$/.exec(value)
         if (match === null) return false
         var date = new Date(Number(match[1]), Number(match[2]) - 1, Number(match[3]), Number(match[4]), Number(match[5]))
         return !isNaN(date.getTime())
@@ -64,15 +75,16 @@ Dialog {
         var timeStr = targetTimeField.dateTimeString
         errorLabel.visible = false
         if (!isValidTime(timeStr)) {
-            errorLabel.text = "Geçersiz veya eksik tarih formatı! Lütfen geçerli bir gün seçin."
+            errorLabel.text = "Geçersiz veya eksik tarih/saat formatı! Lütfen geçerli bir zaman seçin."
             errorLabel.visible = true
             return
         }
+        var recValue = recurrenceField.model[recurrenceField.currentIndex].value
         root.reminderSubmitted(
             titleField.text.trim(),
             descriptionField.text.trim(),
             timeStr,
-            recurrenceField.currentValue
+            recValue
         )
         root.close()
     }
@@ -126,19 +138,15 @@ Dialog {
             BaseText {
                 text: "Zaman (YYYY-MM-DD HH:mm)"
                 font.bold: true
-                color: DesignTokens.text
+                color: DesignTokens.primaryText
             }
             DateTimePicker {
                 id: targetTimeField
                 Layout.fillWidth: true
                 allowEmpty: false
-                
-                Component.onCompleted: {
-                    if (root.targetTimeLabel !== "") {
-                        targetTimeField.setDateTime(root.targetTimeLabel)
-                    }
-                }
+                showDate: recurrenceField.currentIndex === -1 || recurrenceField.model[recurrenceField.currentIndex].value !== "daily"
             }
+
         }
         
         Label {

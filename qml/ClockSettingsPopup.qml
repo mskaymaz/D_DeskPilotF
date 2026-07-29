@@ -4,16 +4,39 @@ import QtQuick.Layouts
 
 Popup {
     id: root
+    closePolicy: Popup.NoAutoClose
 
     property string stencilFontName: ""
     property string digitalFontName: ""
     property string technologyFontName: ""
 
+    // Draft properties
+    property bool visibleDraft: false
+    property bool showSecondsDraft: false
+    property bool use24HourFormatDraft: false
+    property bool boldDraft: false
+    property int fontIndexDraft: 0
+    property int colorIndexDraft: 0
+    property real scaleDraft: 1.0
+    property real secondsScaleDraft: 0.75
+
     width: DesignTokens.scaled(440)
     height: DesignTokens.scaled(520)
-    modal: true
+    modal: false
     focus: true
     padding: DesignTokens.space5
+
+    onOpened: {
+        visibleDraft = clockModel.visible
+        showSecondsDraft = clockModel.showSeconds
+        use24HourFormatDraft = clockModel.use24HourFormat
+        boldDraft = clockModel.bold
+        fontIndexDraft = fontIndex()
+        colorIndexDraft = colorIndex()
+        scaleDraft = clockModel.scale
+        secondsScaleDraft = clockModel.secondsScale
+        if (typeof rootWindow !== "undefined") rootWindow.updateInputMask()
+    }
 
     function fontIndex() {
         if (!clockModel.useEmbeddedFont) {
@@ -64,6 +87,18 @@ Popup {
         }
     }
 
+    function applyChanges() {
+        clockModel.visible = visibleDraft
+        clockModel.showSeconds = showSecondsDraft
+        clockModel.use24HourFormat = use24HourFormatDraft
+        clockModel.bold = boldDraft
+        selectFont(fontIndexDraft)
+        selectColor(colorIndexDraft)
+        clockModel.scale = scaleDraft
+        clockModel.secondsScale = secondsScaleDraft
+        if (typeof rootWindow !== "undefined") rootWindow.scheduleLayoutSettingsSave()
+    }
+
     background: Rectangle {
         color: DesignTokens.surface
         radius: DesignTokens.radiusLarge
@@ -83,7 +118,7 @@ Popup {
         }
 
         Label {
-            text: "Değişiklikler anında uygulanır ve kaydedilir."
+            text: "Ayarları düzenleyin ve uygulamak için Kaydet veya Uygula butonuna basın."
             color: DesignTokens.secondaryText
             font.pixelSize: DesignTokens.captionPixelSize
             Layout.fillWidth: true
@@ -91,29 +126,29 @@ Popup {
 
         CheckBox {
             text: "Saati göster"
-            checked: clockModel.visible
-            onToggled: clockModel.visible = checked
+            checked: root.visibleDraft
+            onToggled: root.visibleDraft = checked
             Layout.fillWidth: true
         }
 
         CheckBox {
             text: "Saniyeleri göster"
-            checked: clockModel.showSeconds
-            onToggled: clockModel.showSeconds = checked
+            checked: root.showSecondsDraft
+            onToggled: root.showSecondsDraft = checked
             Layout.fillWidth: true
         }
 
         CheckBox {
             text: "24 saat biçimi"
-            checked: clockModel.use24HourFormat
-            onToggled: clockModel.use24HourFormat = checked
+            checked: root.use24HourFormatDraft
+            onToggled: root.use24HourFormatDraft = checked
             Layout.fillWidth: true
         }
 
         CheckBox {
             text: "Kalın yazı"
-            checked: clockModel.bold
-            onToggled: clockModel.bold = checked
+            checked: root.boldDraft
+            onToggled: root.boldDraft = checked
             Layout.fillWidth: true
         }
 
@@ -122,8 +157,8 @@ Popup {
         ComboBox {
             id: fontCombo
             model: ["Stencil", "Digital-7", "Technology", "Sistem fontu"]
-            currentIndex: root.fontIndex()
-            onActivated: root.selectFont(currentIndex)
+            currentIndex: root.fontIndexDraft
+            onActivated: root.fontIndexDraft = currentIndex
             Layout.fillWidth: true
         }
 
@@ -132,8 +167,8 @@ Popup {
         ComboBox {
             id: colorCombo
             model: ["Koyu", "Mavi", "Turuncu"]
-            currentIndex: root.colorIndex()
-            onActivated: root.selectColor(currentIndex)
+            currentIndex: root.colorIndexDraft
+            onActivated: root.colorIndexDraft = currentIndex
             Layout.fillWidth: true
         }
 
@@ -142,8 +177,8 @@ Popup {
             Label { text: "Saat boyutu"; color: DesignTokens.secondaryText; Layout.fillWidth: true }
             ComboBox {
                 model: ["75%", "100%", "125%", "150%"]
-                currentIndex: Math.max(0, [0.75, 1.0, 1.25, 1.5].indexOf(clockModel.scale))
-                onActivated: clockModel.scale = [0.75, 1.0, 1.25, 1.5][currentIndex]
+                currentIndex: Math.max(0, [0.75, 1.0, 1.25, 1.5].indexOf(root.scaleDraft))
+                onActivated: root.scaleDraft = [0.75, 1.0, 1.25, 1.5][currentIndex]
                 Layout.preferredWidth: DesignTokens.scaled(120)
             }
         }
@@ -153,18 +188,35 @@ Popup {
             Label { text: "Saniye boyutu"; color: DesignTokens.secondaryText; Layout.fillWidth: true }
             ComboBox {
                 model: ["50%", "75%", "100%", "125%", "150%"]
-                currentIndex: Math.max(0, [0.5, 0.75, 1.0, 1.25, 1.5].indexOf(clockModel.secondsScale))
-                onActivated: clockModel.secondsScale = [0.5, 0.75, 1.0, 1.25, 1.5][currentIndex]
+                currentIndex: Math.max(0, [0.5, 0.75, 1.0, 1.25, 1.5].indexOf(root.secondsScaleDraft))
+                onActivated: root.secondsScaleDraft = [0.5, 0.75, 1.0, 1.25, 1.5][currentIndex]
                 Layout.preferredWidth: DesignTokens.scaled(120)
             }
         }
 
         Item { Layout.fillHeight: true; Layout.fillWidth: true }
 
-        Button {
-            text: "Kapat"
-            onClicked: root.close()
+        RowLayout {
             Layout.alignment: Qt.AlignRight
+            spacing: DesignTokens.space2
+
+            Button {
+                text: "İptal"
+                onClicked: root.close()
+            }
+
+            Button {
+                text: "Uygula"
+                onClicked: root.applyChanges()
+            }
+
+            Button {
+                text: "Kaydet"
+                onClicked: {
+                    root.applyChanges()
+                    root.close()
+                }
+            }
         }
     }
 }

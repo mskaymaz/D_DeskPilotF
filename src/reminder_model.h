@@ -25,6 +25,7 @@ public:
         DescriptionRole,
         TargetTimeRole,
         RecurrenceRole,
+        RecurrenceTokenRole,
         StateRole,
         RemainingTimeRole,
         EnabledRole,

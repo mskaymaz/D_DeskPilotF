@@ -4,12 +4,38 @@ import QtQuick.Layouts
 
 Popup {
     id: root
+    closePolicy: Popup.NoAutoClose
+
+    // Draft properties
+    property bool notificationVisualEnabledDraft: false
+    property bool notificationSoundEnabledDraft: false
+    property bool notificationTtsEnabledDraft: false
+    property bool notificationSilentModeDraft: false
+    property int notificationCooldownMinutesDraft: 0
 
     width: DesignTokens.scaled(440)
     height: DesignTokens.scaled(400)
-    modal: true
+    modal: false
     focus: true
     padding: DesignTokens.space5
+
+    onOpened: {
+        notificationVisualEnabledDraft = rootWindow.notificationVisualEnabled
+        notificationSoundEnabledDraft = rootWindow.notificationSoundEnabled
+        notificationTtsEnabledDraft = rootWindow.notificationTtsEnabled
+        notificationSilentModeDraft = rootWindow.notificationSilentMode
+        notificationCooldownMinutesDraft = rootWindow.notificationCooldownMinutes
+        if (typeof rootWindow !== "undefined") rootWindow.updateInputMask()
+    }
+
+    function applyChanges() {
+        rootWindow.notificationVisualEnabled = notificationVisualEnabledDraft
+        rootWindow.notificationSoundEnabled = notificationSoundEnabledDraft
+        rootWindow.notificationTtsEnabled = notificationTtsEnabledDraft
+        rootWindow.notificationSilentMode = notificationSilentModeDraft
+        rootWindow.notificationCooldownMinutes = notificationCooldownMinutesDraft
+        if (typeof rootWindow !== "undefined") rootWindow.scheduleLayoutSettingsSave()
+    }
 
     background: Rectangle {
         color: DesignTokens.surface
@@ -30,7 +56,7 @@ Popup {
         }
 
         Label {
-            text: "Bildirim tercihleri anında uygulanır ve kaydedilir."
+            text: "Ayarları düzenleyin ve uygulamak için Kaydet veya Uygula butonuna basın."
             color: DesignTokens.secondaryText
             font.pixelSize: DesignTokens.captionPixelSize
             Layout.fillWidth: true
@@ -38,29 +64,29 @@ Popup {
 
         CheckBox {
             text: "Görsel bildirimleri etkinleştir"
-            checked: rootWindow.notificationVisualEnabled
-            onToggled: rootWindow.notificationVisualEnabled = checked
+            checked: root.notificationVisualEnabledDraft
+            onToggled: root.notificationVisualEnabledDraft = checked
             Layout.fillWidth: true
         }
 
         CheckBox {
             text: "Bildirim sesini etkinleştir"
-            checked: rootWindow.notificationSoundEnabled
-            onToggled: rootWindow.notificationSoundEnabled = checked
+            checked: root.notificationSoundEnabledDraft
+            onToggled: root.notificationSoundEnabledDraft = checked
             Layout.fillWidth: true
         }
 
         CheckBox {
             text: "Sesli metni (TTS) etkinleştir"
-            checked: rootWindow.notificationTtsEnabled
-            onToggled: rootWindow.notificationTtsEnabled = checked
+            checked: root.notificationTtsEnabledDraft
+            onToggled: root.notificationTtsEnabledDraft = checked
             Layout.fillWidth: true
         }
 
         CheckBox {
             text: "Sessiz mod"
-            checked: rootWindow.notificationSilentMode
-            onToggled: rootWindow.notificationSilentMode = checked
+            checked: root.notificationSilentModeDraft
+            onToggled: root.notificationSilentModeDraft = checked
             Layout.fillWidth: true
         }
 
@@ -68,18 +94,34 @@ Popup {
 
         ComboBox {
             model: ["Devre dışı", "5 dakika", "15 dakika", "30 dakika", "60 dakika"]
-            currentIndex: Math.max(0, [0, 5, 15, 30, 60].indexOf(
-                rootWindow.notificationCooldownMinutes))
-            onActivated: rootWindow.notificationCooldownMinutes = [0, 5, 15, 30, 60][currentIndex]
+            currentIndex: Math.max(0, [0, 5, 15, 30, 60].indexOf(root.notificationCooldownMinutesDraft))
+            onActivated: root.notificationCooldownMinutesDraft = [0, 5, 15, 30, 60][currentIndex]
             Layout.fillWidth: true
         }
 
         Item { Layout.fillHeight: true; Layout.fillWidth: true }
 
-        Button {
-            text: "Kapat"
-            onClicked: root.close()
+        RowLayout {
             Layout.alignment: Qt.AlignRight
+            spacing: DesignTokens.space2
+
+            Button {
+                text: "İptal"
+                onClicked: root.close()
+            }
+
+            Button {
+                text: "Uygula"
+                onClicked: root.applyChanges()
+            }
+
+            Button {
+                text: "Kaydet"
+                onClicked: {
+                    root.applyChanges()
+                    root.close()
+                }
+            }
         }
     }
 }

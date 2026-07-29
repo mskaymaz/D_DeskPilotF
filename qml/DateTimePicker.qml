@@ -7,14 +7,21 @@ RowLayout {
     spacing: DesignTokens.space2
 
     property bool allowEmpty: true
+    property bool showDate: true
     
     property string dateTimeString: {
         var d = dateField.text.trim()
-        if (d === "" && root.allowEmpty) return ""
+        if (!root.showDate) {
+            // If date is hidden, just use today's date so it's a valid timestamp
+            d = Qt.formatDate(new Date(), "yyyy-MM-dd")
+        } else if (d === "" && root.allowEmpty) {
+            return ""
+        }
+
         
         var t = timeField.text.trim()
         if (t === "") t = "00:00"
-        return d + " " + t
+        return d + "T" + t + ":00"
     }
 
     function setDateTime(isoString) {
@@ -24,7 +31,10 @@ RowLayout {
             timeField.text = Qt.formatTime(now, "HH:mm")
             return
         }
-        var parts = isoString.trim().split(" ")
+        var parts = isoString.trim().split("T")
+        if (parts.length === 1 && isoString.includes(" ")) {
+            parts = isoString.trim().split(" ")
+        }
         if (parts.length >= 1) dateField.text = parts[0]
         if (parts.length >= 2) {
             var tParts = parts[1].split(":")
@@ -82,25 +92,45 @@ RowLayout {
         timeField.cursorPosition = cursor
     }
 
-    TextField {
-        id: dateField
-        placeholderText: "YYYY-AA-GG"
-        font.pixelSize: DesignTokens.bodyPixelSize
-        Layout.preferredWidth: DesignTokens.scaled(110)
-        selectByMouse: true
-        validator: RegularExpressionValidator { regularExpression: /^\d{4}-\d{2}-\d{2}$/ }
+    RowLayout {
+        spacing: 0
+        visible: root.showDate
 
-        Keys.onUpPressed: adjustDate(1, cursorPosition)
-        Keys.onDownPressed: adjustDate(-1, cursorPosition)
+        Button {
+            text: "-"
+            width: DesignTokens.scaled(32)
+            padding: 0
+            onClicked: root.adjustDate(-1, dateField.cursorPosition)
+        }
         
-        MouseArea {
-            anchors.fill: parent
-            acceptedButtons: Qt.NoButton
-            onWheel: (wheel) => {
-                dateField.forceActiveFocus()
-                if (wheel.angleDelta.y > 0) adjustDate(1, dateField.cursorPosition)
-                else if (wheel.angleDelta.y < 0) adjustDate(-1, dateField.cursorPosition)
+        TextField {
+            id: dateField
+            placeholderText: "YYYY-MM-DD"
+            font.pixelSize: DesignTokens.bodyPixelSize
+            horizontalAlignment: TextInput.AlignHCenter
+            Layout.preferredWidth: DesignTokens.scaled(120)
+            selectByMouse: true
+            validator: RegularExpressionValidator { regularExpression: /^\d{4}-\d{2}-\d{2}$/ }
+
+            Keys.onUpPressed: adjustDate(1, cursorPosition)
+            Keys.onDownPressed: adjustDate(-1, cursorPosition)
+            
+            MouseArea {
+                anchors.fill: parent
+                acceptedButtons: Qt.NoButton
+                onWheel: (wheel) => {
+                    dateField.forceActiveFocus()
+                    if (wheel.angleDelta.y > 0) adjustDate(1, dateField.cursorPosition)
+                    else if (wheel.angleDelta.y < 0) adjustDate(-1, dateField.cursorPosition)
+                }
             }
+        }
+
+        Button {
+            text: "+"
+            width: DesignTokens.scaled(32)
+            padding: 0
+            onClicked: root.adjustDate(1, dateField.cursorPosition)
         }
     }
     

@@ -5,16 +5,24 @@ import Qt.labs.settings
 
 Dialog {
     id: root
+    closePolicy: Popup.NoAutoClose
 
     property var model: reminderModel
+    property var activeDialog: null
 
     Binding { target: model; property: "filterActive"; value: root.activeOnly }
     Binding { target: model; property: "filterCompleted"; value: root.completedOnly }
     Binding { target: model; property: "filterMissed"; value: root.missedOnly }
 
     property bool activeOnly: true
-    property bool missedOnly: true
+    property bool missedOnly: false
     property bool completedOnly: false
+
+    Component.onCompleted: {
+        model.filterActive = activeOnly
+        model.filterMissed = missedOnly
+        model.filterCompleted = completedOnly
+    }
 
     readonly property bool hasReminders: model ? model.count > 0 : false
 
@@ -55,7 +63,7 @@ Dialog {
     onYChanged: if (visible) panelSettings.savedY = y
 
     title: "Hatırlatıcılar"
-    modal: true
+    modal: false
     width: DesignTokens.scaled(520)
     height: DesignTokens.scaled(400)
     standardButtons: Dialog.Close
@@ -101,23 +109,47 @@ Dialog {
             Layout.fillWidth: true
             spacing: DesignTokens.space2
 
-            Button {
+            RadioButton {
                 text: "Aktif"
-                checkable: true
                 checked: root.activeOnly
-                onClicked: root.activeOnly = checked
+                onToggled: {
+                    if (checked) {
+                        root.activeOnly = true
+                        root.missedOnly = false
+                        root.completedOnly = false
+                        root.model.filterActive = true
+                        root.model.filterMissed = false
+                        root.model.filterCompleted = false
+                    }
+                }
             }
-            Button {
+            RadioButton {
                 text: "Kaçırılan"
-                checkable: true
                 checked: root.missedOnly
-                onClicked: root.missedOnly = checked
+                onToggled: {
+                    if (checked) {
+                        root.activeOnly = false
+                        root.missedOnly = true
+                        root.completedOnly = false
+                        root.model.filterActive = false
+                        root.model.filterMissed = true
+                        root.model.filterCompleted = false
+                    }
+                }
             }
-            Button {
+            RadioButton {
                 text: "Tamamlanan"
-                checkable: true
                 checked: root.completedOnly
-                onClicked: root.completedOnly = checked
+                onToggled: {
+                    if (checked) {
+                        root.activeOnly = false
+                        root.missedOnly = false
+                        root.completedOnly = true
+                        root.model.filterActive = false
+                        root.model.filterMissed = false
+                        root.model.filterCompleted = true
+                    }
+                }
             }
 
             Item { Layout.fillWidth: true } // Spacer
@@ -126,6 +158,14 @@ Dialog {
                 text: "+ Yeni"
                 onClicked: {
                     var dialog = Qt.createComponent("EditReminderDialog.qml").createObject(root)
+                    root.activeDialog = dialog
+                    dialog.closed.connect(function() {
+                        root.activeDialog = null
+                        if (typeof rootWindow !== "undefined") rootWindow.updateInputMask()
+                    })
+                    dialog.opened.connect(function() {
+                        if (typeof rootWindow !== "undefined") rootWindow.updateInputMask()
+                    })
                     dialog.reminderSubmitted.connect(function(title, desc, time, rec) {
                         root.newReminderRequested(title, desc, time, rec)
                     })
@@ -168,10 +208,18 @@ Dialog {
                             "reminderTitle": reminderTitle,
                             "reminderDescription": reminderDescription,
                             "targetTimeLabel": targetTimeLabel,
-                            "recurrenceToken": recurrenceLabel
+                            "recurrenceToken": model.recurrenceToken
+                        })
+                        root.activeDialog = dialog
+                        dialog.closed.connect(function() {
+                            root.activeDialog = null
+                            if (typeof rootWindow !== "undefined") rootWindow.updateInputMask()
+                        })
+                        dialog.opened.connect(function() {
+                            if (typeof rootWindow !== "undefined") rootWindow.updateInputMask()
                         })
                         dialog.reminderSubmitted.connect(function(title, desc, time, rec) {
-                            root.model.updateReminder(reminderId, title, desc, time, rec)
+                            root.model.updateReminder(dialog.reminderId, title, desc, time, rec)
                         })
                         dialog.open()
                     }

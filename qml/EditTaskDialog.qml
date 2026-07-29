@@ -4,6 +4,7 @@ import QtQuick.Layouts
 
 Dialog {
     id: root
+    closePolicy: Popup.NoAutoClose
 
     property string taskId: ""
     property string taskTitle: ""
@@ -20,6 +21,10 @@ Dialog {
     modal: true
     width: DesignTokens.scaled(440)
     height: DesignTokens.scaled(540)
+
+    parent: Overlay.overlay
+    x: Math.round((parent.width - width) / 2)
+    y: Math.round((parent.height - height) / 2)
 
     function priorityIndex(value) {
         if (value === "low" || value === "Düşük") {
@@ -45,7 +50,7 @@ Dialog {
         if (value === "") {
             return true
         }
-        var match = /^(\d{4})-(\d{2})-(\d{2}) (\d{2}):(\d{2})$/.exec(value)
+        var match = /^(\d{4})-(\d{2})-(\d{2})[T ](\d{2}):(\d{2})(:\d{2})?(\.\d+)?(Z|[+-]\d{2}:\d{2})?$/.exec(value)
         if (match === null) {
             return false
         }

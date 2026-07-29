@@ -202,7 +202,7 @@ private slots:
         QCOMPARE(actual.user.battery.alertIntervalMinutes, 1);
         QVERIFY(!actual.user.battery.silentMode);
         QVERIFY(actual.user.clock.showSeconds);
-        QCOMPARE(actual.user.clock.scale, 1.0);
+        QCOMPARE(actual.user.clock.scale, 1.25);
         QCOMPARE(actual.user.globalScale, 1.5);
         QCOMPARE(actual.user.date.dateFormat, QStringLiteral("dd.MM.yyyy"));
         QCOMPARE(actual.device.layout.moduleSpacing, 64);

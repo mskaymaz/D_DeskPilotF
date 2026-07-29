@@ -4,6 +4,7 @@ import QtQuick.Layouts
 
 Dialog {
     id: root
+    closePolicy: Popup.NoAutoClose
 
     signal taskSubmitted(
         string title, string description, string plannedTime, string priority)
@@ -11,7 +12,11 @@ Dialog {
     title: "Yeni görev"
     modal: true
     width: DesignTokens.scaled(440)
-    height: DesignTokens.scaled(460)
+    height: DesignTokens.scaled(520)
+
+    parent: Overlay.overlay
+    x: Math.round((parent.width - width) / 2)
+    y: Math.round((parent.height - height) / 2)
 
     function priorityToken() {
         if (priorityField.currentIndex === 0) {
@@ -27,7 +32,7 @@ Dialog {
         if (value === "") {
             return true
         }
-        var match = /^(\d{4})-(\d{2})-(\d{2}) (\d{2}):(\d{2})$/.exec(value)
+        var match = /^(\d{4})-(\d{2})-(\d{2})[T ](\d{2}):(\d{2})(:\d{2})?(\.\d+)?(Z|[+-]\d{2}:\d{2})?$/.exec(value)
         if (match === null) {
             return false
         }
