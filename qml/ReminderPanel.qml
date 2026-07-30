@@ -3,13 +3,11 @@ import QtQuick.Controls
 import QtQuick.Layouts
 import Qt.labs.settings
 
-Dialog {
+WidgetWindow {
     id: root
-    closePolicy: Popup.NoAutoClose
+    title: "Hatırlatıcılar"
 
     property var model: reminderModel
-    property var activeDialog: null
-
     Binding { target: model; property: "filterActive"; value: root.activeOnly }
     Binding { target: model; property: "filterCompleted"; value: root.completedOnly }
     Binding { target: model; property: "filterMissed"; value: root.missedOnly }
@@ -49,24 +47,38 @@ Dialog {
     onReminderCompleteRequested: root.model.completeReminder(reminderId)
     onReminderDeleteRequested: root.model.deleteReminder(reminderId)
 
-    Settings {
-        id: panelSettings
-        category: "ReminderPanelPosition"
-        property real savedX: -1
-        property real savedY: -1
-    }
-
-    x: panelSettings.savedX === -1 ? (parent ? Math.round((parent.width - width) / 2) : 0) : panelSettings.savedX
-    y: panelSettings.savedY === -1 ? (parent ? Math.round((parent.height - height) / 2) : 0) : panelSettings.savedY
-
-    onXChanged: if (visible) panelSettings.savedX = x
-    onYChanged: if (visible) panelSettings.savedY = y
-
-    title: "Hatırlatıcılar"
-    modal: false
     width: DesignTokens.scaled(520)
     height: DesignTokens.scaled(400)
-    standardButtons: Dialog.Close
+
+    EditReminderDialog {
+        id: editReminderDialog
+        onReminderSubmitted: function(title, description, targetTime, recurrence) {
+            if (editReminderDialog.reminderId === "") {
+                root.newReminderRequested(title, description, targetTime, recurrence)
+            } else {
+                root.model.updateReminder(editReminderDialog.reminderId, title, description, targetTime, recurrence)
+            }
+        }
+        // Removed updateInputMask calls as they are no longer needed
+
+        function openForNew() {
+            reminderId = ""
+            reminderTitle = ""
+            reminderDescription = ""
+            targetTimeLabel = ""
+            recurrenceToken = "none"
+            open()
+        }
+        
+        function openForEdit(id, title, desc, timeLabel, recToken) {
+            reminderId = id
+            reminderTitle = title
+            reminderDescription = desc
+            targetTimeLabel = timeLabel
+            recurrenceToken = recToken
+            open()
+        }
+    }
 
     header: Rectangle {
         color: DesignTokens.surface
@@ -97,6 +109,17 @@ Dialog {
                 var dy = mouse.y - lastMousePos.y
                 root.x += dx
                 root.y += dy
+            }
+        }
+        
+        RowLayout {
+            anchors.right: parent.right
+            anchors.verticalCenter: parent.verticalCenter
+            anchors.rightMargin: DesignTokens.space2
+            
+            ToolButton {
+                text: "✕"
+                onClicked: root.visible = false
             }
         }
     }
@@ -156,21 +179,7 @@ Dialog {
 
             Button {
                 text: "+ Yeni"
-                onClicked: {
-                    var dialog = Qt.createComponent("EditReminderDialog.qml").createObject(root)
-                    root.activeDialog = dialog
-                    dialog.closed.connect(function() {
-                        root.activeDialog = null
-                        if (typeof rootWindow !== "undefined") rootWindow.updateInputMask()
-                    })
-                    dialog.opened.connect(function() {
-                        if (typeof rootWindow !== "undefined") rootWindow.updateInputMask()
-                    })
-                    dialog.reminderSubmitted.connect(function(title, desc, time, rec) {
-                        root.newReminderRequested(title, desc, time, rec)
-                    })
-                    dialog.open()
-                }
+                onClicked: editReminderDialog.openForNew()
             }
         }
 
@@ -202,27 +211,8 @@ Dialog {
                     onDeleteRequested: root.reminderDeleteRequested(reminderId)
                     onToggleEnabledRequested: root.model.toggleEnabled(reminderId)
                     
-                    onEditRequested: {
-                        var dialog = Qt.createComponent("EditReminderDialog.qml").createObject(root, {
-                            "reminderId": reminderId,
-                            "reminderTitle": reminderTitle,
-                            "reminderDescription": reminderDescription,
-                            "targetTimeLabel": targetTimeLabel,
-                            "recurrenceToken": model.recurrenceToken
-                        })
-                        root.activeDialog = dialog
-                        dialog.closed.connect(function() {
-                            root.activeDialog = null
-                            if (typeof rootWindow !== "undefined") rootWindow.updateInputMask()
-                        })
-                        dialog.opened.connect(function() {
-                            if (typeof rootWindow !== "undefined") rootWindow.updateInputMask()
-                        })
-                        dialog.reminderSubmitted.connect(function(title, desc, time, rec) {
-                            root.model.updateReminder(dialog.reminderId, title, desc, time, rec)
-                        })
-                        dialog.open()
-                    }
+                    onEditRequested: editReminderDialog.openForEdit(
+                        reminderId, reminderTitle, reminderDescription, targetTimeLabel, model.recurrenceToken)
                 }
 
                 PlaceholderView {

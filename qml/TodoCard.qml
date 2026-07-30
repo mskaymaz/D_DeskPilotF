@@ -50,6 +50,7 @@ Rectangle {
     signal completionToggled(bool completed)
     signal trashToggled(bool trashed)
     signal deleteRequested()
+    signal subtaskToggled(string taskId, int subtaskIndex, bool completed)
 
     implicitHeight: Math.max(contentArea.implicitHeight + DesignTokens.space4 * 2, DesignTokens.scaled(90))
     color: DesignTokens.surface
@@ -254,8 +255,9 @@ Rectangle {
                         
                         CheckBox {
                             checked: modelData.completed
-                            enabled: false // For now, read-only in this view
+                            enabled: !root.taskCompleted && !root.taskCancelled && !root.taskTrashed
                             scale: 0.8
+                            onToggled: root.subtaskToggled(root.taskId, index, checked)
                         }
                         
                         Label {

@@ -368,11 +368,23 @@ Phase 0 is complete when:
 - [ ] "Project" or "Category" grouping.
 - [ ] Archiving old tasks.
 - [ ] Quick-add command bar.
+- [ ] Todo UI Redesign: Left vertical color strip with priority text and dynamic status icon (!, hourglass, check).
+- [ ] Todo UI Redesign: Custom priority colors via settings.
+- [ ] Todo UI Redesign: Title and truncated description in center, with tooltip balloon for full text.
+- [ ] Todo UI Redesign: "SÜRESİ GEÇTİ", "TAMAMLANDI", "İPTAL EDİLDİ", "SİLİNDİ" diagonal watermarks.
+- [ ] Todo UI Redesign: Cancelled state grays out the card (50-40% black) and moves it to the bottom.
+- [ ] Todo UI Redesign: Right action buttons (Edit, List, Complete/Restore, Cancel/Delete) with dynamic visibility based on task state and hover tooltips.
+- [ ] Todo UI Redesign: Input fields in Edit Dialog use gray rounded border style.
+- [ ] Todo UI Redesign: Subtask list input with free text formatting (1., 2., -, *) accessible via List icon.
+- [ ] Quick Actions visual redesign: icons displayed horizontally above each module.
+- [ ] Quick Actions icon assets: use dedicated img icons (user will provide filenames).
+- [ ] Quick Actions colored/filled icon style matching reference design.
 
 ### Completion Criteria
 
 - Todo functionality feels professional and comparable to modern standards.
 - Data integrity maintained during complex transitions.
+- Quick Actions icons appear above modules with the reference visual style.
 
 ---
 

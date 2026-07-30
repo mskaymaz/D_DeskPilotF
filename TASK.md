@@ -6,6 +6,17 @@
 - `[ ]` Not started
 - `[!]` Blocked / decision required
 
+## AI Execution Protocol
+
+**Bismillah**: Before modifying any file, the AI must read the `<!-- BISMILLAH CHECKPOINT: ... -->` marker in `STATE.md` (or `TASK.md`) to know the last completed step. The marker contains the phase, task number, and a short description.
+
+**Eko Tek Madde**: When the user invokes **Eko** (or **Eko Tek Madde**), the AI must focus on a single pending item, apply the smallest possible fix, and stop. If additional files are required, the AI must request explicit permission; otherwise it finishes after the single change.
+
+The marker format is:
+```html
+<!-- BISMILLAH CHECKPOINT: Phase X – Task Y – <short description> -->
+```
+
 ## Current Phase: Phase 8 - Reminder V1 Completion (IN PROGRESS)
 
 ## Active Tasks
@@ -165,10 +176,45 @@ Work on one verified task at a time. Do not begin later phases early. Do not mec
 - [29*] Visual customization where appropriate.
 - [30*] TodoModel–SQLite–QML integration.
 
+## Phase 9 — Advanced Todo Features & UI Redesign
+- [ ] Sub-tasks / Checklist support.
+- [ ] Drag-and-drop reordering.
+- [ ] Task tags/labels.
+- [ ] "Project" or "Category" grouping.
+- [ ] Archiving old tasks.
+- [ ] Quick-add command bar.
+- [ ] Todo UI Redesign: Left vertical color strip with priority text and dynamic status icon (!, hourglass, check).
+- [ ] Todo UI Redesign: Custom priority colors via settings.
+- [ ] Todo UI Redesign: Title and truncated description in center, with tooltip balloon for full text.
+- [ ] Todo UI Redesign: "SÜRESİ GEÇTİ", "TAMAMLANDI", "İPTAL EDİLDİ", "SİLİNDİ" diagonal watermarks.
+- [ ] Todo UI Redesign: Cancelled state grays out the card (50-40% black) and moves it to the bottom.
+- [ ] Todo UI Redesign: Right action buttons (Edit, List, Complete/Restore, Cancel/Delete) with dynamic visibility based on task state and hover tooltips.
+- [ ] Todo UI Redesign: Input fields in Edit Dialog use gray rounded border style.
+- [ ] Todo UI Redesign: Subtask list input with free text formatting (1., 2., -, *) accessible via List icon.
+- [ ] Quick Actions visual redesign: icons displayed horizontally above each module.
+- [ ] Quick Actions icon assets: use dedicated img icons (user will provide filenames).
+- [ ] Quick Actions colored/filled icon style matching reference design.
+
+## Multi-Window UI Architecture Refactor
+- [x] Clean up `task.md` status.
+- [x] Refactor `ModuleWindow.qml` to be a standalone `Qt.Tool` frameless window with native dragging and position saving (Created `WidgetWindow.qml`).
+- [x] Convert `QuickActions.qml` to a `ModuleWindow` (Deferred: QuickActions will be embedded into headers in Phase 9 redesign).
+- [x] Convert `ReminderPanel.qml` to a `WidgetWindow`.
+- [x] Convert `TodoPanel.qml` to a `WidgetWindow`.
+- [x] Convert settings popups to standard QML `Window` or `Dialog` objects (Left as popups in Main.qml).
+- [x] Refactor `Main.qml` to act as an invisible controller.
+- [x] Remove `InputMaskHelper` and layout managers (`GroupedLayout.qml`, `FreeLayout.qml`) usage.
+
+## Phase 9 - Advanced Todo Features & UI Redesign
+- [ ] Todo ve Hatırlatıcı panellerinde sol renkli şerit ve öncelik ikonlarını tasarla.
+- [ ] Todo ve Hatırlatıcı panellerinde başlık, açıklama metni için karakter sınırları ve popup balon okuma yapısını tasarla.
+- [ ] Tarih/saat bölümü görsel düzenlemeleri (sağ taraf).
+- [ ] Dinamik aksiyon butonları (Düzenle, Liste/Ayrıntı, Tamamlandı, İptal).
+- [ ] İptal edilen görevlerin (%50 gri, 'İPTAL EDİLDİ' damgası) en alta taşınması.
+- [ ] Ayrıntılı liste (subtasks) ekleme UI kutusu ve metin girişi.
+- [ ] Yeni görev/düzenle penceresindeki input alanlarını gri köşeleri yuvarlatılmış (rounded) şekilde yeniden tasarla.
+
 ## Next Immediate Task
-Missed reminder recovery.
-
-
-
+Wait for user to verify the Multi-Window UI refactor.
 
 

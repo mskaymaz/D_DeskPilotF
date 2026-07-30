@@ -48,6 +48,11 @@ Communicate with the user in Turkish unless explicitly requested otherwise. Defa
 
 ### 14. User-Executed Commands for Builds and Tests
 **CRITICAL AND MANDATORY:** For ANY builds, tests, or extensive local analyses, DO NOT RUN the commands in the background yourself. You MUST provide the exact PowerShell (PS) commands to the user. The user will execute them locally and paste the output/results back into the chat. You MUST STOP and wait for the user's report before proceeding. Any deviation from this rule is strictly prohibited.
+### 15. Strict File Size Limit (Modularity)
+**CRITICAL AND MANDATORY:** No source code file shall normally exceed 400-450 lines. In cases of absolute technical necessity, the maximum hard limit is 700 lines. When a file approaches these limits, it MUST be refactored and split into smaller, single-responsibility components or modules. Do not create "God Objects".
+
+### 16. Global Application and Localization (i18n)
+**CRITICAL AND MANDATORY:** The application architecture MUST natively support a global structure, including multi-language support (TR, EN, Arabic, etc.), Right-To-Left (RTL) layout capabilities, and regional formatting (date/time, currency). All user-facing text must be wrapped in translation functions (e.g., `qsTr()` in Qt/QML) from the beginning. Never hardcode UI text strings.
 
 ## REQUIRED DOCUMENT READING ORDER
 

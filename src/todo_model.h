@@ -55,6 +55,7 @@ public:
     Q_INVOKABLE bool setCancelled(const QString &taskId, bool cancelled);
     Q_INVOKABLE bool setTrashed(const QString &taskId, bool trashed);
     Q_INVOKABLE bool deleteTask(const QString &taskId);
+    Q_INVOKABLE bool toggleSubtask(const QString &taskId, int subtaskIndex, bool completed);
 
     QString searchQuery() const { return m_searchQuery; }
     void setSearchQuery(const QString &query);

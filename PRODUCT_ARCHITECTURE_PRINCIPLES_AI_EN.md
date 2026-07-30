@@ -350,3 +350,28 @@ This document is intentionally written in English so that AI engineering agents 
 Technical identifiers, source-code naming, commit messages, documentation, or AI-agent prompts may use English when appropriate or when separately specified by the user.
 
 The use of English in this document must never be interpreted as a request to switch the normal conversation language from Turkish to English.
+
+---
+
+## 14. Strict Modularity and File Size Limits
+
+Software maintainability, readability, and testability decrease significantly as file size grows. To prevent the creation of "God Objects" or unmanageable monolithic files:
+
+- **Soft Limit:** No source code file should normally exceed **400-450 lines**.
+- **Hard Limit:** In cases of absolute technical necessity (e.g., complex generated UI layouts or very specific algorithms), a file may extend up to **700 lines maximum**.
+- **Enforcement:** When a file approaches these limits, it MUST be refactored. Split the file into smaller, single-responsibility components, modules, or helper classes.
+
+AI engineering agents must treat this as a strict architectural constraint and proactively suggest or perform refactoring when a file crosses the soft limit.
+
+---
+
+## 15. Global Application and Localization (i18n)
+
+Every product must be architected from day one to support a global audience, even if the initial release targets a single language.
+
+- **Multi-language Support:** The architecture must seamlessly support multiple languages (e.g., Turkish, English, Arabic).
+- **No Hardcoded Strings:** All user-facing text strings must be wrapped in translation functions natively supported by the framework (e.g., `qsTr()` in Qt/QML, or `react-i18next` in React). Never hardcode UI text.
+- **RTL Support:** The UI architecture and layout system must support both Left-To-Right (LTR) and Right-To-Left (RTL) reading directions dynamically.
+- **Regional Formatting:** Dates, times, numbers, and currencies must be formatted according to the user's regional settings or locale variables, not fixed string formats.
+
+AI engineering agents must automatically apply translation wrappers to all new UI text during development.

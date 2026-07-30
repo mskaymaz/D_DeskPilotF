@@ -1,10 +1,11 @@
 import QtQuick
 import QtQuick.Controls
 import QtQuick.Layouts
+import QtQuick.Window
 
-Popup {
+Window {
     id: root
-    closePolicy: Popup.NoAutoClose
+    visible: false
 
     property string stencilFontName: ""
     property string digitalFontName: ""
@@ -23,13 +24,16 @@ Popup {
     property bool alertSoundEnabledDraft: true
     property bool silentModeDraft: false
 
-    width: DesignTokens.scaled(480)
-    height: DesignTokens.scaled(700)
-    modal: false
-    focus: true
-    padding: DesignTokens.space5
+    width: DesignTokens.scaled(440)
+    height: DesignTokens.scaled(520)
+    color: "transparent"
+    flags: Qt.Dialog | Qt.FramelessWindowHint | Qt.WindowStaysOnTopHint
 
-    onOpened: {
+    x: Screen.virtualX + Math.round((Screen.desktopAvailableWidth - width) / 2)
+    y: Screen.virtualY + Math.round((Screen.desktopAvailableHeight - height) / 2)
+
+    onVisibleChanged: {
+        if (!visible) return;
         visibleDraft = batteryModel.visible
         showIconDraft = batteryModel.showIcon
         fontIndexDraft = fontIndex()
@@ -40,8 +44,9 @@ Popup {
         fullChargeThresholdDraft = batteryModel.fullChargeThreshold
         alertIntervalMinutesDraft = batteryModel.alertIntervalMinutes
         alertSoundEnabledDraft = batteryModel.alertSoundEnabled
-        silentModeDraft = rootWindow.notificationSilentMode
-        if (typeof rootWindow !== "undefined") rootWindow.updateInputMask()
+        boldDraft = batteryModel.bold
+        scaleDraft = batteryModel.scale
+        // if (typeof rootWindow !== "undefined") rootWindow.updateInputMask()
     }
 
     function fontIndex() {
@@ -104,15 +109,17 @@ Popup {
         if (typeof rootWindow !== "undefined") rootWindow.scheduleLayoutSettingsSave()
     }
 
-    background: Rectangle {
+    Rectangle {
+        anchors.fill: parent
         color: DesignTokens.surface
         radius: DesignTokens.radiusLarge
         border.color: DesignTokens.border
         border.width: 1
-    }
 
-    contentItem: ColumnLayout {
-        spacing: DesignTokens.space3
+        ColumnLayout {
+            anchors.fill: parent
+            anchors.margins: DesignTokens.space5
+            spacing: DesignTokens.space3
 
         Label {
             text: "Pil ayarları"
@@ -234,7 +241,7 @@ Popup {
 
             Button {
                 text: "İptal"
-                onClicked: root.close()
+                onClicked: root.visible = false
             }
 
             Button {
@@ -246,9 +253,10 @@ Popup {
                 text: "Kaydet"
                 onClicked: {
                     root.applyChanges()
-                    root.close()
+                    root.visible = false
                 }
             }
         }
     }
+}
 }

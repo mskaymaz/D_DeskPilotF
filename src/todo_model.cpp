@@ -280,6 +280,25 @@ void TodoModel::setSearchQuery(const QString &query)
     }
 }
 
+bool TodoModel::toggleSubtask(const QString &taskId, int subtaskIndex, bool completed)
+{
+    QString errorMessage;
+    auto current = findItem(taskId, &errorMessage);
+    if (!current.has_value()) {
+        return fail(errorMessage.isEmpty() ? QStringLiteral("Todo was not found.") : errorMessage);
+    }
+    TodoItem updated = current.value();
+    if (subtaskIndex < 0 || subtaskIndex >= updated.subtasks.size()) {
+        return fail(QStringLiteral("Subtask index is out of range."));
+    }
+    updated.subtasks[subtaskIndex].completed = completed;
+    updated.updatedAt = QDateTime::currentDateTime();
+    if (!m_repository->save(updated, &errorMessage)) {
+        return fail(errorMessage);
+    }
+    return reload();
+}
+
 void TodoModel::setFilterToday(bool filter)
 {
     if (m_filterToday != filter) {

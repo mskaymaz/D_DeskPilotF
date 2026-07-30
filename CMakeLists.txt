@@ -51,6 +51,10 @@ target_sources(DeskPilotC
         src/todo_repository.h
         src/sound_service.h
         src/sound_service.cpp
+        src/settings_io.h
+        src/settings_io.cpp
+        src/app_bootstrap.h
+        src/app_bootstrap.cpp
 )
 
 if(WIN32)
@@ -98,6 +102,11 @@ qt_add_qml_module(DeskPilotC
         qml/Main.qml
         qml/ModuleVisibilityController.qml
         qml/ModuleWindow.qml
+        qml/WidgetWindow.qml
+        qml/ClockWindow.qml
+        qml/DateWindow.qml
+        qml/BatteryWindow.qml
+        qml/QuickActionsWindow.qml
         qml/NewTaskDialog.qml
         qml/NotificationSettingsPopup.qml
         qml/QuickActions.qml
@@ -112,6 +121,10 @@ qt_add_qml_module(DeskPilotC
         qml/ReminderPanel.qml
         qml/ReminderPopup.qml
         qml/DateTimePicker.qml
+        qml/menus/GlobalScaleMenu.qml
+        qml/menus/ClockContextMenu.qml
+        qml/menus/DateContextMenu.qml
+        qml/menus/BatteryContextMenu.qml
     RESOURCES
         ${DESKPILOT_FONT_FILES}
         ${DESKPILOT_IMAGE_FILES}
@@ -166,6 +179,8 @@ if(BUILD_TESTING)
         tests/settings_schema_test.cpp
         src/settings_schema.cpp
         src/settings_schema.h
+        src/settings_io.cpp
+        src/settings_io.h
     )
 
     target_include_directories(SettingsSchemaTest PRIVATE src)

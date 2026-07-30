@@ -34,6 +34,7 @@
 #include "reminder_model.h"
 #include "reminder_scheduler.h"
 #include "tts_service.h"
+#include "app_bootstrap.h"
 
 namespace {
 
@@ -108,37 +109,7 @@ int main(int argc, char *argv[])
     qInfo() << "DeskPilotC settings file:" << settings.fileName();
 
     const auto loadedSettings = DeskPilot::SettingsSchema::load(settings);
-    clockModel.setVisible(loadedSettings.user.clock.visible);
-    clockModel.setShowSeconds(loadedSettings.user.clock.showSeconds);
-    clockModel.setUse24HourFormat(loadedSettings.user.clock.use24HourFormat);
-    clockModel.setFontFamily(loadedSettings.user.clock.fontFamily);
-    clockModel.setFontColor(loadedSettings.user.clock.fontColor);
-    clockModel.setBold(loadedSettings.user.clock.bold);
-    clockModel.setUseEmbeddedFont(loadedSettings.user.clock.useEmbeddedFont);
-    clockModel.setScale(loadedSettings.user.clock.scale);
-    clockModel.setSecondsScale(loadedSettings.user.clock.secondsScale);
-
-    dateModel.setVisible(loadedSettings.user.date.visible);
-    dateModel.setDateFormat(loadedSettings.user.date.dateFormat);
-    dateModel.setShowWeekNumber(loadedSettings.user.date.showWeekNumber);
-    dateModel.setGregorianFirst(loadedSettings.user.date.gregorianFirst);
-    dateModel.setFontFamily(loadedSettings.user.date.fontFamily);
-    dateModel.setFontColor(loadedSettings.user.date.fontColor);
-    dateModel.setBold(loadedSettings.user.date.bold);
-    dateModel.setUseEmbeddedFont(loadedSettings.user.date.useEmbeddedFont);
-    dateModel.setScale(loadedSettings.user.date.scale);
-
-    batteryModel.setVisible(loadedSettings.user.battery.visible);
-    batteryModel.setShowIcon(loadedSettings.user.battery.showIcon);
-    batteryModel.setLowBatteryThreshold(loadedSettings.user.battery.lowBatteryThreshold);
-    batteryModel.setFullChargeThreshold(loadedSettings.user.battery.fullChargeThreshold);
-    batteryModel.setAlertIntervalMinutes(loadedSettings.user.battery.alertIntervalMinutes);
-    batteryModel.setAlertSoundEnabled(loadedSettings.user.battery.alertSoundEnabled);
-    batteryModel.setSilentMode(loadedSettings.user.battery.silentMode);
-    batteryModel.setFontFamily(loadedSettings.user.battery.fontFamily);
-    batteryModel.setFontColor(loadedSettings.user.battery.fontColor);
-    batteryModel.setBold(loadedSettings.user.battery.bold);
-    batteryModel.setScale(loadedSettings.user.battery.scale);
+    DeskPilot::AppBootstrap::applyLoadedSettings(loadedSettings, clockModel, dateModel, batteryModel, startupService);
 
     const bool savedFreeLayout = loadedSettings.device.layout.freeLayoutEnabled;
     const bool savedLayoutLocked = loadedSettings.device.layout.layoutLocked;
@@ -149,8 +120,6 @@ int main(int argc, char *argv[])
     const bool savedAlwaysOnTop = loadedSettings.device.alwaysOnTop;
     const bool savedStartAtLogin = loadedSettings.device.startAtLogin;
     const qreal savedGlobalScale = loadedSettings.user.globalScale;
-    batteryModel.setSilentMode(savedNotifications.silentMode);
-    startupService.setEnabled(savedStartAtLogin);
 
     const QString todoDataDirectory = QStandardPaths::writableLocation(
         QStandardPaths::AppDataLocation);
@@ -257,59 +226,7 @@ int main(int argc, char *argv[])
         }
     };
 
-    QObject::connect(&app, &QCoreApplication::aboutToQuit,
-        []() { qInfo() << "DeskPilotC aboutToQuit: saving settings"; });
-    QObject::connect(&clockModel, &DeskPilot::ClockModel::visibleChanged, saveSettings);
-    QObject::connect(&clockModel, &DeskPilot::ClockModel::showSecondsChanged, saveSettings);
-    QObject::connect(
-        &clockModel, &DeskPilot::ClockModel::use24HourFormatChanged, saveSettings);
-    QObject::connect(&clockModel, &DeskPilot::ClockModel::fontFamilyChanged, saveSettings);
-    QObject::connect(&clockModel, &DeskPilot::ClockModel::fontColorChanged, saveSettings);
-    QObject::connect(&clockModel, &DeskPilot::ClockModel::boldChanged, saveSettings);
-    QObject::connect(
-        &clockModel, &DeskPilot::ClockModel::useEmbeddedFontChanged, saveSettings);
-    QObject::connect(&clockModel, &DeskPilot::ClockModel::scaleChanged, saveSettings);
-    QObject::connect(
-        &clockModel, &DeskPilot::ClockModel::secondsScaleChanged, saveSettings);
-    QObject::connect(&app, &QCoreApplication::aboutToQuit, saveSettings);
-    QObject::connect(&startupService, &DeskPilot::StartupService::enabledChanged, saveSettings);
-    QObject::connect(&dateModel, &DeskPilot::DateModel::visibleChanged, saveSettings);
-    QObject::connect(&dateModel, &DeskPilot::DateModel::dateFormatChanged, saveSettings);
-    QObject::connect(
-        &dateModel, &DeskPilot::DateModel::showWeekNumberChanged, saveSettings);
-    QObject::connect(&dateModel, &DeskPilot::DateModel::dateOrderChanged, saveSettings);
-    QObject::connect(&dateModel, &DeskPilot::DateModel::fontFamilyChanged, saveSettings);
-    QObject::connect(&dateModel, &DeskPilot::DateModel::fontColorChanged, saveSettings);
-    QObject::connect(&dateModel, &DeskPilot::DateModel::boldChanged, saveSettings);
-    QObject::connect(
-        &dateModel, &DeskPilot::DateModel::useEmbeddedFontChanged, saveSettings);
-    QObject::connect(&dateModel, &DeskPilot::DateModel::scaleChanged, saveSettings);
-    QObject::connect(&app, &QCoreApplication::aboutToQuit, saveSettings);
-    QObject::connect(
-        &batteryModel,
-        &DeskPilot::BatteryModel::lowBatteryThresholdChanged,
-        saveSettings);
-    QObject::connect(
-        &batteryModel,
-        &DeskPilot::BatteryModel::fullChargeThresholdChanged,
-        saveSettings);
-    QObject::connect(
-        &batteryModel,
-        &DeskPilot::BatteryModel::alertIntervalChanged,
-        saveSettings);
-    QObject::connect(
-        &batteryModel,
-        &DeskPilot::BatteryModel::alertSoundEnabledChanged,
-        saveSettings);
-    QObject::connect(
-        &batteryModel,
-        &DeskPilot::BatteryModel::silentModeChanged,
-        saveSettings);
-    QObject::connect(&batteryModel, &DeskPilot::BatteryModel::visibleChanged, saveSettings);
-    QObject::connect(&batteryModel, &DeskPilot::BatteryModel::appearanceChanged,
-        saveSettings);
-    QObject::connect(&batteryModel, &DeskPilot::BatteryModel::scaleChanged, saveSettings);
-    QObject::connect(&app, &QCoreApplication::aboutToQuit, saveSettings);
+    DeskPilot::AppBootstrap::connectSaveSignals(app, clockModel, dateModel, batteryModel, startupService, saveSettings);
 
     QObject::connect(
         &clockService,
@@ -377,56 +294,9 @@ int main(int argc, char *argv[])
         window->setProperty("alwaysOnTop", savedAlwaysOnTop);
         window->setProperty("globalScale", savedGlobalScale);
         QMetaObject::invokeMethod(window, "applySavedModulePositions", Qt::QueuedConnection);
-        auto *layoutSaveTimer = new QTimer(&app);
-        layoutSaveTimer->setInterval(250);
-        QObject::connect(layoutSaveTimer, &QTimer::timeout,
-            [window, saveSettings, lastFreeLayout = QVariant(),
-                lastModulePositions = QVariant(), lastQuickActions = QVariant(),
-                lastNotifications = QVariant(),
-                lastAlwaysOnTop = QVariant(),
-                lastGlobalScale = QVariant(),
-                initialized = false]() mutable {
-                const QVariant currentFreeLayout = window->property("freeLayoutEnabled");
-                const QVariant currentModulePositions = window->property("modulePositions");
-                const QVariant currentQuickActions = QVariantMap{
-                    {QStringLiteral("visible"), window->property("quickActionsVisible")},
-                    {QStringLiteral("settings"),
-                     window->property("quickActionsSettingsEnabled")},
-                    {QStringLiteral("reminder"),
-                     window->property("quickActionsReminderEnabled")},
-                    {QStringLiteral("todo"), window->property("quickActionsTodoEnabled")},
-                    {QStringLiteral("iconSize"), window->property("quickActionsIconSize")},
-                    {QStringLiteral("spacing"), window->property("quickActionsSpacing")}};
-                const QVariant currentNotifications = QVariantMap{
-                    {QStringLiteral("visual"), window->property("notificationVisualEnabled")},
-                    {QStringLiteral("sound"), window->property("notificationSoundEnabled")},
-                    {QStringLiteral("tts"), window->property("notificationTtsEnabled")},
-                    {QStringLiteral("cooldown"),
-                     window->property("notificationCooldownMinutes")},
-                    {QStringLiteral("silent"), window->property("notificationSilentMode")}};
-                const QVariant currentAlwaysOnTop = window->property("alwaysOnTop");
-                const QVariant currentGlobalScale = window->property("globalScale");
-                if (initialized && currentFreeLayout == lastFreeLayout
-                    && currentModulePositions == lastModulePositions
-                    && currentQuickActions == lastQuickActions
-                    && currentNotifications == lastNotifications
-                    && currentAlwaysOnTop == lastAlwaysOnTop
-                    && currentGlobalScale == lastGlobalScale) {
-                    return;
-                }
-                saveSettings();
-                lastFreeLayout = currentFreeLayout;
-                lastModulePositions = currentModulePositions;
-                lastQuickActions = currentQuickActions;
-                lastNotifications = currentNotifications;
-                lastAlwaysOnTop = currentAlwaysOnTop;
-                lastGlobalScale = currentGlobalScale;
-                initialized = true;
-        });
-        layoutSaveTimer->start();
-        QObject::connect(&app, &QCoreApplication::aboutToQuit,
-            saveSettings);
+        DeskPilot::AppBootstrap::setupLayoutPolling(app, window, saveSettings);
         inputMaskController.setWindow(window);
+
     }
 
     // Start scheduler after everything is ready

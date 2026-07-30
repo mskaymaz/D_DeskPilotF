@@ -3,9 +3,9 @@ import QtQuick.Controls 2.15
 import QtQuick.Layouts
 import Qt.labs.settings
 
-Dialog {
+WidgetWindow {
     id: root
-    closePolicy: Popup.NoAutoClose
+    title: "Todo"
 
     property var tasksModel: todoModel
 
@@ -43,6 +43,7 @@ Dialog {
     signal taskCompletionRequested(string taskId, bool completed)
     signal taskTrashRequested(string taskId, bool trashed)
     signal taskDeleteRequested(string taskId)
+    signal subtaskToggleRequested(string taskId, int subtaskIndex, bool completed)
 
     onNewTaskRequested: root.tasksModel.createTask(title, description, plannedTime, priority)
     onTaskEditRequested: {
@@ -62,27 +63,12 @@ Dialog {
         }
     }
     onTaskCompletionRequested: root.tasksModel.setCompleted(taskId, completed)
+    onSubtaskToggleRequested: root.tasksModel.toggleSubtask(taskId, subtaskIndex, completed)
     onTaskTrashRequested: root.tasksModel.setTrashed(taskId, trashed)
     onTaskDeleteRequested: root.tasksModel.deleteTask(taskId)
 
-    Settings {
-        id: panelSettings
-        category: "TodoPanelPosition"
-        property real savedX: -1
-        property real savedY: -1
-    }
-
-    x: panelSettings.savedX === -1 ? (parent ? Math.round((parent.width - width) / 2) : 0) : panelSettings.savedX
-    y: panelSettings.savedY === -1 ? (parent ? Math.round((parent.height - height) / 2) : 0) : panelSettings.savedY
-
-    onXChanged: if (visible) panelSettings.savedX = x
-    onYChanged: if (visible) panelSettings.savedY = y
-
-    title: "Todo"
-    modal: false
     width: DesignTokens.scaled(520)
     height: DesignTokens.scaled(400)
-    standardButtons: Dialog.Close
 
     header: Rectangle {
         color: DesignTokens.surface
@@ -113,6 +99,17 @@ Dialog {
                 var dy = mouse.y - lastMousePos.y
                 root.x += dx
                 root.y += dy
+            }
+        }
+        
+        RowLayout {
+            anchors.right: parent.right
+            anchors.verticalCenter: parent.verticalCenter
+            anchors.rightMargin: DesignTokens.space2
+            
+            ToolButton {
+                text: "✕"
+                onClicked: root.visible = false
             }
         }
     }
@@ -158,8 +155,6 @@ Dialog {
     NewTaskDialog {
         id: newTaskDialog
         onTaskSubmitted: root.newTaskRequested(title, description, plannedTime, priority)
-        onOpened: if (typeof rootWindow !== "undefined") rootWindow.updateInputMask()
-        onClosed: if (typeof rootWindow !== "undefined") rootWindow.updateInputMask()
     }
 
     EditTaskDialog {
@@ -167,8 +162,6 @@ Dialog {
         onTaskSubmitted: root.taskEditRequested(
             editTaskDialog.taskId, title, description, plannedTime,
             priority, completed, cancelled)
-        onOpened: if (typeof rootWindow !== "undefined") rootWindow.updateInputMask()
-        onClosed: if (typeof rootWindow !== "undefined") rootWindow.updateInputMask()
     }
 
     Connections {
@@ -176,15 +169,17 @@ Dialog {
         ignoreUnknownSignals: true
     }
 
-    background: Rectangle {
+    Rectangle {
+        anchors.fill: parent
         color: DesignTokens.surface
         radius: DesignTokens.radiusLarge
         border.color: DesignTokens.border
         border.width: 1
-    }
 
-    contentItem: ColumnLayout {
-        spacing: DesignTokens.space3
+        ColumnLayout {
+            anchors.fill: parent
+            anchors.margins: DesignTokens.space3
+            spacing: DesignTokens.space3
 
         RowLayout {
             Layout.fillWidth: true
@@ -334,6 +329,7 @@ Dialog {
                         onCompletionToggled: root.taskCompletionRequested(taskId, completed)
                         onTrashToggled: root.taskTrashRequested(taskId, trashed)
                         onDeleteRequested: root.taskDeleteRequested(taskId)
+                        onSubtaskToggled: root.subtaskToggleRequested(taskId, subtaskIndex, completed)
                         onEditRequested: editTaskDialog.openForTask(
                             taskId, title, description, plannedTime, priority,
                             taskCompleted, taskCancelled)
@@ -351,5 +347,6 @@ Dialog {
             Layout.fillWidth: true
             Layout.fillHeight: true
         }
+    }
     }
 }
