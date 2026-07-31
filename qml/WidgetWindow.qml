@@ -33,7 +33,9 @@ ApplicationWindow {
     onYChanged: if (visible) winSettings.winY = y
 
     property bool alwaysOnTop: true
+    property bool layoutLocked: false
     signal rightClicked()
+    signal windowDragged(real dx, real dy)
 
     flags: Qt.FramelessWindowHint | Qt.Tool | (alwaysOnTop ? Qt.WindowStaysOnTopHint : 0)
     color: "transparent"

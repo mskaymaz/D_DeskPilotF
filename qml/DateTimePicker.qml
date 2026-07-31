@@ -18,10 +18,9 @@ RowLayout {
             return ""
         }
 
-        
         var t = timeField.text.trim()
         if (t === "") t = "00:00"
-        return d + "T" + t + ":00"
+        return d + " " + t
     }
 
     function setDateTime(isoString) {

@@ -4,8 +4,9 @@ import QtQuick.Controls
 WidgetWindow {
     id: root
     title: "Clock"
-    width: Math.max(primaryText.implicitWidth, primaryText.width) + (clockModel.showSeconds ? DesignTokens.space1 + secondsText.width : 0)
-    height: Math.max(primaryText.implicitHeight, secondsText.implicitHeight)
+    property real clockWidth: Math.max(primaryText.implicitWidth, primaryText.width) + (clockModel.showSeconds ? DesignTokens.space1 + secondsText.width : 0)
+    width: Math.max(clockWidth, quickActions.implicitWidth)
+    height: Math.max(primaryText.implicitHeight, secondsText.implicitHeight) + quickActions.implicitHeight + DesignTokens.space1
     visible: clockModel.visible
 
     property string fontFamily: clockModel.useEmbeddedFont ? (clockModel.fontFamily !== "" ? clockModel.fontFamily : "Segoe UI") : (clockModel.fontFamily !== "" ? clockModel.fontFamily : "Segoe UI")
@@ -30,6 +31,7 @@ WidgetWindow {
 
         MouseArea {
             anchors.fill: parent
+            enabled: !root.layoutLocked
             acceptedButtons: Qt.LeftButton | Qt.RightButton
             property point lastMousePos
             onPressed: (mouse) => {
@@ -43,6 +45,7 @@ WidgetWindow {
                     var dy = mouse.y - lastMousePos.y
                     root.x += dx
                     root.y += dy
+                    root.windowDragged(dx, dy)
                 }
             }
             onClicked: (mouse) => {
@@ -56,32 +59,46 @@ WidgetWindow {
             }
         }
 
-        BaseText {
-            id: primaryText
-            anchors.left: parent.left
-            anchors.verticalCenter: parent.verticalCenter
-            text: clockModel.primaryTimeText
-            horizontalAlignment: Text.AlignRight
-            font.family: root.selectedFontFamily()
-            font.pixelSize: DesignTokens.moduleBasePixelSize * clockModel.scale
-            font.bold: clockModel.bold
-            color: clockModel.fontColor
+        Item {
+            id: contentItem
+            width: root.clockWidth
+            height: Math.max(primaryText.implicitHeight, secondsText.implicitHeight)
+            anchors.bottom: parent.bottom
+            anchors.horizontalCenter: parent.horizontalCenter
+
+            BaseText {
+                id: primaryText
+                anchors.left: parent.left
+                anchors.verticalCenter: parent.verticalCenter
+                text: clockModel.primaryTimeText
+                horizontalAlignment: Text.AlignRight
+                font.family: root.selectedFontFamily()
+                font.pixelSize: DesignTokens.moduleBasePixelSize * clockModel.scale
+                font.bold: clockModel.bold
+                color: clockModel.fontColor
+            }
+
+            BaseText {
+                id: secondsText
+                anchors.left: primaryText.right
+                anchors.leftMargin: DesignTokens.space1
+                anchors.baseline: primaryText.baseline
+                text: ":" + clockModel.secondsText
+                visible: clockModel.showSeconds
+                font.family: root.selectedFontFamily()
+                font.pixelSize: DesignTokens.moduleBasePixelSize * clockModel.secondsScale
+                font.bold: clockModel.bold
+                color: clockModel.fontColor
+            }
         }
 
-        BaseText {
-            id: secondsText
-            anchors.left: primaryText.right
-            anchors.leftMargin: DesignTokens.space1
-            anchors.baseline: primaryText.baseline
-            text: ":" + clockModel.secondsText
-            visible: clockModel.showSeconds
-            font.family: root.selectedFontFamily()
-            font.pixelSize: DesignTokens.moduleBasePixelSize * clockModel.secondsScale
-            font.bold: clockModel.bold
-            color: clockModel.fontColor
+        QuickActions {
+            id: quickActions
+            anchors.top: parent.top
+            anchors.horizontalCenter: parent.horizontalCenter
+            sourceHovered: hoverHandler.hovered
+            actionsVisible: rootWindow.quickActionsVisible
+            onActionTriggered: (actionKey) => rootWindow.handleQuickAction(actionKey)
         }
-
-        // QuickActions will be redesigned later in Phase 9, but for now we put it inside the window if needed
-        // Or we just let the QuickActions stay in Main.qml
     }
 }

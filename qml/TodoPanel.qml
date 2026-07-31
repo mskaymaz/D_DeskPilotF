@@ -45,10 +45,17 @@ WidgetWindow {
     signal taskDeleteRequested(string taskId)
     signal subtaskToggleRequested(string taskId, int subtaskIndex, bool completed)
 
-    onNewTaskRequested: root.tasksModel.createTask(title, description, plannedTime, priority)
-    onTaskEditRequested: {
-        if (!root.tasksModel.updateTask(
-                taskId, updatedTitle, description, plannedTime, priority)) {
+    onNewTaskRequested: function(title, description, plannedTime, priority) {
+        console.log("QML onNewTaskRequested called with:", title, description, plannedTime, priority)
+        var result = root.tasksModel.createTask(title, description, plannedTime, priority)
+        console.log("createTask result:", result)
+    }
+    onTaskEditRequested: function(taskId, updatedTitle, description, plannedTime, priority, completed, cancelled) {
+        console.log("QML onTaskEditRequested called with:", taskId, updatedTitle, description, plannedTime, priority)
+        var result = root.tasksModel.updateTask(
+                taskId, updatedTitle, description, plannedTime, priority)
+        console.log("updateTask result:", result)
+        if (!result) {
             return
         }
         if (cancelled) {
@@ -62,10 +69,18 @@ WidgetWindow {
             root.tasksModel.setCancelled(taskId, false)
         }
     }
-    onTaskCompletionRequested: root.tasksModel.setCompleted(taskId, completed)
-    onSubtaskToggleRequested: root.tasksModel.toggleSubtask(taskId, subtaskIndex, completed)
-    onTaskTrashRequested: root.tasksModel.setTrashed(taskId, trashed)
-    onTaskDeleteRequested: root.tasksModel.deleteTask(taskId)
+    onTaskCompletionRequested: function(taskId, completed) {
+        root.tasksModel.setCompleted(taskId, completed)
+    }
+    onSubtaskToggleRequested: function(taskId, subtaskIndex, completed) {
+        root.tasksModel.toggleSubtask(taskId, subtaskIndex, completed)
+    }
+    onTaskTrashRequested: function(taskId, trashed) {
+        root.tasksModel.setTrashed(taskId, trashed)
+    }
+    onTaskDeleteRequested: function(taskId) {
+        root.tasksModel.deleteTask(taskId)
+    }
 
     width: DesignTokens.scaled(520)
     height: DesignTokens.scaled(400)
@@ -154,19 +169,26 @@ WidgetWindow {
 
     NewTaskDialog {
         id: newTaskDialog
-        onTaskSubmitted: root.newTaskRequested(title, description, plannedTime, priority)
+        onTaskSubmitted: function(title, description, plannedTime, priority) {
+            root.newTaskRequested(title, description, plannedTime, priority)
+        }
     }
 
     EditTaskDialog {
         id: editTaskDialog
-        onTaskSubmitted: root.taskEditRequested(
-            editTaskDialog.taskId, title, description, plannedTime,
-            priority, completed, cancelled)
+        onTaskSubmitted: function(title, description, plannedTime, priority, completed, cancelled) {
+            root.taskEditRequested(
+                editTaskDialog.taskId, title, description, plannedTime,
+                priority, completed, cancelled)
+        }
     }
 
     Connections {
         target: root.tasksModel
         ignoreUnknownSignals: true
+        function onErrorOccurred(message) {
+            console.error("TodoModel Backend Error:", message)
+        }
     }
 
     Rectangle {
@@ -194,7 +216,7 @@ WidgetWindow {
 
             Button {
                 text: "Yeni görev"
-                onClicked: newTaskDialog.open()
+                onClicked: newTaskDialog.visible = true
             }
         }
 
@@ -209,76 +231,16 @@ WidgetWindow {
                 onTextChanged: root.searchQuery = text
             }
 
-            CheckBox {
-                id: todayField
-                text: "Bugün"
-                checked: root.todayOnly
-                onToggled: {
-                    root.todayOnly = checked
-                    if (checked) {
-                        tomorrowField.checked = false
-                        weekField.checked = false
-                        trashedField.checked = false
-                    }
-                }
-            }
-
-            CheckBox {
-                id: tomorrowField
-                text: "Yarın"
-                checked: root.tomorrowOnly
-                onToggled: {
-                    root.tomorrowOnly = checked
-                    if (checked) {
-                        todayField.checked = false
-                        weekField.checked = false
-                        trashedField.checked = false
-                    }
-                }
-            }
-
-            CheckBox {
-                id: weekField
-                text: "Bu hafta"
-                checked: root.weekOnly
-                onToggled: {
-                    root.weekOnly = checked
-                    if (checked) {
-                        todayField.checked = false
-                        tomorrowField.checked = false
-                        completedField.checked = false
-                        trashedField.checked = false
-                    }
-                }
-            }
-
-            CheckBox {
-                id: completedField
-                text: "Tamamlanan"
-                checked: root.completedOnly
-                onToggled: {
-                    root.completedOnly = checked
-                    if (checked) {
-                        todayField.checked = false
-                        tomorrowField.checked = false
-                        weekField.checked = false
-                        trashedField.checked = false
-                    }
-                }
-            }
-            
-            CheckBox {
-                id: trashedField
-                text: "Çöp Kutusu"
-                checked: root.trashedOnly
-                onToggled: {
-                    root.trashedOnly = checked
-                    if (checked) {
-                        todayField.checked = false
-                        tomorrowField.checked = false
-                        weekField.checked = false
-                        completedField.checked = false
-                    }
+            ComboBox {
+                id: filterCombo
+                model: ["Tümü", "Bugün", "Yarın", "Bu hafta", "Tamamlanan", "Çöp Kutusu"]
+                Layout.preferredWidth: DesignTokens.scaled(140)
+                onCurrentIndexChanged: {
+                    root.todayOnly = (currentIndex === 1)
+                    root.tomorrowOnly = (currentIndex === 2)
+                    root.weekOnly = (currentIndex === 3)
+                    root.completedOnly = (currentIndex === 4)
+                    root.trashedOnly = (currentIndex === 5)
                 }
             }
             

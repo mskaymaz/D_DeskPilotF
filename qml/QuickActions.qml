@@ -159,7 +159,7 @@ Item {
                 icon.source: modelData.icon
                 icon.width: root.iconSize
                 icon.height: root.iconSize
-                icon.color: hovered ? DesignTokens.primaryText : DesignTokens.secondaryText
+                icon.color: "transparent"
                 display: AbstractButton.IconOnly
                 ToolTip.visible: hovered
                 ToolTip.text: modelData.label

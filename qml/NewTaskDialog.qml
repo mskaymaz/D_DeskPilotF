@@ -2,21 +2,15 @@ import QtQuick
 import QtQuick.Controls
 import QtQuick.Layouts
 
-Dialog {
+WidgetWindow {
     id: root
-    closePolicy: Popup.NoAutoClose
 
     signal taskSubmitted(
         string title, string description, string plannedTime, string priority)
 
     title: "Yeni görev"
-    modal: true
     width: DesignTokens.scaled(440)
     height: DesignTokens.scaled(520)
-
-    parent: Overlay.overlay
-    x: Math.round((parent.width - width) / 2)
-    y: Math.round((parent.height - height) / 2)
 
     function priorityToken() {
         if (priorityField.currentIndex === 0) {
@@ -50,10 +44,10 @@ Dialog {
     }
 
     function submitTask() {
-        var title = titleField.text.trim()
+        var inputTitle = titleField.text.trim()
         var plannedTime = plannedTimeField.dateTimeString
         errorLabel.visible = false
-        if (title === "") {
+        if (inputTitle === "") {
             titleField.forceActiveFocus()
             return
         }
@@ -63,24 +57,40 @@ Dialog {
             return
         }
         root.taskSubmitted(
-            title, descriptionField.text.trim(), plannedTime, root.priorityToken())
+            inputTitle, descriptionField.text.trim(), plannedTime, root.priorityToken())
         titleField.clear()
         descriptionField.clear()
         plannedTimeField.setDateTime("")
-        root.close()
+        root.visible = false
     }
 
-    onOpened: titleField.forceActiveFocus()
+    onVisibleChanged: {
+        if (visible) {
+            titleField.forceActiveFocus()
+        }
+    }
 
-    background: Rectangle {
+    Rectangle {
+        anchors.fill: parent
         color: DesignTokens.surface
         radius: DesignTokens.radiusLarge
         border.color: DesignTokens.border
         border.width: 1
-    }
 
-    contentItem: ColumnLayout {
-        spacing: DesignTokens.space3
+        MouseArea {
+            anchors.fill: parent
+            property point lastMousePos
+            onPressed: (mouse) => { lastMousePos = Qt.point(mouse.x, mouse.y) }
+            onPositionChanged: (mouse) => {
+                root.x += (mouse.x - lastMousePos.x)
+                root.y += (mouse.y - lastMousePos.y)
+            }
+        }
+
+        ColumnLayout {
+            anchors.fill: parent
+            anchors.margins: DesignTokens.space3
+            spacing: DesignTokens.space3
 
         Label {
             text: "G\u00f6rev ba\u015fl\u0131\u011f\u0131"
@@ -151,7 +161,7 @@ Dialog {
 
             Button {
                 text: "\u0130ptal"
-                onClicked: root.close()
+                onClicked: root.visible = false
             }
 
             Button {
@@ -161,4 +171,5 @@ Dialog {
             }
         }
     }
+}
 }

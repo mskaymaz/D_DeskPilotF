@@ -26,9 +26,12 @@ Rectangle {
             return DesignTokens.success
         }
         if (priorityLabel === "Yüksek" || priorityLabel === "high") {
-            return DesignTokens.accent
+            return DesignTokens.error
         }
-        return DesignTokens.border
+        if (priorityLabel === "Düşük" || priorityLabel === "low") {
+            return DesignTokens.success
+        }
+        return DesignTokens.accent
     }
     readonly property bool taskOverdue: {
         overdueRevision
@@ -133,7 +136,7 @@ Rectangle {
                     Layout.preferredHeight: DesignTokens.iconSmall
                     source: {
                         if (root.taskOverdue && !root.taskCompleted && !root.taskCancelled && !root.taskTrashed) 
-                            return "qrc:/qt/qml/DeskPilot/img/icons/Un1.svg"
+                            return "qrc:/qt/qml/DeskPilot/img/icons/unlem.svg"
                         return "qrc:/qt/qml/DeskPilot/img/icons/hourglass.svg"
                     }
                     fillMode: Image.PreserveAspectFit
@@ -168,16 +171,6 @@ Rectangle {
             RowLayout {
                 Layout.fillWidth: true
                 spacing: DesignTokens.space2
-                
-                CheckBox {
-                    id: completeCheck
-                    checked: root.taskCompleted
-                    enabled: !root.taskCancelled && !root.taskTrashed
-                    onToggled: {
-                        root.taskCompleted = checked
-                        root.completionToggled(checked)
-                    }
-                }
                 
                 Label {
                     text: root.taskTitle
@@ -228,6 +221,16 @@ Rectangle {
                     icon.source: "qrc:/qt/qml/DeskPilot/img/icons/delete_icon.svg"
                     icon.color: DesignTokens.error
                     onClicked: root.deleteRequested()
+                }
+
+                CheckBox {
+                    id: completeCheck
+                    checked: root.taskCompleted
+                    enabled: !root.taskCancelled && !root.taskTrashed
+                    onToggled: {
+                        root.taskCompleted = checked
+                        root.completionToggled(checked)
+                    }
                 }
             }
             

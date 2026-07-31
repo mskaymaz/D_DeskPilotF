@@ -67,7 +67,7 @@ WidgetWindow {
             reminderDescription = ""
             targetTimeLabel = ""
             recurrenceToken = "none"
-            open()
+            visible = true
         }
         
         function openForEdit(id, title, desc, timeLabel, recToken) {
@@ -76,7 +76,7 @@ WidgetWindow {
             reminderDescription = desc
             targetTimeLabel = timeLabel
             recurrenceToken = recToken
-            open()
+            visible = true
         }
     }
 
@@ -124,9 +124,16 @@ WidgetWindow {
         }
     }
 
-    ColumnLayout {
+    Rectangle {
         anchors.fill: parent
-        spacing: DesignTokens.space3
+        color: DesignTokens.surface
+        radius: DesignTokens.radiusLarge
+        border.color: DesignTokens.border
+        border.width: 1
+
+        ColumnLayout {
+            anchors.fill: parent
+            spacing: DesignTokens.space3
 
         RowLayout {
             Layout.fillWidth: true
@@ -221,6 +228,7 @@ WidgetWindow {
                     text: "Gösterilecek hatırlatıcı bulunamadı."
                 }
             }
+        }
         }
     }
     

@@ -2,11 +2,9 @@ import QtQuick
 import QtQuick.Controls
 import QtQuick.Layouts
 
-Dialog {
+WidgetWindow {
     id: root
-    closePolicy: Popup.NoAutoClose
-
-    property string reminderId: ""
+        property string reminderId: ""
     property string reminderTitle: ""
     property string reminderDescription: ""
     property string targetTimeLabel: ""
@@ -16,13 +14,9 @@ Dialog {
         string title, string description, string targetTime, string recurrence)
 
     title: reminderId === "" ? "Yeni Hatırlatıcı" : "Hatırlatıcıyı Düzenle"
-    modal: true
     width: DesignTokens.scaled(440)
     height: DesignTokens.scaled(520)
 
-    parent: Overlay.overlay
-    x: Math.round((parent.width - width) / 2)
-    y: Math.round((parent.height - height) / 2)
 
     header: Rectangle {
         color: DesignTokens.surface
@@ -57,12 +51,14 @@ Dialog {
         }
     }
 
-    onOpened: {
+    onVisibleChanged: {
+        if (visible) {
         if (root.targetTimeLabel !== "") {
             targetTimeField.setDateTime(root.targetTimeLabel)
         }
+        }
     }
-    
+
     function isValidTime(value) {
         if (value === "") return false
         var match = /^(\d{4})-(\d{2})-(\d{2})[T ](\d{2}):(\d{2})(:\d{2})?(\.\d+)?(Z|[+-]\d{2}:\d{2})?$/.exec(value)
@@ -86,14 +82,22 @@ Dialog {
             timeStr,
             recValue
         )
-        root.close()
+        root.visible = false
     }
 
-    ColumnLayout {
+    Rectangle {
         anchors.fill: parent
-        spacing: DesignTokens.space3
+        color: DesignTokens.surface
+        radius: DesignTokens.radiusLarge
+        border.color: DesignTokens.border
+        border.width: 1
 
         ColumnLayout {
+            anchors.fill: parent
+            anchors.margins: DesignTokens.space3
+            spacing: DesignTokens.space3
+
+            ColumnLayout {
             Layout.fillWidth: true
             spacing: DesignTokens.space1
             
@@ -191,7 +195,11 @@ Dialog {
             }
         }
 
-        Item { Layout.fillHeight: true } // spacer
+        Rectangle {
+            Layout.fillWidth: true
+            Layout.fillHeight: true
+            color: "transparent"
+        }
         
         RowLayout {
             spacing: DesignTokens.space2
@@ -199,7 +207,7 @@ Dialog {
 
             Button {
                 text: "İptal"
-                onClicked: root.close()
+                onClicked: root.visible = false
             }
 
             Button {
@@ -208,5 +216,6 @@ Dialog {
                 onClicked: root.submitReminder()
             }
         }
+    }
     }
 }

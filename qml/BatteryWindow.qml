@@ -4,8 +4,9 @@ import QtQuick.Controls
 WidgetWindow {
     id: root
     title: "Battery"
-    width: batteryRow.implicitWidth
-    height: batteryRow.implicitHeight
+    property real batteryWidth: batteryRow.implicitWidth
+    width: Math.max(batteryWidth, quickActions.implicitWidth)
+    height: batteryRow.implicitHeight + quickActions.implicitHeight + DesignTokens.space1
     visible: batteryModel.available && batteryModel.visible
 
     property string fontFamily: batteryModel.useEmbeddedFont ? (batteryModel.fontFamily !== "" ? batteryModel.fontFamily : "Segoe UI") : (batteryModel.fontFamily !== "" ? batteryModel.fontFamily : "Segoe UI")
@@ -23,8 +24,13 @@ WidgetWindow {
     Item {
         anchors.fill: parent
 
+        HoverHandler {
+            id: hoverHandler
+            acceptedDevices: PointerDevice.Mouse | PointerDevice.TouchPad
+        }
         MouseArea {
             anchors.fill: parent
+            enabled: !root.layoutLocked
             acceptedButtons: Qt.LeftButton | Qt.RightButton
             property point lastMousePos
             onPressed: (mouse) => {
@@ -38,6 +44,7 @@ WidgetWindow {
                     var dy = mouse.y - lastMousePos.y
                     root.x += dx
                     root.y += dy
+                    root.windowDragged(dx, dy)
                 }
             }
             onClicked: (mouse) => {
@@ -51,32 +58,49 @@ WidgetWindow {
             }
         }
 
-        Row {
-            id: batteryRow
-            anchors.fill: parent
-            spacing: DesignTokens.space2
-            
-            BatteryIcon {
-                id: batteryIcon
-                visible: batteryModel.showIcon
-                width: DesignTokens.iconMedium * batteryModel.scale
-                height: DesignTokens.iconMedium * batteryModel.scale
-                anchors.verticalCenter: parent.verticalCenter
-                percentage: batteryModel.percentage
-                charging: batteryModel.charging
-                iconColor: batteryModel.fontColor
-            }
-            
-            BaseText {
-                id: batteryText
-                text: batteryModel.percentage + "%"
-                horizontalAlignment: Text.AlignLeft
-                verticalAlignment: Text.AlignTop
-                font.family: root.selectedBatteryFontFamily()
-                font.pixelSize: DesignTokens.moduleBasePixelSize * batteryModel.scale
-                font.bold: batteryModel.bold
-                color: batteryModel.fontColor
-                anchors.verticalCenter: parent.verticalCenter
+        QuickActions {
+            id: quickActions
+            anchors.top: parent.top
+            anchors.horizontalCenter: parent.horizontalCenter
+            sourceHovered: hoverHandler.hovered
+            actionsVisible: rootWindow.quickActionsVisible
+            onActionTriggered: (actionKey) => rootWindow.handleQuickAction(actionKey)
+        }
+
+        Item {
+            id: contentItem
+            width: root.batteryWidth
+            height: batteryRow.implicitHeight
+            anchors.bottom: parent.bottom
+            anchors.horizontalCenter: parent.horizontalCenter
+
+            Row {
+                id: batteryRow
+                anchors.fill: parent
+                spacing: DesignTokens.space2
+                
+                BatteryIcon {
+                    id: batteryIcon
+                    visible: batteryModel.showIcon
+                    width: DesignTokens.iconMedium * batteryModel.scale
+                    height: DesignTokens.iconMedium * batteryModel.scale
+                    anchors.verticalCenter: parent.verticalCenter
+                    percentage: batteryModel.percentage
+                    charging: batteryModel.charging
+                    iconColor: batteryModel.fontColor
+                }
+                
+                BaseText {
+                    id: batteryText
+                    text: batteryModel.percentage + "%"
+                    horizontalAlignment: Text.AlignLeft
+                    verticalAlignment: Text.AlignTop
+                    font.family: root.selectedBatteryFontFamily()
+                    font.pixelSize: DesignTokens.moduleBasePixelSize * batteryModel.scale
+                    font.bold: batteryModel.bold
+                    color: batteryModel.fontColor
+                    anchors.verticalCenter: parent.verticalCenter
+                }
             }
         }
     }

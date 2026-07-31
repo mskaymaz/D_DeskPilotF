@@ -2,11 +2,9 @@ import QtQuick
 import QtQuick.Controls
 import QtQuick.Layouts
 
-Dialog {
+WidgetWindow {
     id: root
-    closePolicy: Popup.NoAutoClose
-
-    property string taskId: ""
+        property string taskId: ""
     property string taskTitle: ""
     property string taskDescription: ""
     property string taskPlannedTime: ""
@@ -18,13 +16,9 @@ Dialog {
         string priority, bool completed, bool cancelled)
 
     title: "Görevi düzenle"
-    modal: true
     width: DesignTokens.scaled(440)
     height: DesignTokens.scaled(540)
 
-    parent: Overlay.overlay
-    x: Math.round((parent.width - width) / 2)
-    y: Math.round((parent.height - height) / 2)
 
     function priorityIndex(value) {
         if (value === "low" || value === "Düşük") {
@@ -68,10 +62,10 @@ Dialog {
     }
 
     function submitTask() {
-        var title = titleField.text.trim()
+        var inputTitle = titleField.text.trim()
         var plannedTime = plannedTimeField.dateTimeString
         errorLabel.visible = false
-        if (title === "") {
+        if (inputTitle === "") {
             titleField.forceActiveFocus()
             return
         }
@@ -81,42 +75,56 @@ Dialog {
             return
         }
         root.taskSubmitted(
-            title, descriptionField.text.trim(), plannedTime,
+            inputTitle, descriptionField.text.trim(), plannedTime,
             root.priorityToken(), completedField.checked, cancelledField.checked)
-        root.close()
+        root.visible = false
     }
 
-    function openForTask(taskId, title, description, plannedTime, priority, completed, cancelled) {
+    function openForTask(taskId, tTitle, description, plannedTime, priority, completed, cancelled) {
         root.taskId = taskId
-        root.taskTitle = title
+        root.taskTitle = tTitle
         root.taskDescription = description
         root.taskPlannedTime = plannedTime
         root.taskPriority = priority
         root.taskCompleted = completed
         root.taskCancelled = cancelled
-        titleField.text = title
+        titleField.text = tTitle
         descriptionField.text = description
         plannedTimeField.setDateTime(plannedTime)
         priorityField.currentIndex = root.priorityIndex(priority)
         completedField.checked = completed
         cancelledField.checked = cancelled
-        root.open()
+        root.visible = true
     }
 
-    onOpened: {
+    onVisibleChanged: {
+        if (visible) {
         titleField.forceActiveFocus()
         titleField.selectAll()
+        }
     }
 
-    background: Rectangle {
+    Rectangle {
+        anchors.fill: parent
         color: DesignTokens.surface
         radius: DesignTokens.radiusLarge
         border.color: DesignTokens.border
         border.width: 1
-    }
 
-    contentItem: ColumnLayout {
-        spacing: DesignTokens.space3
+        MouseArea {
+            anchors.fill: parent
+            property point lastMousePos
+            onPressed: (mouse) => { lastMousePos = Qt.point(mouse.x, mouse.y) }
+            onPositionChanged: (mouse) => {
+                root.x += (mouse.x - lastMousePos.x)
+                root.y += (mouse.y - lastMousePos.y)
+            }
+        }
+
+        ColumnLayout {
+            anchors.fill: parent
+            anchors.margins: DesignTokens.space3
+            spacing: DesignTokens.space3
 
         Label {
             text: "Görev başlığı"
@@ -211,7 +219,7 @@ Dialog {
 
             Button {
                 text: "İptal"
-                onClicked: root.close()
+                onClicked: root.visible = false
             }
 
             Button {
@@ -220,5 +228,6 @@ Dialog {
                 onClicked: root.submitTask()
             }
         }
+    }
     }
 }

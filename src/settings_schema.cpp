@@ -4,9 +4,10 @@
 #include <QFile>
 #include <QFileInfo>
 
+#include "settings_io.h"
+
 namespace DeskPilot {
 
-#include "settings_io.h"
 SettingsSnapshot SettingsSchema::defaults()
 {
     return {};
