@@ -128,9 +128,24 @@ ApplicationWindow {
         technologyFontName: technologyFont.name
     }
 
-    ClockWindow { id: clockWindow; alwaysOnTop: rootWindow.alwaysOnTop; onRightClicked: { console.log("RIGHT CLICKED CLOCK!"); contextMenu.open() } }
-    DateWindow { id: dateWindow; alwaysOnTop: rootWindow.alwaysOnTop; onRightClicked: { console.log("RIGHT CLICKED DATE!"); contextMenu.open() } }
-    BatteryWindow { id: batteryWindow; alwaysOnTop: rootWindow.alwaysOnTop; onRightClicked: { console.log("RIGHT CLICKED BATTERY!"); contextMenu.open() } }
+    ClockWindow { 
+        id: clockWindow
+        alwaysOnTop: rootWindow.alwaysOnTop
+        onRightClicked: { console.log("RIGHT CLICKED CLOCK!"); contextMenu.open() }
+        onWindowDragged: (dx, dy) => rootWindow.handleGroupDrag(clockWindow, dx, dy)
+    }
+    DateWindow { 
+        id: dateWindow
+        alwaysOnTop: rootWindow.alwaysOnTop
+        onRightClicked: { console.log("RIGHT CLICKED DATE!"); contextMenu.open() }
+        onWindowDragged: (dx, dy) => rootWindow.handleGroupDrag(dateWindow, dx, dy)
+    }
+    BatteryWindow { 
+        id: batteryWindow
+        alwaysOnTop: rootWindow.alwaysOnTop
+        onRightClicked: { console.log("RIGHT CLICKED BATTERY!"); contextMenu.open() }
+        onWindowDragged: (dx, dy) => rootWindow.handleGroupDrag(batteryWindow, dx, dy)
+    }
     QuickActionsWindow { id: quickActionsWindow; alwaysOnTop: rootWindow.alwaysOnTop; onRightClicked: { console.log("RIGHT CLICKED QUICKACTIONS!"); contextMenu.open() } }
 
     DateSettingsPopup {
@@ -253,6 +268,18 @@ ApplicationWindow {
         contextMenu.open()
     }
 
+    function handleGroupDrag(sourceWindow, dx, dy) {
+        if (freeLayoutEnabled) return
+
+        var modules = [clockWindow, dateWindow, batteryWindow]
+        for (var i = 0; i < modules.length; i++) {
+            var mod = modules[i]
+            if (mod !== sourceWindow && mod.visible) {
+                mod.x += dx
+                mod.y += dy
+            }
+        }
+    }
 
     // Obsolete layout functions removed
     FontLoader {
