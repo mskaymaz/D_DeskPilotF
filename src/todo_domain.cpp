@@ -34,13 +34,14 @@ QString todoPriorityToken(TodoPriority priority)
 
 std::optional<TodoPriority> todoPriorityFromToken(const QString &token)
 {
-    if (token == QStringLiteral("low")) {
+    const QString t = token.trimmed().toLower();
+    if (t == QStringLiteral("low") || t == QStringLiteral("düşük")) {
         return TodoPriority::Low;
     }
-    if (token == QStringLiteral("normal")) {
+    if (t == QStringLiteral("normal")) {
         return TodoPriority::Normal;
     }
-    if (token == QStringLiteral("high")) {
+    if (t == QStringLiteral("high") || t == QStringLiteral("yüksek")) {
         return TodoPriority::High;
     }
     return std::nullopt;

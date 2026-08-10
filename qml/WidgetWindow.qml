@@ -41,6 +41,18 @@ ApplicationWindow {
     color: "transparent"
     background: null
 
+    function open() {
+        visible = true
+        raise()
+        requestActivate()
+    }
+
+    function show() {
+        visible = true
+        raise()
+        requestActivate()
+    }
+
     onVisibleChanged: {
         if (visible) {
             raise()

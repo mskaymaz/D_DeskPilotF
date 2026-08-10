@@ -407,7 +407,16 @@ std::optional<QDateTime> TodoModel::parsePlannedTime(
     if (trimmed.isEmpty()) {
         return std::nullopt;
     }
-    const QDateTime result = QDateTime::fromString(trimmed, QStringLiteral("yyyy-MM-dd HH:mm"));
+    QDateTime result = QDateTime::fromString(trimmed, QStringLiteral("yyyy-MM-dd HH:mm"));
+    if (!result.isValid()) {
+        result = QDateTime::fromString(trimmed, Qt::ISODate);
+    }
+    if (!result.isValid()) {
+        result = QDateTime::fromString(trimmed, QStringLiteral("yyyy-MM-dd HH:mm:ss"));
+    }
+    if (!result.isValid()) {
+        result = QDateTime::fromString(trimmed, QStringLiteral("yyyy-MM-dd"));
+    }
     if (!result.isValid()) {
         if (errorMessage != nullptr) {
             *errorMessage = QStringLiteral("Todo planned time is invalid.");

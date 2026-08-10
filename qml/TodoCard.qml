@@ -15,6 +15,16 @@ Rectangle {
     property bool taskTrashed: false
     property var taskSubtasks: []
     property int overdueRevision: 0
+    readonly property color priorityColor: {
+        var p = (priorityLabel || "").toString().toLowerCase()
+        if (p === "yüksek" || p === "high") {
+            return DesignTokens.error
+        }
+        if (p === "düşük" || p === "low") {
+            return DesignTokens.success
+        }
+        return DesignTokens.accent
+    }
     readonly property color visualBorderColor: {
         if (taskTrashed) {
             return DesignTokens.secondaryText
@@ -25,13 +35,7 @@ Rectangle {
         if (taskCompleted) {
             return DesignTokens.success
         }
-        if (priorityLabel === "Yüksek" || priorityLabel === "high") {
-            return DesignTokens.error
-        }
-        if (priorityLabel === "Düşük" || priorityLabel === "low") {
-            return DesignTokens.success
-        }
-        return DesignTokens.accent
+        return priorityColor
     }
     readonly property bool taskOverdue: {
         overdueRevision
@@ -55,7 +59,8 @@ Rectangle {
     signal deleteRequested()
     signal subtaskToggled(string taskId, int subtaskIndex, bool completed)
 
-    implicitHeight: Math.max(contentArea.implicitHeight + DesignTokens.space4 * 2, DesignTokens.scaled(90))
+    implicitHeight: DesignTokens.scaled(52)
+    height: DesignTokens.scaled(52)
     color: DesignTokens.surface
     radius: DesignTokens.radiusMedium
     border.color: root.visualBorderColor
@@ -95,12 +100,12 @@ Rectangle {
             if (root.taskOverdue) return "SÜRESİ GEÇTİ"
             return ""
         }
-        font.pixelSize: DesignTokens.headingPixelSize * 1.5
+        font.pixelSize: DesignTokens.headingPixelSize * 1.1
         font.bold: true
         color: root.visualBorderColor
-        opacity: 0.15
+        opacity: 0.12
         anchors.centerIn: parent
-        rotation: -15
+        rotation: -10
         z: 0
     }
 
@@ -108,14 +113,13 @@ Rectangle {
         anchors.fill: parent
         spacing: 0
 
-        // Left Colored Strip
+        // Left Colored Strip (Fixed Height 52px)
         Rectangle {
             id: priorityStrip
             Layout.fillHeight: true
-            Layout.preferredWidth: DesignTokens.scaled(40)
+            Layout.preferredWidth: DesignTokens.scaled(75)
             color: root.visualBorderColor
             
-            // Overlap the left border properly
             radius: DesignTokens.radiusMedium
             Rectangle {
                 anchors.right: parent.right
@@ -125,36 +129,29 @@ Rectangle {
                 color: parent.color
             }
             
-            ColumnLayout {
-                anchors.fill: parent
+            RowLayout {
+                anchors.centerIn: parent
                 spacing: DesignTokens.space1
-                anchors.margins: DesignTokens.space2
+
+                BaseText {
+                    text: root.priorityLabel.toUpperCase()
+                    color: DesignTokens.surface
+                    font.bold: true
+                    font.pixelSize: DesignTokens.captionPixelSize
+                }
                 
                 Image {
-                    Layout.alignment: Qt.AlignTop | Qt.AlignHCenter
                     Layout.preferredWidth: DesignTokens.iconSmall
                     Layout.preferredHeight: DesignTokens.iconSmall
                     source: {
-                        if (root.taskOverdue && !root.taskCompleted && !root.taskCancelled && !root.taskTrashed) 
-                            return "qrc:/qt/qml/DeskPilot/img/icons/unlem.svg"
+                        if (root.taskTrashed) return "qrc:/qt/qml/DeskPilot/img/icons/delete_icon.svg"
+                        if (root.taskCancelled) return "qrc:/qt/qml/DeskPilot/img/icons/unlem.svg"
+                        if (root.taskCompleted) return "qrc:/qt/qml/DeskPilot/img/icons/add_icon.svg"
+                        if (root.taskOverdue) return "qrc:/qt/qml/DeskPilot/img/icons/unlem.svg"
                         return "qrc:/qt/qml/DeskPilot/img/icons/hourglass.svg"
                     }
                     fillMode: Image.PreserveAspectFit
-                    opacity: 0.9
-                }
-                
-                Item {
-                    Layout.fillHeight: true
-                    Layout.fillWidth: true
-                    BaseText {
-                        anchors.centerIn: parent
-                        rotation: -90
-                        text: root.priorityLabel.toUpperCase()
-                        color: DesignTokens.surface
-                        font.bold: true
-                        font.pixelSize: DesignTokens.captionPixelSize
-                        font.letterSpacing: 2
-                    }
+                    opacity: 0.95
                 }
             }
         }
@@ -164,8 +161,11 @@ Rectangle {
             id: contentArea
             Layout.fillWidth: true
             Layout.fillHeight: true
-            Layout.margins: DesignTokens.space4
-            spacing: DesignTokens.space2
+            Layout.leftMargin: DesignTokens.space3
+            Layout.rightMargin: DesignTokens.space3
+            Layout.topMargin: DesignTokens.space1
+            Layout.bottomMargin: DesignTokens.space1
+            spacing: 2
             z: 1
             
             RowLayout {
@@ -175,61 +175,79 @@ Rectangle {
                 Label {
                     text: root.taskTitle
                     color: DesignTokens.primaryText
-                    font.pixelSize: DesignTokens.bodyPixelSize
+                    font.pixelSize: DesignTokens.bodyPixelSize * 0.95
                     font.bold: true
                     elide: Text.ElideRight
                     Layout.fillWidth: true
                     font.strikeout: root.taskCompleted || root.taskCancelled
                 }
-                
-                // Edit Icon
-                ToolButton {
-                    icon.source: "qrc:/qt/qml/DeskPilot/img/icons/duzenle.svg"
-                    icon.color: DesignTokens.secondaryText
-                    enabled: !root.taskTrashed
-                    onClicked: root.editRequested(
-                        root.taskId, root.taskTitle, root.taskDescription,
-                        root.plannedTimeLabel, root.priorityLabel,
-                        root.taskCompleted, root.taskCancelled)
-                }
-                
-                // Trash Icon
-                ToolButton {
-                    visible: !root.taskTrashed
-                    icon.source: "qrc:/qt/qml/DeskPilot/img/icons/delete_icon.svg"
-                    icon.color: DesignTokens.secondaryText
-                    onClicked: {
-                        root.taskTrashed = true
-                        root.trashToggled(true)
-                    }
-                }
-                
-                // Restore Icon
-                ToolButton {
-                    visible: root.taskTrashed
-                    icon.source: "qrc:/qt/qml/DeskPilot/img/icons/add_icon.svg" 
-                    icon.color: DesignTokens.success
-                    onClicked: {
-                        root.taskTrashed = false
-                        root.trashToggled(false)
-                    }
-                }
-                
-                // Permanent Delete Icon
-                ToolButton {
-                    visible: root.taskTrashed
-                    icon.source: "qrc:/qt/qml/DeskPilot/img/icons/delete_icon.svg"
-                    icon.color: DesignTokens.error
-                    onClicked: root.deleteRequested()
-                }
 
+                BaseText {
+                    text: root.plannedTimeLabel !== "" ? root.plannedTimeLabel : ""
+                    color: (root.taskOverdue && !root.taskCompleted && !root.taskCancelled && !root.taskTrashed) ? DesignTokens.warning : DesignTokens.secondaryText
+                    font.pixelSize: DesignTokens.captionPixelSize
+                    font.bold: root.taskOverdue && !root.taskCompleted
+                    visible: text !== ""
+                }
+                
                 CheckBox {
                     id: completeCheck
                     checked: root.taskCompleted
                     enabled: !root.taskCancelled && !root.taskTrashed
+                    ToolTip.visible: hovered
+                    ToolTip.text: checked ? "Tamamlandı olarak işaretlendi" : "Tamamla"
                     onToggled: {
                         root.taskCompleted = checked
                         root.completionToggled(checked)
+                    }
+                }
+
+                ToolButton {
+                    text: "⋮"
+                    font.pixelSize: DesignTokens.headingPixelSize * 0.65
+                    ToolTip.visible: hovered
+                    ToolTip.text: "Seçenekler"
+                    onClicked: cardMenu.open()
+
+                    Menu {
+                        id: cardMenu
+
+                        MenuItem {
+                            text: "✏️ Düzenle"
+                            enabled: !root.taskTrashed
+                            onTriggered: root.editRequested(
+                                root.taskId, root.taskTitle, root.taskDescription,
+                                root.plannedTimeLabel, root.priorityLabel,
+                                root.taskCompleted, root.taskCancelled)
+                        }
+
+                        MenuItem {
+                            text: root.taskCancelled ? "🔄 İptali Kaldır" : "🚫 İptal Et"
+                            enabled: !root.taskTrashed && !root.taskCompleted
+                            onTriggered: {
+                                var newCancelled = !root.taskCancelled
+                                root.taskCancelled = newCancelled
+                                root.editRequested(
+                                    root.taskId, root.taskTitle, root.taskDescription,
+                                    root.plannedTimeLabel, root.priorityLabel,
+                                    root.taskCompleted, newCancelled)
+                            }
+                        }
+
+                        MenuItem {
+                            text: root.taskTrashed ? "♻️ Çöpten Çıkar" : "🗑️ Çöpe Taşı"
+                            onTriggered: {
+                                var newTrashed = !root.taskTrashed
+                                root.taskTrashed = newTrashed
+                                root.trashToggled(newTrashed)
+                            }
+                        }
+
+                        MenuItem {
+                            text: "❌ Kalıcı Olarak Sil"
+                            visible: root.taskTrashed
+                            onTriggered: root.deleteRequested()
+                        }
                     }
                 }
             }
@@ -239,51 +257,17 @@ Rectangle {
                 color: DesignTokens.secondaryText
                 font.pixelSize: DesignTokens.captionPixelSize
                 visible: text !== ""
-                wrapMode: Text.WordWrap
+                elide: Text.ElideRight
                 Layout.fillWidth: true
                 font.strikeout: root.taskCompleted || root.taskCancelled
-            }
-            
-            // Subtasks (Checklist)
-            ColumnLayout {
-                Layout.fillWidth: true
-                spacing: DesignTokens.space1
-                visible: root.taskSubtasks && root.taskSubtasks.length > 0
-                
-                Repeater {
-                    model: root.taskSubtasks
-                    delegate: RowLayout {
-                        Layout.fillWidth: true
-                        spacing: DesignTokens.space2
-                        
-                        CheckBox {
-                            checked: modelData.completed
-                            enabled: !root.taskCompleted && !root.taskCancelled && !root.taskTrashed
-                            scale: 0.8
-                            onToggled: root.subtaskToggled(root.taskId, index, checked)
-                        }
-                        
-                        Label {
-                            text: modelData.title
-                            color: DesignTokens.primaryText
-                            font.pixelSize: DesignTokens.captionPixelSize
-                            font.strikeout: modelData.completed || root.taskCompleted || root.taskCancelled
-                            Layout.fillWidth: true
-                        }
-                    }
-                }
-            }
-            
-            RowLayout {
-                spacing: DesignTokens.space3
-                Layout.fillWidth: true
-                
-                BaseText {
-                    text: root.plannedTimeLabel !== "" ? "Hedef: " + root.plannedTimeLabel : "Tarih belirtilmedi"
-                    color: (root.taskOverdue && !root.taskCompleted && !root.taskCancelled && !root.taskTrashed) ? DesignTokens.warning : DesignTokens.secondaryText
-                    font.pixelSize: DesignTokens.captionPixelSize
-                    font.bold: root.taskOverdue && !root.taskCompleted
-                    Layout.fillWidth: true
+                ToolTip.visible: descMouse.containsMouse && text.length > 30
+                ToolTip.text: text
+
+                MouseArea {
+                    id: descMouse
+                    anchors.fill: parent
+                    hoverEnabled: true
+                    acceptedButtons: Qt.NoButton
                 }
             }
         }
