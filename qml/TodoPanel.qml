@@ -36,24 +36,24 @@ WidgetWindow {
     readonly property bool hasTasks: tasksModel ? tasksModel.count > 0 : false
     readonly property bool hasVisibleTasks: hasTasks
     signal newTaskRequested(
-        string title, string description, string plannedTime, string priority)
+        string title, string description, string plannedTime, string priority, var subtasks)
     signal taskEditRequested(
         string taskId, string updatedTitle, string description,
-        string plannedTime, string priority, bool completed, bool cancelled)
+        string plannedTime, string priority, bool completed, bool cancelled, var subtasks)
     signal taskCompletionRequested(string taskId, bool completed)
     signal taskTrashRequested(string taskId, bool trashed)
     signal taskDeleteRequested(string taskId)
     signal subtaskToggleRequested(string taskId, int subtaskIndex, bool completed)
 
-    onNewTaskRequested: function(title, description, plannedTime, priority) {
+    onNewTaskRequested: function(title, description, plannedTime, priority, subtasks) {
         console.log("QML onNewTaskRequested called with:", title, description, plannedTime, priority)
-        var result = root.tasksModel.createTask(title, description, plannedTime, priority)
+        var result = root.tasksModel.createTask(title, description, plannedTime, priority, subtasks)
         console.log("createTask result:", result)
     }
-    onTaskEditRequested: function(taskId, updatedTitle, description, plannedTime, priority, completed, cancelled) {
+    onTaskEditRequested: function(taskId, updatedTitle, description, plannedTime, priority, completed, cancelled, subtasks) {
         console.log("QML onTaskEditRequested called with:", taskId, updatedTitle, description, plannedTime, priority)
         var result = root.tasksModel.updateTask(
-                taskId, updatedTitle, description, plannedTime, priority)
+                taskId, updatedTitle, description, plannedTime, priority, subtasks)
         console.log("updateTask result:", result)
         if (!result) {
             return
@@ -83,51 +83,7 @@ WidgetWindow {
     }
 
     width: DesignTokens.scaled(520)
-    height: DesignTokens.scaled(400)
-
-    header: Rectangle {
-        color: DesignTokens.surface
-        implicitHeight: DesignTokens.scaled(48)
-        radius: DesignTokens.radiusMedium
-        
-        BaseText {
-            anchors.centerIn: parent
-            text: root.title
-            font.weight: Font.Bold
-            font.pixelSize: DesignTokens.headingPixelSize * 0.55
-            color: DesignTokens.primaryText
-        }
-        
-        Rectangle {
-            width: parent.width
-            height: 1
-            color: DesignTokens.border
-            anchors.bottom: parent.bottom
-        }
-
-        MouseArea {
-            anchors.fill: parent
-            property point lastMousePos
-            onPressed: (mouse) => { lastMousePos = Qt.point(mouse.x, mouse.y) }
-            onPositionChanged: (mouse) => {
-                var dx = mouse.x - lastMousePos.x
-                var dy = mouse.y - lastMousePos.y
-                root.x += dx
-                root.y += dy
-            }
-        }
-        
-        RowLayout {
-            anchors.right: parent.right
-            anchors.verticalCenter: parent.verticalCenter
-            anchors.rightMargin: DesignTokens.space2
-            
-            ToolButton {
-                text: "✕"
-                onClicked: root.visible = false
-            }
-        }
-    }
+    height: DesignTokens.scaled(420)
 
     function taskCount() {
         if (tasksModel === null || tasksModel === undefined) {
@@ -169,17 +125,17 @@ WidgetWindow {
 
     NewTaskDialog {
         id: newTaskDialog
-        onTaskSubmitted: function(title, description, plannedTime, priority) {
-            root.newTaskRequested(title, description, plannedTime, priority)
+        onTaskSubmitted: function(title, description, plannedTime, priority, subtasks) {
+            root.newTaskRequested(title, description, plannedTime, priority, subtasks)
         }
     }
 
     EditTaskDialog {
         id: editTaskDialog
-        onTaskSubmitted: function(title, description, plannedTime, priority, completed, cancelled) {
+        onTaskSubmitted: function(title, description, plannedTime, priority, completed, cancelled, subtasks) {
             root.taskEditRequested(
                 editTaskDialog.taskId, title, description, plannedTime,
-                priority, completed, cancelled)
+                priority, completed, cancelled, subtasks)
         }
     }
 
@@ -198,6 +154,16 @@ WidgetWindow {
         border.color: DesignTokens.border
         border.width: 1
 
+        MouseArea {
+            anchors.fill: parent
+            property point lastMousePos
+            onPressed: (mouse) => { lastMousePos = Qt.point(mouse.x, mouse.y) }
+            onPositionChanged: (mouse) => {
+                root.x += (mouse.x - lastMousePos.x)
+                root.y += (mouse.y - lastMousePos.y)
+            }
+        }
+
         ColumnLayout {
             anchors.fill: parent
             anchors.margins: DesignTokens.space3
@@ -205,18 +171,44 @@ WidgetWindow {
 
         RowLayout {
             Layout.fillWidth: true
+            spacing: DesignTokens.scaled(6)
 
             Label {
-                text: "G\u00f6revler"
+                text: "Görevler"
                 color: DesignTokens.primaryText
-                font.pixelSize: DesignTokens.headingPixelSize * 0.55
+                font.pointSize: 19
                 font.bold: true
                 Layout.fillWidth: true
             }
 
             Button {
-                text: "Yeni görev"
+                id: newTaskBtn
+                text: "Yeni Görev"
+                font.pointSize: 10
+                font.bold: true
+                implicitHeight: DesignTokens.scaled(26)
+                implicitWidth: DesignTokens.scaled(85)
+                Layout.rightMargin: DesignTokens.scaled(30)
+                background: Rectangle {
+                    color: newTaskBtn.down ? "#2563EB" : (newTaskBtn.hovered ? "#3B82F6" : "#4F46E5")
+                    radius: DesignTokens.scaled(5)
+                }
+                contentItem: Text {
+                    text: newTaskBtn.text
+                    font: newTaskBtn.font
+                    color: "#FFFFFF"
+                    horizontalAlignment: Text.AlignHCenter
+                    verticalAlignment: Text.AlignVCenter
+                }
                 onClicked: newTaskDialog.visible = true
+            }
+
+            ToolButton {
+                text: "✕"
+                font.pixelSize: DesignTokens.scaled(14)
+                implicitWidth: DesignTokens.scaled(28)
+                implicitHeight: DesignTokens.scaled(28)
+                onClicked: root.visible = false
             }
         }
 
@@ -264,37 +256,37 @@ WidgetWindow {
                     model: root.tasksModel
 
                     delegate: TodoCard {
-                        required property string title
-                        required property string description
-                        required property string priority
-                        required property string plannedTime
-                        property bool modelCompleted:
-                            (typeof completed !== "undefined" && completed === true)
-                            || (typeof state !== "undefined" && state === "completed")
-                        property bool modelCancelled:
-                            (typeof cancelled !== "undefined" && cancelled === true)
-                            || (typeof state !== "undefined" && state === "cancelled")
-                        property bool modelTrashed:
-                            (typeof trashed !== "undefined" && trashed === true)
-                            || (typeof state !== "undefined" && state === "trashed")
-                        property var modelSubtasks: typeof subtasks !== "undefined" ? subtasks : []
-
-                        taskTitle: title
-                        taskDescription: description
-                        priorityLabel: priority
-                        plannedTimeLabel: plannedTime
-                        taskCompleted: modelCompleted
-                        taskCancelled: modelCancelled
-                        taskTrashed: modelTrashed
-                        taskSubtasks: modelSubtasks
+                        taskId: model.taskId
+                        taskTitle: model.title
+                        taskDescription: model.description
+                        priorityLabel: model.priority
+                        plannedTimeLabel: model.plannedTime
+                        taskCompleted: (typeof model.completed !== "undefined" && model.completed === true)
+                                       || (typeof model.state !== "undefined" && model.state === "completed")
+                        taskCancelled: (typeof model.cancelled !== "undefined" && model.cancelled === true)
+                                       || (typeof model.state !== "undefined" && model.state === "cancelled")
+                        taskTrashed: (typeof model.trashed !== "undefined" && model.trashed === true)
+                                     || (typeof model.state !== "undefined" && model.state === "trashed")
+                        taskSubtasks: typeof model.subtasks !== "undefined" ? model.subtasks : []
                         Layout.fillWidth: true
-                        onCompletionToggled: root.taskCompletionRequested(taskId, completed)
-                        onTrashToggled: root.taskTrashRequested(taskId, trashed)
-                        onDeleteRequested: root.taskDeleteRequested(taskId)
-                        onSubtaskToggled: root.subtaskToggleRequested(taskId, subtaskIndex, completed)
-                        onEditRequested: editTaskDialog.openForTask(
-                            taskId, title, description, plannedTime, priority,
-                            taskCompleted, taskCancelled)
+
+                        onCompletionToggled: (completed) => root.taskCompletionRequested(model.taskId, completed)
+                        onTrashToggled: (trashed) => root.taskTrashRequested(model.taskId, trashed)
+                        onDeleteRequested: () => root.taskDeleteRequested(model.taskId)
+                        onSubtasksClicked: (tId, tTitle, desc, pTime, prio, st) => {
+                            panelSubtaskPopup.currentTaskId = tId
+                            panelSubtaskPopup.currentTitle = tTitle
+                            panelSubtaskPopup.currentDescription = desc
+                            panelSubtaskPopup.currentPlannedTime = pTime
+                            panelSubtaskPopup.currentPriority = prio
+                            panelSubtaskPopup.currentSubtasks = st ? JSON.parse(JSON.stringify(st)) : []
+                            panelSubtaskPopup.open()
+                        }
+                        onEditRequested: (tId, tTitle, desc, pTime, prio, comp, canc) => {
+                            editTaskDialog.openForTask(
+                                tId, tTitle, desc, pTime, prio,
+                                comp, canc, model.subtasks || [])
+                        }
                     }
                 }
             }
@@ -310,5 +302,158 @@ WidgetWindow {
             Layout.fillHeight: true
         }
     }
+    }
+
+    Popup {
+        id: panelSubtaskPopup
+        property string currentTaskId: ""
+        property string currentTitle: ""
+        property var currentSubtasks: []
+        property string currentDescription: ""
+        property string currentPlannedTime: ""
+        property string currentPriority: ""
+
+        width: DesignTokens.scaled(290)
+        padding: DesignTokens.scaled(12)
+        parent: Overlay.overlay
+        anchors.centerIn: parent
+        modal: true
+        closePolicy: Popup.CloseOnEscape | Popup.CloseOnPressOutside
+
+        background: Rectangle {
+            color: "#FFFFFF"
+            radius: DesignTokens.radiusLarge
+            border.color: "#CBD5E1"
+            border.width: 1
+        }
+
+        ColumnLayout {
+            anchors.fill: parent
+            spacing: DesignTokens.scaled(6)
+
+            RowLayout {
+                Layout.fillWidth: true
+                Label {
+                    text: qsTr("📋 Alt Görevler")
+                    font.pointSize: 12
+                    font.bold: true
+                    color: DesignTokens.primaryText
+                    Layout.fillWidth: true
+                }
+                ToolButton {
+                    text: "✕"
+                    font.pixelSize: DesignTokens.scaled(11)
+                    implicitWidth: DesignTokens.scaled(22)
+                    implicitHeight: DesignTokens.scaled(22)
+                    onClicked: panelSubtaskPopup.close()
+                }
+            }
+
+            Label {
+                text: panelSubtaskPopup.currentTitle
+                font.pointSize: 11
+                color: DesignTokens.secondaryText
+                elide: Text.ElideRight
+                Layout.fillWidth: true
+            }
+
+            ScrollView {
+                Layout.fillWidth: true
+                Layout.preferredHeight: DesignTokens.scaled(130)
+                clip: true
+
+                ColumnLayout {
+                    width: parent.width
+                    spacing: DesignTokens.scaled(3)
+
+                    Repeater {
+                        model: panelSubtaskPopup.currentSubtasks.length
+                        delegate: RowLayout {
+                            Layout.fillWidth: true
+                            spacing: DesignTokens.space1
+
+                            Text {
+                                text: "•"
+                                font.pixelSize: DesignTokens.scaled(11)
+                                color: DesignTokens.secondaryText
+                            }
+
+                            Text {
+                                text: panelSubtaskPopup.currentSubtasks[index] ? (panelSubtaskPopup.currentSubtasks[index].title || "") : ""
+                                font.pixelSize: DesignTokens.scaled(11)
+                                color: DesignTokens.primaryText
+                                wrapMode: Text.WordWrap
+                                Layout.fillWidth: true
+                            }
+
+                            ToolButton {
+                                text: "✕"
+                                font.pixelSize: DesignTokens.scaled(9)
+                                implicitWidth: DesignTokens.scaled(18)
+                                implicitHeight: DesignTokens.scaled(18)
+                                onClicked: {
+                                    var cur = panelSubtaskPopup.currentSubtasks.slice()
+                                    cur.splice(index, 1)
+                                    panelSubtaskPopup.currentSubtasks = cur
+                                    root.tasksModel.updateTask(
+                                        panelSubtaskPopup.currentTaskId,
+                                        panelSubtaskPopup.currentTitle,
+                                        panelSubtaskPopup.currentDescription,
+                                        panelSubtaskPopup.currentPlannedTime,
+                                        panelSubtaskPopup.currentPriority,
+                                        cur)
+                                }
+                            }
+                        }
+                    }
+
+                    Label {
+                        visible: panelSubtaskPopup.currentSubtasks.length === 0
+                        text: qsTr("Henüz alt görev eklenmemiş.")
+                        font.pointSize: 10
+                        color: DesignTokens.secondaryText
+                    }
+                }
+            }
+
+            RowLayout {
+                Layout.fillWidth: true
+                spacing: DesignTokens.scaled(4)
+
+                TextField {
+                    id: panelNewSubtaskInput
+                    placeholderText: qsTr("Yeni alt görev...")
+                    font.pointSize: 11
+                    Layout.fillWidth: true
+                    onAccepted: panelAddSubtaskBtn.clicked()
+                }
+
+                Button {
+                    id: panelAddSubtaskBtn
+                    text: "+"
+                    font.bold: true
+                    font.pointSize: 11
+                    implicitWidth: DesignTokens.scaled(28)
+                    implicitHeight: DesignTokens.scaled(28)
+                    enabled: panelNewSubtaskInput.text.trim() !== ""
+                    onClicked: {
+                        var txt = panelNewSubtaskInput.text.trim()
+                        if (txt !== "") {
+                            var cur = panelSubtaskPopup.currentSubtasks.slice()
+                            cur.push({ title: txt, completed: false })
+                            panelSubtaskPopup.currentSubtasks = cur
+                            root.tasksModel.updateTask(
+                                panelSubtaskPopup.currentTaskId,
+                                panelSubtaskPopup.currentTitle,
+                                panelSubtaskPopup.currentDescription,
+                                panelSubtaskPopup.currentPlannedTime,
+                                panelSubtaskPopup.currentPriority,
+                                cur)
+                            panelNewSubtaskInput.clear()
+                        }
+                    }
+                }
+            }
+        }
     }
 }

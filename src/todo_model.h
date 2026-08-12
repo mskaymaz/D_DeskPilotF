@@ -47,10 +47,12 @@ public:
     Q_INVOKABLE bool reload();
     Q_INVOKABLE bool createTask(
         const QString &title, const QString &description,
-        const QString &plannedTime, const QString &priorityToken);
+        const QString &plannedTime, const QString &priorityToken,
+        const QVariantList &subtasks = {});
     Q_INVOKABLE bool updateTask(
         const QString &taskId, const QString &title, const QString &description,
-        const QString &plannedTime, const QString &priorityToken);
+        const QString &plannedTime, const QString &priorityToken,
+        const QVariantList &subtasks = {});
     Q_INVOKABLE bool setCompleted(const QString &taskId, bool completed);
     Q_INVOKABLE bool setCancelled(const QString &taskId, bool cancelled);
     Q_INVOKABLE bool setTrashed(const QString &taskId, bool trashed);

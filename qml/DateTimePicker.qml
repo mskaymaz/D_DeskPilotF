@@ -4,7 +4,7 @@ import QtQuick.Layouts
 
 RowLayout {
     id: root
-    spacing: DesignTokens.space2
+    spacing: DesignTokens.scaled(4)
 
     property bool allowEmpty: true
     property bool showDate: true
@@ -12,7 +12,6 @@ RowLayout {
     property string dateTimeString: {
         var d = dateField.text.trim()
         if (!root.showDate) {
-            // If date is hidden, just use today's date so it's a valid timestamp
             d = Qt.formatDate(new Date(), "yyyy-MM-dd")
         } else if (d === "" && root.allowEmpty) {
             return ""
@@ -60,11 +59,11 @@ RowLayout {
         if (isNaN(year) || isNaN(month) || isNaN(day)) return
 
         var d = new Date(year, month - 1, day)
-        if (cursor <= 4) { // Year
+        if (cursor <= 4) {
             d.setFullYear(d.getFullYear() + delta)
-        } else if (cursor > 4 && cursor <= 7) { // Month
+        } else if (cursor > 4 && cursor <= 7) {
             d.setMonth(d.getMonth() + delta)
-        } else { // Day
+        } else {
             d.setDate(d.getDate() + delta)
         }
         
@@ -79,10 +78,10 @@ RowLayout {
         var m = parseInt(parts[1])
         if (isNaN(h) || isNaN(m)) return
 
-        if (cursor <= 2) { // Hour
+        if (cursor <= 2) {
             h = (h + delta) % 24
             if (h < 0) h += 24
-        } else { // Minute
+        } else {
             m = (m + delta) % 60
             if (m < 0) m += 60
         }
@@ -97,18 +96,22 @@ RowLayout {
 
         Button {
             text: "-"
-            width: DesignTokens.scaled(32)
+            implicitWidth: DesignTokens.scaled(20)
+            implicitHeight: DesignTokens.scaled(26)
             padding: 0
+            font.pixelSize: DesignTokens.scaled(12)
             onClicked: root.adjustDate(-1, dateField.cursorPosition)
         }
         
         TextField {
             id: dateField
             placeholderText: "YYYY-MM-DD"
-            font.pixelSize: DesignTokens.bodyPixelSize
+            font.pixelSize: DesignTokens.scaled(13)
             horizontalAlignment: TextInput.AlignHCenter
-            Layout.preferredWidth: DesignTokens.scaled(120)
+            implicitHeight: DesignTokens.scaled(26)
+            Layout.preferredWidth: DesignTokens.scaled(90)
             selectByMouse: true
+            padding: DesignTokens.scaled(2)
             validator: RegularExpressionValidator { regularExpression: /^\d{4}-\d{2}-\d{2}$/ }
 
             Keys.onUpPressed: adjustDate(1, cursorPosition)
@@ -127,8 +130,10 @@ RowLayout {
 
         Button {
             text: "+"
-            width: DesignTokens.scaled(32)
+            implicitWidth: DesignTokens.scaled(20)
+            implicitHeight: DesignTokens.scaled(26)
             padding: 0
+            font.pixelSize: DesignTokens.scaled(12)
             onClicked: root.adjustDate(1, dateField.cursorPosition)
         }
     }
@@ -136,9 +141,12 @@ RowLayout {
     TextField {
         id: timeField
         placeholderText: "SS:dd"
-        font.pixelSize: DesignTokens.bodyPixelSize
-        Layout.preferredWidth: DesignTokens.scaled(70)
+        font.pixelSize: DesignTokens.scaled(13)
+        horizontalAlignment: TextInput.AlignHCenter
+        implicitHeight: DesignTokens.scaled(26)
+        Layout.preferredWidth: DesignTokens.scaled(52)
         selectByMouse: true
+        padding: DesignTokens.scaled(2)
         validator: RegularExpressionValidator { regularExpression: /^\d{2}:\d{2}$/ }
 
         Keys.onUpPressed: adjustTime(1, cursorPosition)

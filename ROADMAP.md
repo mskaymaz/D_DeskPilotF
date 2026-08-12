@@ -308,11 +308,11 @@ Phase 0 is complete when:
 
 ---
 
-## [ ] Phase 8 â€” Reminder V1 Completion
+## [x] Phase 8 — Reminder V1 Completion
 
 **Goal:** Complete the major unfinished functional area inherited from the frozen Python project.
 
-### [ ] Core
+### [x] Core
 
 1. [x] Finalize Reminder model.
 2. [x] SQLite Reminder repository.
@@ -323,7 +323,7 @@ Phase 0 is complete when:
 7. [x] Missed reminder recovery.
 8. [x] Duplicate firing prevention.
 9. [x] Application-restart recovery.
-10. [ ] Enable/disable behavior.
+10. [x] Enable/disable behavior.
 11. [x] Snooze 5 minutes, 10 minutes, 60 minutes.
 12. [x] Remaining-time formatting.
 13. [x] Safe malformed-data handling.
@@ -362,18 +362,18 @@ Phase 0 is complete when:
 
 ### Tasks
 
-- [ ] Sub-tasks / Checklist support.
+- [x] Sub-tasks / Checklist support.
 - [ ] Drag-and-drop reordering.
 - [ ] Task tags/labels.
 - [ ] "Project" or "Category" grouping.
 - [ ] Archiving old tasks.
 - [ ] Quick-add command bar.
-- [ ] Todo UI Redesign: Left vertical color strip with priority text and dynamic status icon (!, hourglass, check).
+- [x] Todo UI Redesign: Left vertical color strip with priority text and dynamic status icon (!, hourglass, check).
 - [ ] Todo UI Redesign: Custom priority colors via settings.
-- [ ] Todo UI Redesign: Title and truncated description in center, with tooltip balloon for full text.
-- [ ] Todo UI Redesign: "SÜRESİ GEÇTİ", "TAMAMLANDI", "İPTAL EDİLDİ", "SİLİNDİ" diagonal watermarks.
-- [ ] Todo UI Redesign: Cancelled state grays out the card (50-40% black) and moves it to the bottom.
-- [ ] Todo UI Redesign: Right action buttons (Edit, List, Complete/Restore, Cancel/Delete) with dynamic visibility based on task state and hover tooltips.
+- [x] Todo UI Redesign: Title and truncated description in center, with tooltip balloon for full text.
+- [x] Todo UI Redesign: "SÜRESİ GEÇTİ", "TAMAMLANDI", "İPTAL EDİLDİ", "SİLİNDİ" diagonal watermarks.
+- [x] Todo UI Redesign: Cancelled state grays out the card (50-40% black) and moves it to the bottom.
+- [x] Todo UI Redesign: Right action buttons (Edit, List, Complete/Restore, Cancel/Delete) with dynamic visibility based on task state and hover tooltips.
 - [ ] Todo UI Redesign: Input fields in Edit Dialog use gray rounded border style.
 - [ ] Todo UI Redesign: Subtask list input with free text formatting (1., 2., -, *) accessible via List icon.
 - [ ] Quick Actions visual redesign: icons displayed horizontally above each module.

@@ -7,12 +7,12 @@
 Private GitHub repository: `mskaymaz/D_DeskPilotC`
 
 ## Current Phase
-**Phase 8 — Reminder V1 Completion**
+**Phase 9 — Advanced Todo Features**
 
-<!-- BISMILLAH CHECKPOINT: Phase 9 – Task 1 – Start Phase 9 advanced Todo features -->
+<!-- BISMILLAH CHECKPOINT: Phase 9 – Sub-tasks/Checklist support completed -->
 
 ## Current Status
-The desktop surface is transparent and panel-free across the primary screen. Visible module regions receive input; all other areas pass through to underlying applications. Free-layout modules remain within the available screen area, while grouped mode moves all modules together. The Clock, Date, and Battery modules are implemented and build-verified. Phase 4 battery work is complete, including efficient polling and unchanged-state suppression. Phase 5 grouped/free startup behavior, independent module positioning, layout locking, inter-module spacing, scale interactions, monitor-bound clamping, the reusable contextual Quick Actions component, the Settings action, the Reminder action, the Todo action, content-aware Quick Actions positioning, stable hover transition, delayed hide behavior, window movement behavior, proportional icon sizing, smooth QML animations, and no-flicker behavior are verified. Phase 6 Settings System is complete; Phase 7 Todo V1 Data and Domain stage, Todo panel/page, Task cards, New Task dialog, and Edit Task dialog are complete.
+Phase 9 Advanced Todo Features is underway. Sub-tasks / Checklist support (backend domain/model, NewTaskDialog subtask list input, EditTaskDialog subtask checklist management, and TodoCard progress badge `☑ done/total`) is complete and verified.
 
 Module settings persistence, including stable layout, placement, and visual settings across close/reopen, is complete for the current scope.
 

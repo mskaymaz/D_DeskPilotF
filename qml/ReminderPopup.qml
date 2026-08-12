@@ -105,17 +105,11 @@ Window {
             
             ColumnLayout {
                 Layout.alignment: Qt.AlignTop | Qt.AlignRight
-                Button {
+                ToolButton {
                     text: "✕"
                     implicitWidth: DesignTokens.scaled(24)
                     implicitHeight: DesignTokens.scaled(24)
-                    background: Item {} // Transparent
-                    contentItem: Text {
-                        text: parent.text
-                        color: DesignTokens.secondaryText
-                        horizontalAlignment: Text.AlignHCenter
-                        verticalAlignment: Text.AlignVCenter
-                    }
+                    font.pixelSize: DesignTokens.captionPixelSize
                     onClicked: {
                         soundService.stopAlarm()
                         root.closedRequested()

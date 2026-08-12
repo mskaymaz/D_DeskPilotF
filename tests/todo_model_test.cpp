@@ -52,8 +52,10 @@ void TodoModelTest::createUpdateAndTransitionRoundTrip()
     QVERIFY(model.setCancelled(taskId, true));
     QVERIFY(model.get(0).value(QStringLiteral("cancelled")).toBool());
     QVERIFY(model.setTrashed(taskId, true));
+    model.setFilterTrashed(true);
     QVERIFY(model.get(0).value(QStringLiteral("trashed")).toBool());
     QVERIFY(model.setTrashed(taskId, false));
+    model.setFilterTrashed(false);
     QVERIFY(!model.get(0).value(QStringLiteral("trashed")).toBool());
 }
 

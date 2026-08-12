@@ -5,6 +5,8 @@ project(D_DeskPilotC VERSION 0.1.0 LANGUAGES CXX)
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
+set(QT_I18N_NO_AUTOMATIC_QT_TRANSLATIONS ON)
+set(QT_I18N_TRANSLATIONS OFF)
 find_package(Qt6 6.11 REQUIRED COMPONENTS Quick Test Sql)
 
 qt_standard_project_setup(REQUIRES 6.11)
@@ -12,6 +14,7 @@ qt_standard_project_setup(REQUIRES 6.11)
 qt_add_executable(DeskPilotC
     src/main.cpp
 )
+set_target_properties(DeskPilotC PROPERTIES OUTPUT_NAME "DeskPilotC")
 
 target_sources(DeskPilotC
     PRIVATE

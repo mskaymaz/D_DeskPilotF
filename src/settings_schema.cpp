@@ -99,19 +99,17 @@ SettingsSnapshot SettingsSchema::load(QSettings &settings)
 
         const QStringList allLegacyKeys = settings.allKeys();
         for (const auto &[legacyGroup, targetSettings] : legacyMappings) {
-            if (SettingsIO::readSchemaVersion(*targetSettings, 0) == 0) {
-                // Target is empty, copy from legacy
-                for (const QString &key : allLegacyKeys) {
-                    if (key.startsWith(legacyGroup + QStringLiteral("/"))) {
-                        targetSettings->setValue(key, settings.value(key));
-                    }
+            for (const QString &key : allLegacyKeys) {
+                if (key.startsWith(legacyGroup + QStringLiteral("/"))) {
+                    targetSettings->setValue(key, settings.value(key));
                 }
-                // Mark as migrated
-                targetSettings->beginGroup(QStringLiteral("meta"));
-                targetSettings->setValue(QStringLiteral("schemaVersion"), SettingsIO::kCurrentSchemaVersion);
-                targetSettings->endGroup();
-                targetSettings->sync();
             }
+        }
+        for (auto *targetSettings : {&clockSettings, &dateSettings, &batterySettings, &layoutSettings, &notificationSettings}) {
+            targetSettings->beginGroup(QStringLiteral("meta"));
+            targetSettings->setValue(QStringLiteral("schemaVersion"), SettingsIO::kCurrentSchemaVersion);
+            targetSettings->endGroup();
+            targetSettings->sync();
         }
         
         // Clear the main settings so we don't migrate again
@@ -119,7 +117,7 @@ SettingsSnapshot SettingsSchema::load(QSettings &settings)
         settings.sync();
     }
 
-    for (auto *s : {&clockSettings, &dateSettings, &batterySettings, &layoutSettings, &notificationSettings}) {
+    for (auto *s : {&settings, &clockSettings, &dateSettings, &batterySettings, &layoutSettings, &notificationSettings}) {
         recoverCorrupted(*s);
         migrate(*s);
     }
@@ -279,10 +277,11 @@ bool SettingsSchema::save(QSettings &settings, const SettingsSnapshot &snapshot)
     QSettings layoutSettings(baseDir + "DeskPilotC_layout.ini", QSettings::IniFormat);
     QSettings notificationSettings(baseDir + "DeskPilotC_notifications.ini", QSettings::IniFormat);
 
-    for (auto *s : {&clockSettings, &dateSettings, &batterySettings, &layoutSettings, &notificationSettings}) {
+    for (auto *s : {&settings, &clockSettings, &dateSettings, &batterySettings, &layoutSettings, &notificationSettings}) {
         s->beginGroup(QStringLiteral("meta"));
         s->setValue(QStringLiteral("schemaVersion"), qMax(1, snapshot.schemaVersion));
         s->endGroup();
+        s->sync();
     }
 
     layoutSettings.beginGroup(QStringLiteral("user/display"));

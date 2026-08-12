@@ -146,9 +146,31 @@ bool TodoModel::reload()
     return true;
 }
 
+static QList<SubTask> parseSubtasksList(const QVariantList &rawList)
+{
+    QList<SubTask> result;
+    for (const auto &var : rawList) {
+        if (var.userType() == QMetaType::QVariantMap) {
+            QVariantMap map = var.toMap();
+            QString title = map.value(QStringLiteral("title")).toString().trimmed();
+            if (!title.isEmpty()) {
+                bool completed = map.value(QStringLiteral("completed")).toBool();
+                result.append(SubTask{title, completed});
+            }
+        } else {
+            QString title = var.toString().trimmed();
+            if (!title.isEmpty()) {
+                result.append(SubTask{title, false});
+            }
+        }
+    }
+    return result;
+}
+
 bool TodoModel::createTask(
     const QString &title, const QString &description,
-    const QString &plannedTime, const QString &priorityToken)
+    const QString &plannedTime, const QString &priorityToken,
+    const QVariantList &subtasks)
 {
     if (m_repository == nullptr) {
         return fail(QStringLiteral("Todo repository is not configured."));
@@ -171,6 +193,7 @@ bool TodoModel::createTask(
     item.description = description.trimmed();
     item.plannedAt = plannedAt;
     item.priority = priority.value();
+    item.subtasks = parseSubtasksList(subtasks);
     item.createdAt = now;
     item.updatedAt = now;
     if (!m_repository->save(item, &errorMessage)) {
@@ -181,7 +204,8 @@ bool TodoModel::createTask(
 
 bool TodoModel::updateTask(
     const QString &taskId, const QString &title, const QString &description,
-    const QString &plannedTime, const QString &priorityToken)
+    const QString &plannedTime, const QString &priorityToken,
+    const QVariantList &subtasks)
 {
     QString errorMessage;
     const auto current = findItem(taskId, &errorMessage);
@@ -202,6 +226,9 @@ bool TodoModel::updateTask(
     updated.description = description.trimmed();
     updated.plannedAt = plannedAt;
     updated.priority = priority.value();
+    if (!subtasks.isEmpty()) {
+        updated.subtasks = parseSubtasksList(subtasks);
+    }
     updated.updatedAt = QDateTime::currentDateTime();
     if (!m_repository->save(updated, &errorMessage)) {
         return fail(errorMessage);
