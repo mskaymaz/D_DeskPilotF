@@ -36,6 +36,10 @@ ApplicationWindow {
     property bool alwaysOnTop: true
     signal layoutSettingsChanged()
 
+    Component.onCompleted: {
+        modulePositionsInitialized = true
+    }
+
     onNotificationSilentModeChanged: batteryModel.silentMode = notificationSilentMode
     onGlobalScaleChanged: DesignTokens.globalScale = globalScale
 

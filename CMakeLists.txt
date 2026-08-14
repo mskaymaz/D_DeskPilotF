@@ -80,6 +80,8 @@ file(GLOB DESKPILOT_FONT_FILES CONFIGURE_DEPENDS
 
 file(GLOB DESKPILOT_IMAGE_FILES CONFIGURE_DEPENDS
     RELATIVE "${CMAKE_CURRENT_SOURCE_DIR}"
+    "${CMAKE_CURRENT_SOURCE_DIR}/img/*.svg"
+    "${CMAKE_CURRENT_SOURCE_DIR}/img/*.png"
     "${CMAKE_CURRENT_SOURCE_DIR}/img/icons/*.svg"
     "${CMAKE_CURRENT_SOURCE_DIR}/img/icons/*.png"
     "${CMAKE_CURRENT_SOURCE_DIR}/img/logos/*.svg"
@@ -113,6 +115,7 @@ qt_add_qml_module(DeskPilotC
         qml/BatteryWindow.qml
         qml/QuickActionsWindow.qml
         qml/NewTaskDialog.qml
+        qml/TagManagementDialog.qml
         qml/NotificationSettingsPopup.qml
         qml/QuickActions.qml
         qml/QuickActionsSettingsPopup.qml

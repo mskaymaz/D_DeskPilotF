@@ -12,7 +12,7 @@ namespace DeskPilot {
 
 namespace {
 
-constexpr int kCurrentSchemaVersion = 2;
+constexpr int kCurrentSchemaVersion = 4;
 
 bool fail(QString *errorMessage, const QString &message)
 {
@@ -113,6 +113,10 @@ std::optional<TodoItem> readItem(const QSqlQuery &query, QString *errorMessage)
         }
     }
 
+    item.position = query.value(12).toInt();
+    const QString tagsStr = query.value(13).toString();
+    item.tagIds = tagsStr.isEmpty() ? QStringList() : tagsStr.split(QStringLiteral(","), Qt::SkipEmptyParts);
+
     if (!item.isValid(errorMessage)) {
         return std::nullopt;
     }
@@ -167,13 +171,13 @@ bool SQLiteTodoRepository::save(const TodoItem &item, QString *errorMessage)
     QSqlQuery query(m_database);
     query.prepare(QStringLiteral(
         "INSERT INTO todo_items (id, title, description, planned_at, priority, state, "
-        "created_at, updated_at, completed_at, cancelled_at, trashed_at, subtasks) "
-        "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?) "
+        "created_at, updated_at, completed_at, cancelled_at, trashed_at, subtasks, position, tags) "
+        "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?) "
         "ON CONFLICT(id) DO UPDATE SET title=excluded.title, description=excluded.description, "
         "planned_at=excluded.planned_at, priority=excluded.priority, state=excluded.state, "
         "created_at=excluded.created_at, updated_at=excluded.updated_at, "
         "completed_at=excluded.completed_at, cancelled_at=excluded.cancelled_at, "
-        "trashed_at=excluded.trashed_at, subtasks=excluded.subtasks"));
+        "trashed_at=excluded.trashed_at, subtasks=excluded.subtasks, position=excluded.position, tags=excluded.tags"));
     query.addBindValue(item.id.toString(QUuid::WithoutBraces));
     query.addBindValue(item.title);
     query.addBindValue(item.description.isNull() ? QStringLiteral("") : item.description);
@@ -203,6 +207,8 @@ bool SQLiteTodoRepository::save(const TodoItem &item, QString *errorMessage)
     }
     const QByteArray subtasksJson = QJsonDocument(subtasksArray).toJson(QJsonDocument::Compact);
     query.addBindValue(QString::fromUtf8(subtasksJson));
+    query.addBindValue(item.position);
+    query.addBindValue(item.tagIds.join(QStringLiteral(",")));
 
     if (!query.exec()) {
         m_database.rollback();
@@ -248,13 +254,14 @@ bool SQLiteTodoRepository::restore(const QUuid &id, const QDateTime &at, QString
 std::optional<TodoItem> SQLiteTodoRepository::find(
     const QUuid &id, QString *errorMessage) const
 {
-    if (id.isNull() || !ensureOpen(errorMessage)) {
+    if (!ensureOpen(errorMessage)) {
         return std::nullopt;
     }
     QSqlQuery query(m_database);
     query.prepare(QStringLiteral(
-        "SELECT id, title, description, planned_at, priority, state, created_at, updated_at, "
-        "completed_at, cancelled_at, trashed_at, subtasks FROM todo_items WHERE id = ?"));
+        "SELECT id, title, description, planned_at, priority, state, created_at, "
+        "updated_at, completed_at, cancelled_at, trashed_at, subtasks, position, tags FROM todo_items "
+        "WHERE id = ?"));
     query.addBindValue(id.toString(QUuid::WithoutBraces));
     if (!query.exec()) {
         fail(errorMessage, databaseError(query));
@@ -275,9 +282,8 @@ QList<TodoItem> SQLiteTodoRepository::list(QString *errorMessage) const
     QSqlQuery query(m_database);
     if (!query.exec(QStringLiteral(
             "SELECT id, title, description, planned_at, priority, state, created_at, "
-            "updated_at, completed_at, cancelled_at, trashed_at, subtasks FROM todo_items "
-            "ORDER BY state ASC, CASE WHEN planned_at IS NULL THEN 1 ELSE 0 END ASC, "
-            "planned_at ASC, priority DESC, created_at ASC, id ASC"))) {
+            "updated_at, completed_at, cancelled_at, trashed_at, subtasks, position, tags FROM todo_items "
+            "ORDER BY state ASC, position ASC, created_at ASC, id ASC"))) {
         fail(errorMessage, databaseError(query));
         return items;
     }
@@ -344,21 +350,76 @@ bool SQLiteTodoRepository::migrateSchema(QString *errorMessage) const
             "id TEXT PRIMARY KEY, title TEXT NOT NULL, description TEXT NOT NULL DEFAULT '', "
             "planned_at TEXT NULL, priority INTEGER NOT NULL, state INTEGER NOT NULL, "
             "created_at TEXT NOT NULL, updated_at TEXT NOT NULL, completed_at TEXT NULL, "
-            "cancelled_at TEXT NULL, trashed_at TEXT NULL, subtasks TEXT NULL)"))) {
+            "cancelled_at TEXT NULL, trashed_at TEXT NULL, subtasks TEXT NULL, "
+            "position INTEGER NOT NULL DEFAULT 0, tags TEXT NULL)"))) {
         m_database.rollback();
         return fail(errorMessage, databaseError(schemaQuery));
     }
-    
-    if (schemaVersion == 1) {
-        QSqlQuery alterQuery(m_database);
-        if (!alterQuery.exec(QStringLiteral("ALTER TABLE todo_items ADD COLUMN subtasks TEXT NULL"))) {
+
+    if (schemaVersion > 0) {
+        if (schemaVersion < 2) {
+            QSqlQuery alterQuery(m_database);
+            if (!alterQuery.exec(QStringLiteral("ALTER TABLE todo_items ADD COLUMN subtasks TEXT NULL"))) {
+                m_database.rollback();
+                return fail(errorMessage, databaseError(alterQuery));
+            }
+        }
+
+        if (schemaVersion < 3) {
+            QSqlQuery alterQuery(m_database);
+            if (!alterQuery.exec(QStringLiteral("ALTER TABLE todo_items ADD COLUMN position INTEGER NOT NULL DEFAULT 0"))) {
+                m_database.rollback();
+                return fail(errorMessage, databaseError(alterQuery));
+            }
+        }
+
+        if (schemaVersion < 4) {
+            QSqlQuery alterQuery(m_database);
+            if (!alterQuery.exec(QStringLiteral("ALTER TABLE todo_items ADD COLUMN tags TEXT NULL"))) {
+                m_database.rollback();
+                return fail(errorMessage, databaseError(alterQuery));
+            }
+        }
+    }
+
+    if (schemaVersion < 4) {
+        QSqlQuery createTagsQuery(m_database);
+        if (!createTagsQuery.exec(QStringLiteral(
+                "CREATE TABLE IF NOT EXISTS tags ("
+                "id TEXT PRIMARY KEY, name TEXT NOT NULL, color TEXT NOT NULL)"))) {
             m_database.rollback();
-            return fail(errorMessage, databaseError(alterQuery));
+            return fail(errorMessage, databaseError(createTagsQuery));
+        }
+
+        QSqlQuery countQuery(m_database);
+        if (countQuery.exec(QStringLiteral("SELECT COUNT(*) FROM tags")) && countQuery.next() && countQuery.value(0).toInt() == 0) {
+            struct DefaultTag {
+                QString name;
+                QString color;
+            };
+            const QList<DefaultTag> defaults = {
+                {QStringLiteral("İş"), QStringLiteral("#3B82F6")},
+                {QStringLiteral("Kişisel"), QStringLiteral("#10B981")},
+                {QStringLiteral("Sosyal"), QStringLiteral("#F59E0B")},
+                {QStringLiteral("Ailevi"), QStringLiteral("#8B5CF6")}
+            };
+
+            QSqlQuery insertQuery(m_database);
+            insertQuery.prepare(QStringLiteral("INSERT INTO tags (id, name, color) VALUES (?, ?, ?)"));
+            for (const auto &dt : defaults) {
+                insertQuery.addBindValue(QUuid::createUuid().toString(QUuid::WithoutBraces));
+                insertQuery.addBindValue(dt.name);
+                insertQuery.addBindValue(dt.color);
+                if (!insertQuery.exec()) {
+                    m_database.rollback();
+                    return fail(errorMessage, databaseError(insertQuery));
+                }
+            }
         }
     }
 
     QSqlQuery versionUpdate(m_database);
-    if (!versionUpdate.exec(QStringLiteral("PRAGMA user_version = 2"))) {
+    if (!versionUpdate.exec(QStringLiteral("PRAGMA user_version = 4"))) {
         m_database.rollback();
         return fail(errorMessage, databaseError(versionUpdate));
     }
@@ -366,6 +427,97 @@ bool SQLiteTodoRepository::migrateSchema(QString *errorMessage) const
         return fail(errorMessage, m_database.lastError().text());
     }
     return true;
+}
+
+bool SQLiteTodoRepository::updatePositions(const QList<QPair<QUuid, int>> &positions, QString *errorMessage)
+{
+    if (!ensureOpen(errorMessage)) {
+        return false;
+    }
+    if (!m_database.transaction()) {
+        return fail(errorMessage, m_database.lastError().text());
+    }
+    QSqlQuery query(m_database);
+    query.prepare(QStringLiteral("UPDATE todo_items SET position = ? WHERE id = ?"));
+    for (const auto &pair : positions) {
+        query.addBindValue(pair.second);
+        query.addBindValue(pair.first.toString(QUuid::WithoutBraces));
+        if (!query.exec()) {
+            m_database.rollback();
+            return fail(errorMessage, databaseError(query));
+        }
+    }
+    if (!m_database.commit()) {
+        return fail(errorMessage, m_database.lastError().text());
+    }
+    return true;
+}
+
+bool SQLiteTodoRepository::saveTag(const Tag &tag, QString *errorMessage)
+{
+    if (!ensureOpen(errorMessage)) {
+        return false;
+    }
+    if (!m_database.transaction()) {
+        return fail(errorMessage, m_database.lastError().text());
+    }
+    QSqlQuery query(m_database);
+    query.prepare(QStringLiteral(
+        "INSERT INTO tags (id, name, color) VALUES (?, ?, ?) "
+        "ON CONFLICT(id) DO UPDATE SET name=excluded.name, color=excluded.color"));
+    query.addBindValue(tag.id.toString(QUuid::WithoutBraces));
+    query.addBindValue(tag.name);
+    query.addBindValue(tag.color);
+    if (!query.exec()) {
+        m_database.rollback();
+        return fail(errorMessage, databaseError(query));
+    }
+    if (!m_database.commit()) {
+        return fail(errorMessage, m_database.lastError().text());
+    }
+    return true;
+}
+
+bool SQLiteTodoRepository::deleteTag(const QUuid &id, QString *errorMessage)
+{
+    if (!ensureOpen(errorMessage)) {
+        return false;
+    }
+    if (!m_database.transaction()) {
+        return fail(errorMessage, m_database.lastError().text());
+    }
+    QSqlQuery query(m_database);
+    query.prepare(QStringLiteral("DELETE FROM tags WHERE id = ?"));
+    query.addBindValue(id.toString(QUuid::WithoutBraces));
+    if (!query.exec()) {
+        m_database.rollback();
+        return fail(errorMessage, databaseError(query));
+    }
+    if (!m_database.commit()) {
+        return fail(errorMessage, m_database.lastError().text());
+    }
+    return true;
+}
+
+QList<Tag> SQLiteTodoRepository::listTags(QString *errorMessage) const
+{
+    QList<Tag> items;
+    if (!ensureOpen(errorMessage)) {
+        return items;
+    }
+    QSqlQuery query(m_database);
+    if (!query.exec(QStringLiteral("SELECT id, name, color FROM tags ORDER BY name ASC"))) {
+        fail(errorMessage, databaseError(query));
+        return items;
+    }
+    while (query.next()) {
+        Tag tag;
+        tag.id = QUuid(query.value(0).toString());
+        tag.name = query.value(1).toString();
+        tag.color = query.value(2).toString();
+        items.append(tag);
+    }
+    return items;
 }
 
 } // namespace DeskPilot

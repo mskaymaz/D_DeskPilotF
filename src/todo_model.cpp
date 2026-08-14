@@ -95,6 +95,8 @@ QVariant TodoModel::data(const QModelIndex &index, int role) const
     }
     case IsOverdueRole:
         return item.isOverdue(QDateTime::currentDateTime());
+    case TagIdsRole:
+        return item.tagIds;
     default:
         return {};
     }
@@ -114,6 +116,7 @@ QHash<int, QByteArray> TodoModel::roleNames() const
         {StateRole, "state"},
         {SubtasksRole, "subtasks"},
         {IsOverdueRole, "isOverdue"},
+        {TagIdsRole, "tagIds"},
     };
 }
 
@@ -142,6 +145,7 @@ bool TodoModel::reload()
     if (!errorMessage.isEmpty()) {
         return fail(errorMessage);
     }
+    reloadTags();
     applyFilters();
     return true;
 }
@@ -170,7 +174,8 @@ static QList<SubTask> parseSubtasksList(const QVariantList &rawList)
 bool TodoModel::createTask(
     const QString &title, const QString &description,
     const QString &plannedTime, const QString &priorityToken,
-    const QVariantList &subtasks)
+    const QVariantList &subtasks,
+    const QStringList &tagIds)
 {
     if (m_repository == nullptr) {
         return fail(QStringLiteral("Todo repository is not configured."));
@@ -194,8 +199,18 @@ bool TodoModel::createTask(
     item.plannedAt = plannedAt;
     item.priority = priority.value();
     item.subtasks = parseSubtasksList(subtasks);
+    item.tagIds = tagIds;
     item.createdAt = now;
     item.updatedAt = now;
+
+    int maxPos = 0;
+    for (const auto &it : m_allItems) {
+        if (it.position > maxPos) {
+            maxPos = it.position;
+        }
+    }
+    item.position = maxPos + 1;
+
     if (!m_repository->save(item, &errorMessage)) {
         return fail(errorMessage);
     }
@@ -205,7 +220,8 @@ bool TodoModel::createTask(
 bool TodoModel::updateTask(
     const QString &taskId, const QString &title, const QString &description,
     const QString &plannedTime, const QString &priorityToken,
-    const QVariantList &subtasks)
+    const QVariantList &subtasks,
+    const QStringList &tagIds)
 {
     QString errorMessage;
     const auto current = findItem(taskId, &errorMessage);
@@ -226,6 +242,7 @@ bool TodoModel::updateTask(
     updated.description = description.trimmed();
     updated.plannedAt = plannedAt;
     updated.priority = priority.value();
+    updated.tagIds = tagIds;
     if (!subtasks.isEmpty()) {
         updated.subtasks = parseSubtasksList(subtasks);
     }
@@ -470,6 +487,127 @@ bool TodoModel::fail(const QString &message)
 {
     emit errorOccurred(message);
     return false;
+}
+
+bool TodoModel::moveTask(int fromIndex, int toIndex)
+{
+    if (fromIndex < 0 || fromIndex >= m_items.size() ||
+        toIndex < 0 || toIndex >= m_items.size() ||
+        fromIndex == toIndex) {
+        return false;
+    }
+
+    int destination = toIndex > fromIndex ? toIndex + 1 : toIndex;
+    beginMoveRows(QModelIndex(), fromIndex, fromIndex, QModelIndex(), destination);
+    m_items.move(fromIndex, toIndex);
+    endMoveRows();
+    return true;
+}
+
+bool TodoModel::persistPositions()
+{
+    if (m_repository == nullptr) {
+        return false;
+    }
+    
+    QList<QPair<QUuid, int>> positions;
+    for (int i = 0; i < m_items.size(); ++i) {
+        m_items[i].position = i;
+        positions.append(qMakePair(m_items[i].id, i));
+    }
+    
+    QString errorMessage;
+    if (!m_repository->updatePositions(positions, &errorMessage)) {
+        return fail(errorMessage);
+    }
+    
+    return reload();
+}
+
+bool TodoModel::addOrUpdateTag(const QString &id, const QString &name, const QString &color)
+{
+    if (m_repository == nullptr) {
+        return fail(QStringLiteral("Todo repository is not configured."));
+    }
+
+    Tag tag;
+    tag.id = id.isEmpty() ? QUuid::createUuid() : QUuid(id);
+    tag.name = name.trimmed();
+    tag.color = color.trimmed();
+
+    QString errorMessage;
+    if (!m_repository->saveTag(tag, &errorMessage)) {
+        return fail(errorMessage);
+    }
+
+    reloadTags();
+    return true;
+}
+
+bool TodoModel::removeTag(const QString &id)
+{
+    if (m_repository == nullptr) {
+        return fail(QStringLiteral("Todo repository is not configured."));
+    }
+
+    QString errorMessage;
+    if (!m_repository->deleteTag(QUuid(id), &errorMessage)) {
+        return fail(errorMessage);
+    }
+
+    bool anyChanged = false;
+    for (auto &item : m_allItems) {
+        if (item.tagIds.contains(id)) {
+            item.tagIds.removeAll(id);
+            m_repository->save(item, &errorMessage);
+            anyChanged = true;
+        }
+    }
+
+    reloadTags();
+    if (anyChanged) {
+        return reload();
+    }
+    return true;
+}
+
+QVariantList TodoModel::getTaskTags(const QStringList &tagIds) const
+{
+    QVariantList result;
+    for (const auto &tagId : tagIds) {
+        for (const auto &tag : m_tags) {
+            if (tag.id.toString(QUuid::WithoutBraces) == tagId) {
+                QVariantMap map;
+                map[QStringLiteral("id")] = tag.id.toString(QUuid::WithoutBraces);
+                map[QStringLiteral("name")] = tag.name;
+                map[QStringLiteral("color")] = tag.color;
+                result.append(map);
+                break;
+            }
+        }
+    }
+    return result;
+}
+
+QVariantList TodoModel::tagsList() const
+{
+    QVariantList result;
+    for (const auto &tag : m_tags) {
+        QVariantMap map;
+        map[QStringLiteral("id")] = tag.id.toString(QUuid::WithoutBraces);
+        map[QStringLiteral("name")] = tag.name;
+        map[QStringLiteral("color")] = tag.color;
+        result.append(map);
+    }
+    return result;
+}
+
+void TodoModel::reloadTags()
+{
+    if (m_repository == nullptr) return;
+    QString errorMessage;
+    m_tags = m_repository->listTags(&errorMessage);
+    emit tagsChanged();
 }
 
 } // namespace DeskPilot

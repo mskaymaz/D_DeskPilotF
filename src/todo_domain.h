@@ -23,6 +23,13 @@ enum class TodoState
     Trashed,
 };
 
+struct Tag final
+{
+    QUuid id;
+    QString name;
+    QString color;
+};
+
 struct SubTask final
 {
     QString title;
@@ -47,6 +54,8 @@ struct TodoItem final
     std::optional<QDateTime> trashedAt;
     
     QList<SubTask> subtasks;
+    int position = 0;
+    QStringList tagIds;
 
     bool isValid(QString *errorMessage = nullptr) const;
     bool isDue(const QDateTime &now) const;

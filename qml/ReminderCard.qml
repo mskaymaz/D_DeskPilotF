@@ -40,7 +40,7 @@ Rectangle {
     // ── Computed: status icon character ──────────────────────────
     readonly property string statusIcon: {
         if (root.reminderState === 1) return "✓"
-        if (root.reminderState === 2) return "⚠"
+        if (root.reminderState === 2) return "!"
         return "⏳"
     }
 
@@ -58,10 +58,9 @@ Rectangle {
     readonly property bool hasNote: root.reminderDescription !== ""
         || (root.recurrenceLabel !== "" && root.recurrenceLabel !== "none")
 
-    // ── Card geometry ─────────────────────────────────────────────
-    implicitHeight: root.hasNote
-        ? DesignTokens.scaled(80)
-        : DesignTokens.scaled(62)
+    // ── Card geometry (60 px) ─────────────────────────────────────
+    implicitHeight: DesignTokens.scaled(60)
+    height: DesignTokens.scaled(60)
     color: "#FFFFFF"
     radius: DesignTokens.radiusMedium
     border.color: "#E5E7EB"
@@ -77,30 +76,18 @@ Rectangle {
             root.targetTimeLabel, root.recurrenceLabel)
     }
 
-    // ── Watermark overlay ─────────────────────────────────────────
-    Text {
-        visible: root.reminderState !== 0
-        text: root.reminderState === 1 ? qsTr("TAMAMLANDI") : qsTr("KAÇIRILDI")
-        font.pixelSize: DesignTokens.scaled(15)
-        font.bold: true
-        color: root.stripColor
-        opacity: 0.12
-        anchors.centerIn: parent
-        rotation: -10
-        z: 2
-    }
-
     // ── Main layout ───────────────────────────────────────────────
-    Row {
+    Item {
         anchors.fill: parent
-        spacing: 0
         z: 1
 
         // ── LEFT STATUS STRIP ─────────────────────────────────────
         Rectangle {
             id: strip
-            width: DesignTokens.scaled(44)
-            height: parent.height
+            anchors.left: parent.left
+            anchors.top: parent.top
+            anchors.bottom: parent.bottom
+            width: DesignTokens.scaled(52)
             color: root.stripColor
             radius: DesignTokens.radiusMedium
 
@@ -111,287 +98,344 @@ Rectangle {
                 color: parent.color
             }
 
-            // Status icon — top-center
-            Text {
-                text: root.statusIcon
-                color: "white"
-                font.pixelSize: DesignTokens.scaled(16)
-                font.bold: true
-                anchors.horizontalCenter: parent.horizontalCenter
-                anchors.top: parent.top
-                anchors.topMargin: DesignTokens.space2
+            // Rotated state text: exactly 9px from the left edge of strip
+            Item {
+                id: labelContainer
+                x: 9
+                y: parent.height - DesignTokens.scaled(6)
+                width: parent.height - DesignTokens.scaled(12)
+                height: DesignTokens.scaled(12)
+                rotation: -90
+                transformOrigin: Item.TopLeft
+
+                Text {
+                    anchors.fill: parent
+                    text: root.stripLabel
+                    color: "white"
+                    font.pixelSize: DesignTokens.scaled(9)
+                    font.bold: true
+                    horizontalAlignment: Text.AlignHCenter
+                    verticalAlignment: Text.AlignVCenter
+                }
             }
 
-            // State label — rotated -90°, centered below icon
-            Text {
-                text: root.stripLabel
-                color: "white"
-                font.pixelSize: DesignTokens.scaled(9)
-                font.bold: true
-                rotation: -90
-                transformOrigin: Item.Center
-                anchors.horizontalCenter: parent.horizontalCenter
-                anchors.verticalCenter: parent.verticalCenter
-                anchors.verticalCenterOffset: DesignTokens.scaled(6)
+            // Status icon: vertically centered on the right side of the strip
+            Item {
+                anchors.right: parent.right
+                anchors.top: parent.top
+                anchors.bottom: parent.bottom
+                width: DesignTokens.scaled(28)
+
+                Image {
+                    visible: root.statusIcon === "!"
+                    anchors.centerIn: parent
+                    anchors.horizontalCenterOffset: -2
+                    source: "qrc:/qt/qml/DeskPilot/img/un11.svg"
+                    width: DesignTokens.scaled(13)
+                    height: DesignTokens.scaled(36)
+                    sourceSize: Qt.size(width, height)
+                    fillMode: Image.PreserveAspectFit
+                }
+
+                Text {
+                    id: iconText
+                    visible: root.statusIcon !== "!"
+                    anchors.centerIn: parent
+                    text: root.statusIcon
+                    color: "white"
+                    font.pixelSize: {
+                        if (root.statusIcon === "✓") return DesignTokens.scaled(26)
+                        return DesignTokens.scaled(24)
+                    }
+                    font.bold: true
+                    transform: Scale {
+                        origin.x: iconText.implicitWidth / 2
+                        origin.y: iconText.implicitHeight / 2
+                        xScale: root.statusIcon === "⏳" ? 0.85 : 1.0
+                    }
+                }
             }
         }
 
-        // ── RIGHT CONTENT ─────────────────────────────────────────
+        // ── RIGHT AREA ────────────────────────────────────────────
         Item {
-            width: parent.width - strip.width
-            height: parent.height
+            id: rightArea
+            anchors.left: strip.right
+            anchors.right: parent.right
+            anchors.top: parent.top
+            anchors.bottom: parent.bottom
 
-            Column {
-                anchors {
-                    left: parent.left;   right: parent.right
-                    verticalCenter: parent.verticalCenter
-                    leftMargin:  DesignTokens.space3
-                    rightMargin: DesignTokens.space2
-                }
-                spacing: DesignTokens.space1
+            // ⋮ Context menu button (far right)
+            ToolButton {
+                id: menuBtn
+                anchors.right: parent.right
+                anchors.rightMargin: DesignTokens.scaled(4)
+                anchors.verticalCenter: parent.verticalCenter
+                text: "⋮"
+                font.pixelSize: DesignTokens.scaled(13)
+                padding: 0
+                implicitWidth:  DesignTokens.scaled(18)
+                implicitHeight: DesignTokens.scaled(18)
+                ToolTip.visible: hovered
+                ToolTip.text: qsTr("Seçenekler")
+                onClicked: reminderMenu.open()
 
-                // ── Row 1: Title | Date | Switch | Menu ───────────
-                Row {
-                    id: titleRow
-                    width: parent.width
-                    spacing: DesignTokens.space1
-
-                    // Title
-                    Text {
-                        width: parent.width
-                               - (root.targetTimeLabel !== "" ? dateBlock.width + parent.spacing : 0)
-                               - (root.reminderState !== 1 ? enableSwitch.width + parent.spacing : 0)
-                               - menuBtn.width - parent.spacing
-                        text: root.reminderTitle
-                        color: "#111827"
-                        font.pixelSize: DesignTokens.scaled(13)
-                        font.bold: true
-                        elide: Text.ElideRight
-                        font.strikeout: root.reminderState === 1
-                        verticalAlignment: Text.AlignVCenter
-                        height: Math.max(implicitHeight, dateBlock.height)
+                Menu {
+                    id: reminderMenu
+                    MenuItem {
+                        text: qsTr("✏️ Düzenle")
+                        onTriggered: root.editRequested(
+                            root.reminderId, root.reminderTitle, root.reminderDescription,
+                            root.targetTimeLabel, root.recurrenceLabel)
                     }
-
-                    // Date block — top-right
-                    Column {
-                        id: dateBlock
-                        visible: root.targetTimeLabel !== ""
-                        spacing: 0
-
-                        Text {
-                            anchors.right: parent.right
-                            text: qsTr("Hatırlatma")
-                            color: "#9CA3AF"
-                            font.pixelSize: DesignTokens.scaled(8)
-                        }
-                        Text {
-                            anchors.right: parent.right
-                            text: root.dateLine
-                            color: root.reminderState === 2 ? "#F97316" : "#111827"
-                            font.pixelSize: DesignTokens.scaled(10)
-                            font.bold: true
-                        }
-                        Text {
-                            anchors.right: parent.right
-                            text: root.timeLine
-                            color: root.reminderState === 2 ? "#F97316" : "#111827"
-                            font.pixelSize: DesignTokens.scaled(10)
-                            font.bold: true
-                            visible: root.timeLine !== ""
-                        }
-                    }
-
-                    // Enable/disable toggle (compact)
-                    Rectangle {
-                        id: enableSwitch
+                    MenuItem {
+                        text: qsTr("✓ Tamamla")
                         visible: root.reminderState !== 1
-                        width:  DesignTokens.scaled(28)
-                        height: DesignTokens.scaled(16)
-                        radius: DesignTokens.scaled(8)
-                        color: root.reminderEnabled ? "#3B82F6" : "#D1D5DB"
-                        anchors.verticalCenter: parent.verticalCenter
-
-                        Rectangle {
-                            x: root.reminderEnabled ? parent.width - width - 2 : 2
-                            y: 2
-                            width:  parent.height - 4
-                            height: parent.height - 4
-                            radius: parent.height - 4
-                            color: "white"
-                            Behavior on x { NumberAnimation { duration: 120 } }
-                        }
-
-                        MouseArea {
-                            anchors.fill: parent
-                            cursorShape: Qt.PointingHandCursor
-                            onClicked: root.toggleEnabledRequested()
-                        }
+                        onTriggered: root.completeRequested()
                     }
-
-                    // ⋮ context menu
-                    ToolButton {
-                        id: menuBtn
-                        text: "⋮"
-                        font.pixelSize: DesignTokens.scaled(14)
-                        padding: 0
-                        implicitWidth:  DesignTokens.scaled(20)
-                        implicitHeight: DesignTokens.scaled(20)
-                        ToolTip.visible: hovered
-                        ToolTip.text: qsTr("Seçenekler")
-                        onClicked: reminderMenu.open()
-
-                        Menu {
-                            id: reminderMenu
-                            MenuItem {
-                                text: qsTr("✏️ Düzenle")
-                                onTriggered: root.editRequested(
-                                    root.reminderId, root.reminderTitle, root.reminderDescription,
-                                    root.targetTimeLabel, root.recurrenceLabel)
-                            }
-                            MenuItem {
-                                text: qsTr("✓ Tamamla")
-                                visible: root.reminderState !== 1
-                                onTriggered: root.completeRequested()
-                            }
-                            MenuItem {
-                                text: qsTr("💤 Ertele 15 dk")
-                                visible: root.reminderState !== 1
-                                onTriggered: root.snoozeRequested(15)
-                            }
-                            MenuItem {
-                                text: qsTr("💤 Ertele 1 saat")
-                                visible: root.reminderState !== 1
-                                onTriggered: root.snoozeRequested(60)
-                            }
-                            MenuItem {
-                                text: qsTr("🗑️ Sil")
-                                onTriggered: root.deleteRequested()
-                            }
-                        }
+                    MenuItem {
+                        text: qsTr("💤 Ertele 15 dk")
+                        visible: root.reminderState !== 1
+                        onTriggered: root.snoozeRequested(15)
+                    }
+                    MenuItem {
+                        text: qsTr("💤 Ertele 1 saat")
+                        visible: root.reminderState !== 1
+                        onTriggered: root.snoozeRequested(60)
+                    }
+                    MenuItem {
+                        text: qsTr("🗑️ Sil")
+                        onTriggered: root.deleteRequested()
                     }
                 }
+            }
 
-                // ── Row 2: Description + Note bubble ─────────────
-                Row {
-                    width: parent.width
-                    spacing: DesignTokens.space1
-                    visible: root.hasNote
+            // Enable/disable switch
+            Rectangle {
+                id: enableSwitch
+                visible: root.reminderState !== 1
+                anchors.right: menuBtn.left
+                anchors.rightMargin: DesignTokens.scaled(4)
+                anchors.verticalCenter: parent.verticalCenter
+                width:  DesignTokens.scaled(28)
+                height: DesignTokens.scaled(16)
+                radius: DesignTokens.scaled(8)
+                color: root.reminderEnabled ? "#3B82F6" : "#D1D5DB"
 
-                    Text {
-                        width: parent.width
-                               - (root.hasNote ? noteBubble.width + parent.spacing : 0)
-                        text: root.reminderDescription !== ""
-                              ? root.reminderDescription
-                              : root.remainingTimeLabel
-                        color: "#6B7280"
-                        font.pixelSize: DesignTokens.scaled(11)
-                        elide: Text.ElideRight
-                        font.strikeout: root.reminderState === 1
-                        visible: text !== ""
+                Rectangle {
+                    x: root.reminderEnabled ? parent.width - width - 2 : 2
+                    y: 2
+                    width:  parent.height - 4
+                    height: parent.height - 4
+                    radius: parent.height - 4
+                    color: "white"
+                    Behavior on x { NumberAnimation { duration: 120 } }
+                }
+
+                MouseArea {
+                    anchors.fill: parent
+                    cursorShape: Qt.PointingHandCursor
+                    onClicked: root.toggleEnabledRequested()
+                }
+            }
+
+            // Date block (8 px before enableSwitch / menuBtn, starts 8 px below top)
+            Column {
+                id: dateBlock
+                visible: root.targetTimeLabel !== ""
+                anchors.right: enableSwitch.visible ? enableSwitch.left : menuBtn.left
+                anchors.rightMargin: DesignTokens.scaled(8)
+                anchors.top: parent.top
+                anchors.topMargin: DesignTokens.scaled(8)
+                spacing: 0
+
+                Text {
+                    anchors.right: parent.right
+                    text: qsTr("Hatırlatma")
+                    color: "#9CA3AF"
+                    font.pixelSize: DesignTokens.scaled(8)
+                }
+                Text {
+                    anchors.right: parent.right
+                    text: root.dateLine
+                    color: root.reminderState === 2 ? "#F97316" : "#111827"
+                    font.pixelSize: DesignTokens.scaled(9)
+                    font.bold: true
+                }
+                Text {
+                    anchors.right: parent.right
+                    text: root.timeLine
+                    color: root.reminderState === 2 ? "#F97316" : "#111827"
+                    font.pixelSize: DesignTokens.scaled(9)
+                    font.bold: true
+                    visible: root.timeLine !== ""
+                }
+            }
+
+            // Boxed container for Title + Description
+            Rectangle {
+                id: textBox
+                anchors.left: parent.left
+                anchors.leftMargin: DesignTokens.scaled(6)
+                anchors.right: dateBlock.visible ? dateBlock.left : (enableSwitch.visible ? enableSwitch.left : menuBtn.left)
+                anchors.rightMargin: DesignTokens.scaled(28)
+                anchors.top: parent.top
+                anchors.bottom: parent.bottom
+                anchors.topMargin: DesignTokens.scaled(4)
+                anchors.bottomMargin: DesignTokens.scaled(4)
+                color: "transparent"
+                radius: DesignTokens.scaled(4)
+                border.color: "#E2E8F0"
+                border.width: 1
+                clip: true
+
+                // Watermark text centered inside textBox (+%20 size, opacity 0.38)
+                Text {
+                    visible: root.reminderState !== 0
+                    text: root.reminderState === 1 ? qsTr("TAMAMLANDI") : qsTr("KAÇIRILDI")
+                    font.pixelSize: DesignTokens.scaled(29)
+                    font.bold: true
+                    color: root.reminderState === 1 ? "#22C55E" : "#64748B"
+                    opacity: 0.38
+                    anchors.centerIn: parent
+                    rotation: -7
+                    z: 0
+                }
+
+                // Title near top of textBox
+                Text {
+                    id: titleText
+                    anchors.top: parent.top
+                    anchors.topMargin: DesignTokens.scaled(2)
+                    anchors.left: parent.left
+                    anchors.right: parent.right
+                    anchors.leftMargin: DesignTokens.scaled(4)
+                    anchors.rightMargin: DesignTokens.scaled(3)
+                    text: root.reminderTitle
+                    color: "#111827"
+                    font.pixelSize: DesignTokens.scaled(11)
+                    font.bold: true
+                    elide: Text.ElideRight
+                    font.strikeout: root.reminderState === 1
+                    z: 1
+                }
+
+                // Description starting 2 px below title, up to 2 lines
+                Text {
+                    id: descText
+                    anchors.top: titleText.bottom
+                    anchors.topMargin: DesignTokens.scaled(2)
+                    anchors.left: parent.left
+                    anchors.right: parent.right
+                    anchors.leftMargin: DesignTokens.scaled(4)
+                    anchors.rightMargin: DesignTokens.scaled(4)
+                    text: root.reminderDescription !== "" ? root.reminderDescription : root.remainingTimeLabel
+                    color: "#6B7280"
+                    font.pixelSize: DesignTokens.scaled(9)
+                    wrapMode: Text.WordWrap
+                    maximumLineCount: 2
+                    elide: Text.ElideRight
+                    visible: text !== ""
+                    font.strikeout: root.reminderState === 1
+                    z: 1
+                }
+            }
+
+            // Note/recurrence bubble button right outside bottom-right of textBox
+            Rectangle {
+                id: noteBubble
+                visible: root.hasNote
+                anchors.left: textBox.right
+                anchors.leftMargin: DesignTokens.scaled(4)
+                anchors.bottom: textBox.bottom
+                width: DesignTokens.scaled(20)
+                height: DesignTokens.scaled(18)
+                color: notePopup.opened ? "#DBEAFE" : "#F1F5F9"
+                radius: DesignTokens.scaled(3)
+                border.color: "#CBD5E1"
+                border.width: 1
+
+                Text {
+                    anchors.centerIn: parent
+                    text: "💬"
+                    font.pixelSize: DesignTokens.scaled(9)
+                }
+
+                MouseArea {
+                    anchors.fill: parent
+                    cursorShape: Qt.PointingHandCursor
+                    ToolTip.visible: containsMouse
+                    ToolTip.text: qsTr("Detaylar")
+                    onClicked: notePopup.opened ? notePopup.close() : notePopup.open()
+                }
+
+                Popup {
+                    id: notePopup
+                    width: DesignTokens.scaled(250)
+                    padding: DesignTokens.space3
+                    parent: Overlay.overlay
+                    x: Math.max(10, Math.min(noteBubble.mapToItem(null, 0, 0).x - 120, (parent ? parent.width : 800) - width - 10))
+                    y: Math.max(10, Math.min(noteBubble.mapToItem(null, 0, 0).y + 24, (parent ? parent.height : 600) - height - 10))
+                    closePolicy: Popup.CloseOnEscape | Popup.CloseOnPressOutside
+
+                    background: Rectangle {
+                        color: "white"
+                        radius: DesignTokens.radiusMedium
+                        border.color: "#E5E7EB"
+                        border.width: 1
                     }
 
-                    // Note/recurrence bubble button
-                    Rectangle {
-                        id: noteBubble
-                        visible: root.hasNote
-                        width:  DesignTokens.scaled(36)
-                        height: DesignTokens.scaled(20)
-                        color: notePopup.opened ? "#DBEAFE" : "#F3F4F6"
-                        radius: DesignTokens.scaled(4)
-                        border.color: "#CBD5E1"
-                        border.width: 1
+                    ColumnLayout {
+                        width: parent.width
+                        spacing: DesignTokens.space2
 
-                        Row {
-                            anchors.centerIn: parent
-                            spacing: 2
-
+                        RowLayout {
+                            Layout.fillWidth: true
                             Text {
-                                text: "💬"
-                                font.pixelSize: DesignTokens.scaled(9)
-                                anchors.verticalCenter: parent.verticalCenter
-                            }
-                            Text {
-                                text: root.recurrenceLabel !== "" && root.recurrenceLabel !== "none"
-                                      ? "↺" : "…"
-                                color: "#374151"
-                                font.pixelSize: DesignTokens.scaled(10)
+                                text: qsTr("💬 Hatırlatma Detayı")
+                                font.pixelSize: DesignTokens.scaled(11)
                                 font.bold: true
-                                anchors.verticalCenter: parent.verticalCenter
+                                color: "#111827"
+                                Layout.fillWidth: true
+                            }
+                            ToolButton {
+                                text: "✕"
+                                font.pixelSize: DesignTokens.scaled(10)
+                                onClicked: notePopup.close()
                             }
                         }
 
-                        MouseArea {
-                            anchors.fill: parent
-                            cursorShape: Qt.PointingHandCursor
-                            onClicked: notePopup.opened ? notePopup.close() : notePopup.open()
+                        Text {
+                            text: root.reminderDescription
+                            font.pixelSize: DesignTokens.scaled(11)
+                            color: "#374151"
+                            wrapMode: Text.WordWrap
+                            Layout.fillWidth: true
+                            visible: root.reminderDescription !== ""
                         }
 
-                        // Detail popup
-                        Popup {
-                            id: notePopup
-                            width: DesignTokens.scaled(240)
-                            padding: DesignTokens.space3
-                            parent: Overlay.overlay
-                            x: Math.min(
-                                   noteBubble.mapToItem(null, 0, 0).x,
-                                   (parent ? parent.width : 800) - width - DesignTokens.space3)
-                            y: noteBubble.mapToItem(null, 0, 0).y - height - DesignTokens.space1
-                            closePolicy: Popup.CloseOnEscape | Popup.CloseOnPressOutside
+                        RowLayout {
+                            spacing: DesignTokens.space2
+                            visible: root.recurrenceLabel !== "" && root.recurrenceLabel !== "none"
 
-                            background: Rectangle {
-                                color: "white"
-                                radius: DesignTokens.radiusMedium
-                                border.color: "#E5E7EB"
-                                border.width: 1
+                            Text {
+                                text: "↺"
+                                color: "#3B82F6"
+                                font.pixelSize: DesignTokens.scaled(13)
                             }
-
-                            Column {
-                                width: parent.width
-                                spacing: DesignTokens.space2
-
-                                Text {
-                                    text: qsTr("Hatırlatma Detayı")
-                                    font.pixelSize: DesignTokens.scaled(11)
-                                    font.bold: true
-                                    color: "#111827"
-                                }
-
-                                Text {
-                                    width: parent.width
-                                    text: root.reminderDescription
-                                    font.pixelSize: DesignTokens.scaled(11)
-                                    color: "#374151"
-                                    wrapMode: Text.WordWrap
-                                    visible: root.reminderDescription !== ""
-                                }
-
-                                Row {
-                                    spacing: DesignTokens.space2
-                                    visible: root.recurrenceLabel !== ""
-                                             && root.recurrenceLabel !== "none"
-
-                                    Text {
-                                        text: "↺"
-                                        color: "#3B82F6"
-                                        font.pixelSize: DesignTokens.scaled(13)
-                                        anchors.verticalCenter: parent.verticalCenter
-                                    }
-                                    Text {
-                                        text: root.recurrenceLabel
-                                        font.pixelSize: DesignTokens.scaled(11)
-                                        color: "#374151"
-                                        anchors.verticalCenter: parent.verticalCenter
-                                    }
-                                }
-
-                                Text {
-                                    width: parent.width
-                                    text: root.remainingTimeLabel
-                                    font.pixelSize: DesignTokens.scaled(10)
-                                    color: "#6B7280"
-                                    visible: root.remainingTimeLabel !== ""
-                                }
+                            Text {
+                                text: root.recurrenceLabel
+                                font.pixelSize: DesignTokens.scaled(11)
+                                color: "#374151"
                             }
+                        }
+
+                        Text {
+                            text: root.remainingTimeLabel
+                            font.pixelSize: DesignTokens.scaled(10)
+                            color: "#6B7280"
+                            Layout.fillWidth: true
+                            visible: root.remainingTimeLabel !== ""
                         }
                     }
                 }

@@ -6,18 +6,30 @@ WidgetWindow {
     id: root
 
     property var subtasksModel: []
+    property var selectedTagIds: []
 
     signal taskSubmitted(
-        string title, string description, string plannedTime, string priority, var subtasks)
+        string title, string description, string plannedTime, string priority, var subtasks, var tagIds)
 
     title: "Yeni görev"
     width: DesignTokens.scaled(350)
-    height: DesignTokens.scaled(360)
+    height: DesignTokens.scaled(440)
 
     function priorityToken() {
         if (priorityField.currentIndex === 0) return "high"
         if (priorityField.currentIndex === 2) return "low"
         return "normal"
+    }
+
+    function toggleTagId(tagId, checked) {
+        var arr = selectedTagIds.slice()
+        if (checked) {
+            if (arr.indexOf(tagId) === -1) arr.push(tagId)
+        } else {
+            var idx = arr.indexOf(tagId)
+            if (idx !== -1) arr.splice(idx, 1)
+        }
+        selectedTagIds = arr
     }
 
     function isValidPlannedTime(value) {
@@ -58,18 +70,20 @@ WidgetWindow {
             return
         }
         root.taskSubmitted(
-            inputTitle, descriptionField.text.trim(), plannedTime, root.priorityToken(), root.subtasksModel)
+            inputTitle, descriptionField.text.trim(), plannedTime, root.priorityToken(), root.subtasksModel, root.selectedTagIds)
         titleField.clear()
         descriptionField.clear()
         plannedTimeField.setDateTime("")
         subtaskEditorArea.text = ""
         root.subtasksModel = []
+        root.selectedTagIds = []
         root.visible = false
     }
 
     onVisibleChanged: {
         if (visible) {
             titleField.forceActiveFocus()
+            selectedTagIds = []
         }
     }
 
@@ -203,6 +217,36 @@ WidgetWindow {
                                 currentIndex: 1
                                 font.pointSize: 11
                                 Layout.fillWidth: true
+                            }
+                        }
+                    }
+
+                    // 4. Etiket Seçimi
+                    ColumnLayout {
+                        Layout.fillWidth: true
+                        spacing: 2
+
+                        Label {
+                            text: "Etiketler"
+                            color: DesignTokens.secondaryText
+                            font.pointSize: 11
+                        }
+
+                        Flow {
+                            Layout.fillWidth: true
+                            spacing: DesignTokens.scaled(6)
+
+                            Repeater {
+                                model: todoModel.tags
+                                delegate: CheckBox {
+                                    id: tagCheck
+                                    text: modelData.name
+                                    checked: root.selectedTagIds.indexOf(modelData.id) !== -1
+                                    
+                                    onClicked: {
+                                        root.toggleTagId(modelData.id, checked)
+                                    }
+                                }
                             }
                         }
                     }

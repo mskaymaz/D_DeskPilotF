@@ -27,7 +27,7 @@ Item {
         {
             key: "reminder",
             label: "Hatırlatıcı",
-            icon: "qrc:/qt/qml/DeskPilot/img/icons/reminder_icon.svg"
+            icon: "qrc:/qt/qml/DeskPilot/img/can.svg"
         },
         {
             key: "todo",

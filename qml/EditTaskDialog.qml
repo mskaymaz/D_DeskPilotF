@@ -12,13 +12,15 @@ WidgetWindow {
     property bool taskCompleted: false
     property bool taskCancelled: false
     property var subtasksModel: []
+    property var selectedTagIds: []
+
     signal taskSubmitted(
         string title, string description, string plannedTime,
-        string priority, bool completed, bool cancelled, var subtasks)
+        string priority, bool completed, bool cancelled, var subtasks, var tagIds)
 
     title: "Görevi düzenle"
     width: DesignTokens.scaled(350)
-    height: DesignTokens.scaled(380)
+    height: DesignTokens.scaled(480)
 
     function priorityIndex(value) {
         if (value === "high" || value === "Yüksek") return 0
@@ -30,6 +32,17 @@ WidgetWindow {
         if (priorityField.currentIndex === 0) return "high"
         if (priorityField.currentIndex === 2) return "low"
         return "normal"
+    }
+
+    function toggleTagId(tagId, checked) {
+        var arr = selectedTagIds.slice()
+        if (checked) {
+            if (arr.indexOf(tagId) === -1) arr.push(tagId)
+        } else {
+            var idx = arr.indexOf(tagId)
+            if (idx !== -1) arr.splice(idx, 1)
+        }
+        selectedTagIds = arr
     }
 
     function isValidPlannedTime(value) {
@@ -72,11 +85,11 @@ WidgetWindow {
         }
         root.taskSubmitted(
             inputTitle, descriptionField.text.trim(), plannedTime,
-            root.priorityToken(), completedField.checked, cancelledField.checked, root.subtasksModel)
+            root.priorityToken(), completedField.checked, cancelledField.checked, root.subtasksModel, root.selectedTagIds)
         root.visible = false
     }
 
-    function openForTask(taskId, tTitle, description, plannedTime, priority, completed, cancelled, subtasks) {
+    function openForTask(taskId, tTitle, description, plannedTime, priority, completed, cancelled, subtasks, tagIds) {
         root.taskId = taskId
         root.taskTitle = tTitle
         root.taskDescription = description
@@ -85,6 +98,7 @@ WidgetWindow {
         root.taskCompleted = completed
         root.taskCancelled = cancelled
         root.subtasksModel = subtasks ? subtasks.slice() : []
+        root.selectedTagIds = tagIds ? tagIds.slice() : []
         titleField.text = tTitle
         descriptionField.text = description
         plannedTimeField.setDateTime(plannedTime)
@@ -237,6 +251,36 @@ WidgetWindow {
                                 currentIndex: 1
                                 font.pointSize: 11
                                 Layout.fillWidth: true
+                            }
+                        }
+                    }
+
+                    // 4. Etiket Seçimi
+                    ColumnLayout {
+                        Layout.fillWidth: true
+                        spacing: 2
+
+                        Label {
+                            text: "Etiketler"
+                            color: DesignTokens.secondaryText
+                            font.pointSize: 11
+                        }
+
+                        Flow {
+                            Layout.fillWidth: true
+                            spacing: DesignTokens.scaled(6)
+
+                            Repeater {
+                                model: todoModel.tags
+                                delegate: CheckBox {
+                                    id: tagCheck
+                                    text: modelData.name
+                                    checked: root.selectedTagIds.indexOf(modelData.id) !== -1
+                                    
+                                    onClicked: {
+                                        root.toggleTagId(modelData.id, checked)
+                                    }
+                                }
                             }
                         }
                     }

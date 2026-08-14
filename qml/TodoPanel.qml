@@ -36,24 +36,24 @@ WidgetWindow {
     readonly property bool hasTasks: tasksModel ? tasksModel.count > 0 : false
     readonly property bool hasVisibleTasks: hasTasks
     signal newTaskRequested(
-        string title, string description, string plannedTime, string priority, var subtasks)
+        string title, string description, string plannedTime, string priority, var subtasks, var tagIds)
     signal taskEditRequested(
         string taskId, string updatedTitle, string description,
-        string plannedTime, string priority, bool completed, bool cancelled, var subtasks)
+        string plannedTime, string priority, bool completed, bool cancelled, var subtasks, var tagIds)
     signal taskCompletionRequested(string taskId, bool completed)
     signal taskTrashRequested(string taskId, bool trashed)
     signal taskDeleteRequested(string taskId)
     signal subtaskToggleRequested(string taskId, int subtaskIndex, bool completed)
 
-    onNewTaskRequested: function(title, description, plannedTime, priority, subtasks) {
+    onNewTaskRequested: function(title, description, plannedTime, priority, subtasks, tagIds) {
         console.log("QML onNewTaskRequested called with:", title, description, plannedTime, priority)
-        var result = root.tasksModel.createTask(title, description, plannedTime, priority, subtasks)
+        var result = root.tasksModel.createTask(title, description, plannedTime, priority, subtasks, tagIds || [])
         console.log("createTask result:", result)
     }
-    onTaskEditRequested: function(taskId, updatedTitle, description, plannedTime, priority, completed, cancelled, subtasks) {
+    onTaskEditRequested: function(taskId, updatedTitle, description, plannedTime, priority, completed, cancelled, subtasks, tagIds) {
         console.log("QML onTaskEditRequested called with:", taskId, updatedTitle, description, plannedTime, priority)
         var result = root.tasksModel.updateTask(
-                taskId, updatedTitle, description, plannedTime, priority, subtasks)
+                taskId, updatedTitle, description, plannedTime, priority, subtasks, tagIds || [])
         console.log("updateTask result:", result)
         if (!result) {
             return
@@ -125,18 +125,22 @@ WidgetWindow {
 
     NewTaskDialog {
         id: newTaskDialog
-        onTaskSubmitted: function(title, description, plannedTime, priority, subtasks) {
-            root.newTaskRequested(title, description, plannedTime, priority, subtasks)
+        onTaskSubmitted: function(title, description, plannedTime, priority, subtasks, tagIds) {
+            root.newTaskRequested(title, description, plannedTime, priority, subtasks, tagIds)
         }
     }
 
     EditTaskDialog {
         id: editTaskDialog
-        onTaskSubmitted: function(title, description, plannedTime, priority, completed, cancelled, subtasks) {
+        onTaskSubmitted: function(title, description, plannedTime, priority, completed, cancelled, subtasks, tagIds) {
             root.taskEditRequested(
                 editTaskDialog.taskId, title, description, plannedTime,
-                priority, completed, cancelled, subtasks)
+                priority, completed, cancelled, subtasks, tagIds)
         }
+    }
+
+    TagManagementDialog {
+        id: tagManagementDialog
     }
 
     Connections {
@@ -188,7 +192,6 @@ WidgetWindow {
                 font.bold: true
                 implicitHeight: DesignTokens.scaled(26)
                 implicitWidth: DesignTokens.scaled(85)
-                Layout.rightMargin: DesignTokens.scaled(30)
                 background: Rectangle {
                     color: newTaskBtn.down ? "#2563EB" : (newTaskBtn.hovered ? "#3B82F6" : "#4F46E5")
                     radius: DesignTokens.scaled(5)
@@ -201,6 +204,27 @@ WidgetWindow {
                     verticalAlignment: Text.AlignVCenter
                 }
                 onClicked: newTaskDialog.visible = true
+            }
+
+            Button {
+                id: manageTagsBtn
+                text: "Etiketler"
+                font.pointSize: 10
+                font.bold: true
+                implicitHeight: DesignTokens.scaled(26)
+                implicitWidth: DesignTokens.scaled(80)
+                background: Rectangle {
+                    color: manageTagsBtn.down ? "#0D9488" : (manageTagsBtn.hovered ? "#0F766E" : "#14B8A6")
+                    radius: DesignTokens.scaled(5)
+                }
+                contentItem: Text {
+                    text: manageTagsBtn.text
+                    font: manageTagsBtn.font
+                    color: "#FFFFFF"
+                    horizontalAlignment: Text.AlignHCenter
+                    verticalAlignment: Text.AlignVCenter
+                }
+                onClicked: tagManagementDialog.visible = true
             }
 
             ToolButton {
@@ -239,55 +263,59 @@ WidgetWindow {
             visible: root.hasTasks || root.todayOnly || root.tomorrowOnly || root.weekOnly || root.completedOnly || root.trashedOnly || root.searchQuery !== ""
         }
 
-        ScrollView {
-            id: tasksScrollView
+        ListView {
+            id: tasksListView
             visible: root.hasVisibleTasks
             clip: true
             Layout.fillWidth: true
             Layout.fillHeight: true
-            ScrollBar.vertical.policy: ScrollBar.AsNeeded
-            ScrollBar.horizontal.policy: ScrollBar.AlwaysOff
+            model: root.tasksModel
+            spacing: DesignTokens.space2
+            ScrollBar.vertical: ScrollBar { policy: ScrollBar.AsNeeded }
+            
+            leftMargin: DesignTokens.space5
+            rightMargin: DesignTokens.space5
+            
+            interactive: !draggingActive
+            property bool draggingActive: false
 
-            ColumnLayout {
-                width: root.width - DesignTokens.space5 * 2
-                spacing: DesignTokens.space2
+            move: Transition {
+                NumberAnimation { properties: "y"; duration: 150; easing.type: Easing.InOutQuad }
+            }
 
-                Repeater {
-                    model: root.tasksModel
+            delegate: TodoCard {
+                width: tasksListView.width - tasksListView.leftMargin - tasksListView.rightMargin
 
-                    delegate: TodoCard {
-                        taskId: model.taskId
-                        taskTitle: model.title
-                        taskDescription: model.description
-                        priorityLabel: model.priority
-                        plannedTimeLabel: model.plannedTime
-                        taskCompleted: (typeof model.completed !== "undefined" && model.completed === true)
-                                       || (typeof model.state !== "undefined" && model.state === "completed")
-                        taskCancelled: (typeof model.cancelled !== "undefined" && model.cancelled === true)
-                                       || (typeof model.state !== "undefined" && model.state === "cancelled")
-                        taskTrashed: (typeof model.trashed !== "undefined" && model.trashed === true)
-                                     || (typeof model.state !== "undefined" && model.state === "trashed")
-                        taskSubtasks: typeof model.subtasks !== "undefined" ? model.subtasks : []
-                        Layout.fillWidth: true
+                taskId: model.taskId
+                taskTitle: model.title
+                taskDescription: model.description
+                priorityLabel: model.priority
+                plannedTimeLabel: model.plannedTime
+                taskCompleted: (typeof model.completed !== "undefined" && model.completed === true)
+                               || (typeof model.state !== "undefined" && model.state === "completed")
+                taskCancelled: (typeof model.cancelled !== "undefined" && model.cancelled === true)
+                               || (typeof model.state !== "undefined" && model.state === "cancelled")
+                taskTrashed: (typeof model.trashed !== "undefined" && model.trashed === true)
+                             || (typeof model.state !== "undefined" && model.state === "trashed")
+                taskSubtasks: typeof model.subtasks !== "undefined" ? model.subtasks : []
+                tagIds: typeof model.tagIds !== "undefined" ? model.tagIds : []
 
-                        onCompletionToggled: (completed) => root.taskCompletionRequested(model.taskId, completed)
-                        onTrashToggled: (trashed) => root.taskTrashRequested(model.taskId, trashed)
-                        onDeleteRequested: () => root.taskDeleteRequested(model.taskId)
-                        onSubtasksClicked: (tId, tTitle, desc, pTime, prio, st) => {
-                            panelSubtaskPopup.currentTaskId = tId
-                            panelSubtaskPopup.currentTitle = tTitle
-                            panelSubtaskPopup.currentDescription = desc
-                            panelSubtaskPopup.currentPlannedTime = pTime
-                            panelSubtaskPopup.currentPriority = prio
-                            panelSubtaskPopup.currentSubtasks = st ? JSON.parse(JSON.stringify(st)) : []
-                            panelSubtaskPopup.open()
-                        }
-                        onEditRequested: (tId, tTitle, desc, pTime, prio, comp, canc) => {
-                            editTaskDialog.openForTask(
-                                tId, tTitle, desc, pTime, prio,
-                                comp, canc, model.subtasks || [])
-                        }
-                    }
+                onCompletionToggled: (completed) => root.taskCompletionRequested(model.taskId, completed)
+                onTrashToggled: (trashed) => root.taskTrashRequested(model.taskId, trashed)
+                onDeleteRequested: () => root.taskDeleteRequested(model.taskId)
+                onSubtasksClicked: (tId, tTitle, desc, pTime, prio, st) => {
+                    panelSubtaskPopup.currentTaskId = tId
+                    panelSubtaskPopup.currentTitle = tTitle
+                    panelSubtaskPopup.currentDescription = desc
+                    panelSubtaskPopup.currentPlannedTime = pTime
+                    panelSubtaskPopup.currentPriority = prio
+                    panelSubtaskPopup.currentSubtasks = st ? JSON.parse(JSON.stringify(st)) : []
+                    panelSubtaskPopup.open()
+                }
+                onEditRequested: (tId, tTitle, desc, pTime, prio, comp, canc, tagIds) => {
+                    editTaskDialog.openForTask(
+                        tId, tTitle, desc, pTime, prio,
+                        comp, canc, model.subtasks || [], tagIds || [])
                 }
             }
         }

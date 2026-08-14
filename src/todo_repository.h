@@ -25,6 +25,10 @@ public:
         const QUuid &id, QString *errorMessage = nullptr) const = 0;
     virtual QList<TodoItem> list(QString *errorMessage = nullptr) const = 0;
     virtual bool remove(const QUuid &id, QString *errorMessage = nullptr) = 0;
+    virtual bool updatePositions(const QList<QPair<QUuid, int>> &positions, QString *errorMessage = nullptr) = 0;
+    virtual bool saveTag(const Tag &tag, QString *errorMessage = nullptr) = 0;
+    virtual bool deleteTag(const QUuid &id, QString *errorMessage = nullptr) = 0;
+    virtual QList<Tag> listTags(QString *errorMessage = nullptr) const = 0;
 };
 
 class SQLiteTodoRepository final : public ITodoRepository
@@ -44,6 +48,10 @@ public:
         const QUuid &id, QString *errorMessage = nullptr) const override;
     QList<TodoItem> list(QString *errorMessage = nullptr) const override;
     bool remove(const QUuid &id, QString *errorMessage = nullptr) override;
+    bool updatePositions(const QList<QPair<QUuid, int>> &positions, QString *errorMessage = nullptr) override;
+    bool saveTag(const Tag &tag, QString *errorMessage = nullptr) override;
+    bool deleteTag(const QUuid &id, QString *errorMessage = nullptr) override;
+    QList<Tag> listTags(QString *errorMessage = nullptr) const override;
 
 private:
     bool ensureOpen(QString *errorMessage = nullptr) const;

@@ -15,6 +15,7 @@ Rectangle {
     property bool   taskCancelled: false
     property bool   taskTrashed: false
     property var    taskSubtasks: []
+    property var    tagIds: []
     property int    overdueRevision: 0
 
     // ── Computed: strip colour (priority-driven, gray only when passive) ──
@@ -68,7 +69,7 @@ Rectangle {
     // ── Signals ───────────────────────────────────────────────────
     signal editRequested(string taskId, string title, string description,
                          string plannedTime, string priority,
-                         bool completed, bool cancelled)
+                         bool completed, bool cancelled, var tagIds)
     signal completionToggled(bool completed)
     signal trashToggled(bool trashed)
     signal deleteRequested()
@@ -80,10 +81,15 @@ Rectangle {
     height: DesignTokens.scaled(60)
     color: "#FFFFFF"
     radius: DesignTokens.radiusMedium
-    border.color: "#E5E7EB"
-    border.width: 1
-    opacity: root.taskTrashed ? 0.72 : 1.0
-    clip: true
+    border.color: root.dragging ? "#3B82F6" : "#E5E7EB"
+    border.width: root.dragging ? 2 : 1
+    opacity: root.dragging ? 0.88 : (root.taskTrashed ? 0.72 : 1.0)
+    scale: root.dragging ? 1.03 : 1.0
+    clip: false
+
+    Behavior on border.color { ColorAnimation { duration: 100 } }
+    Behavior on scale { NumberAnimation { duration: 100; easing.type: Easing.OutQuad } }
+    Behavior on opacity { NumberAnimation { duration: 100 } }
 
     // ── Overdue refresh timer ─────────────────────────────────────
     Timer { interval: 60000; running: root.visible; repeat: true; onTriggered: root.overdueRevision++ }
@@ -94,13 +100,17 @@ Rectangle {
         onDoubleTapped: root.editRequested(
             root.taskId, root.taskTitle, root.taskDescription,
             root.plannedTimeLabel, root.priorityLabel,
-            root.taskCompleted, root.taskCancelled)
+            root.taskCompleted, root.taskCancelled, root.tagIds)
     }
+
+    readonly property int visualIndex: index
+    property bool dragging: false
 
     // ── Main layout ───────────────────────────────────────────────
     Item {
+        id: visualContent
         anchors.fill: parent
-        z: 1
+        z: root.dragging ? 100 : 1
 
         // ── LEFT PRIORITY STRIP ───────────────────────────────────
         Rectangle {
@@ -116,6 +126,46 @@ Rectangle {
                 anchors { right: parent.right; top: parent.top; bottom: parent.bottom }
                 width: DesignTokens.radiusMedium
                 color: parent.color
+            }
+
+            // Drag handle MouseArea
+            MouseArea {
+                id: dragArea
+                anchors.fill: parent
+                cursorShape: Qt.OpenHandCursor
+                
+                drag.target: visualContent
+                drag.axis: Drag.YAxis
+                
+                onPressed: {
+                    drag.minimumY = -root.y
+                    if (root.ListView.view) {
+                        drag.maximumY = root.ListView.view.contentHeight - root.y - root.height
+                        root.ListView.view.draggingActive = true
+                    }
+                    root.dragging = true
+                    cursorShape = Qt.ClosedHandCursor
+                }
+                
+                onPositionChanged: (mouse) => {
+                    if (drag.active && root.ListView.view) {
+                        var scenePos = dragArea.mapToItem(root.ListView.view, mouse.x, mouse.y)
+                        var indexUnder = root.ListView.view.indexAt(root.ListView.view.width / 2, scenePos.y)
+                        if (indexUnder !== -1 && indexUnder !== root.visualIndex) {
+                            root.ListView.view.model.moveTask(root.visualIndex, indexUnder)
+                        }
+                    }
+                }
+                
+                onReleased: {
+                    cursorShape = Qt.OpenHandCursor
+                    visualContent.y = 0
+                    root.dragging = false
+                    if (root.ListView.view) {
+                        root.ListView.view.draggingActive = false
+                        root.ListView.view.model.persistPositions()
+                    }
+                }
             }
 
             // Rotated priority text: exactly 9px from the left edge of strip
@@ -146,18 +196,33 @@ Rectangle {
                 anchors.bottom: parent.bottom
                 width: DesignTokens.scaled(28)
 
+                Image {
+                    visible: root.statusIcon === "!"
+                    anchors.centerIn: parent
+                    anchors.horizontalCenterOffset: -2
+                    source: "qrc:/qt/qml/DeskPilot/img/un11.svg"
+                    width: DesignTokens.scaled(13)
+                    height: DesignTokens.scaled(36)
+                    sourceSize: Qt.size(width, height)
+                    fillMode: Image.PreserveAspectFit
+                }
+
                 Text {
                     id: iconText
+                    visible: root.statusIcon !== "!"
                     anchors.centerIn: parent
-                    anchors.horizontalCenterOffset: root.statusIcon === "!" ? -2 : 0
                     text: root.statusIcon
                     color: "white"
                     font.pixelSize: {
-                        if (root.statusIcon === "!") return DesignTokens.scaled(41)
                         if (root.statusIcon === "✓") return DesignTokens.scaled(26)
                         return DesignTokens.scaled(24)
                     }
                     font.bold: true
+                    transform: Scale {
+                        origin.x: iconText.implicitWidth / 2
+                        origin.y: iconText.implicitHeight / 2
+                        xScale: root.statusIcon === "⏳" ? 0.85 : 1.0
+                    }
                 }
             }
         }
@@ -193,7 +258,7 @@ Rectangle {
                         onTriggered: root.editRequested(
                             root.taskId, root.taskTitle, root.taskDescription,
                             root.plannedTimeLabel, root.priorityLabel,
-                            root.taskCompleted, root.taskCancelled)
+                            root.taskCompleted, root.taskCancelled, root.tagIds)
                     }
                     MenuItem {
                         text: root.taskCompleted ? qsTr("↩ Geri Al") : qsTr("✓ Tamamla")
@@ -213,7 +278,7 @@ Rectangle {
                             root.editRequested(
                                 root.taskId, root.taskTitle, root.taskDescription,
                                 root.plannedTimeLabel, root.priorityLabel,
-                                root.taskCompleted, nc)
+                                root.taskCompleted, nc, root.tagIds)
                         }
                     }
                     MenuItem {
@@ -302,14 +367,14 @@ Rectangle {
                     z: 0
                 }
 
-                // Magnifier button inside top-right of textBox
+                // Magnifier button inside bottom-right of textBox
                 Rectangle {
                     id: descExpandBtn
                     visible: root.taskDescription !== ""
                     anchors.right: parent.right
-                    anchors.top: parent.top
+                    anchors.bottom: parent.bottom
                     anchors.rightMargin: DesignTokens.scaled(3)
-                    anchors.topMargin: DesignTokens.scaled(3)
+                    anchors.bottomMargin: DesignTokens.scaled(3)
                     width: DesignTokens.scaled(18)
                     height: DesignTokens.scaled(16)
                     color: descPopup.opened ? "#E0E7FF" : "#F8FAFC"
@@ -380,40 +445,68 @@ Rectangle {
                     }
                 }
 
-                // Title near top of textBox
-                Text {
-                    id: titleText
-                    anchors.top: parent.top
-                    anchors.topMargin: DesignTokens.scaled(2)
-                    anchors.left: parent.left
-                    anchors.right: descExpandBtn.visible ? descExpandBtn.left : parent.right
-                    anchors.leftMargin: DesignTokens.scaled(4)
-                    anchors.rightMargin: DesignTokens.scaled(3)
-                    text: root.taskTitle
-                    color: "#111827"
-                    font.pixelSize: DesignTokens.scaled(11)
-                    font.bold: true
-                    elide: Text.ElideRight
-                    z: 1
-                }
+                Column {
+                    anchors.fill: parent
+                    anchors.margins: DesignTokens.scaled(4)
+                    spacing: DesignTokens.scaled(2)
 
-                // Description starting 2 px below title, up to 2 lines
-                Text {
-                    id: descText
-                    anchors.top: titleText.bottom
-                    anchors.topMargin: DesignTokens.scaled(2)
-                    anchors.left: parent.left
-                    anchors.right: parent.right
-                    anchors.leftMargin: DesignTokens.scaled(4)
-                    anchors.rightMargin: DesignTokens.scaled(4)
-                    text: root.taskDescription
-                    color: "#6B7280"
-                    font.pixelSize: DesignTokens.scaled(9)
-                    wrapMode: Text.WordWrap
-                    maximumLineCount: 2
-                    elide: Text.ElideRight
-                    visible: root.taskDescription !== ""
-                    z: 1
+                    // Title & Tags Row
+                    RowLayout {
+                        width: parent.width
+                        spacing: DesignTokens.scaled(6)
+
+                        // Tags Flow inline to the left
+                        Flow {
+                            id: tagsFlow
+                            spacing: DesignTokens.scaled(4)
+                            visible: root.tagIds && root.tagIds.length > 0
+                            Layout.alignment: Qt.AlignVCenter
+
+                            Repeater {
+                                model: todoModel.getTaskTags(root.tagIds)
+                                delegate: Rectangle {
+                                    width: tagLabel.implicitWidth + DesignTokens.scaled(8)
+                                    height: DesignTokens.scaled(12)
+                                    radius: DesignTokens.radiusNone
+                                    color: modelData.color
+
+                                    Text {
+                                        id: tagLabel
+                                        anchors.centerIn: parent
+                                        text: modelData.name
+                                        color: "white"
+                                        font.pixelSize: DesignTokens.scaled(8)
+                                        font.bold: true
+                                    }
+                                }
+                            }
+                        }
+
+                        // Title to the right of tags
+                        Text {
+                            id: titleText
+                            text: root.taskTitle
+                            color: "#111827"
+                            font.pixelSize: DesignTokens.scaled(11)
+                            font.bold: true
+                            elide: Text.ElideRight
+                            Layout.fillWidth: true
+                            Layout.maximumWidth: parent.width - (tagsFlow.visible ? tagsFlow.implicitWidth + DesignTokens.scaled(6) : 0)
+                        }
+                    }
+
+                    // Description
+                    Text {
+                        id: descText
+                        width: parent.width - (descExpandBtn.visible ? descExpandBtn.width + DesignTokens.scaled(6) : 0)
+                        text: root.taskDescription
+                        color: "#6B7280"
+                        font.pixelSize: DesignTokens.scaled(9)
+                        wrapMode: Text.WordWrap
+                        maximumLineCount: 1
+                        elide: Text.ElideRight
+                        visible: root.taskDescription !== ""
+                    }
                 }
             }
 
