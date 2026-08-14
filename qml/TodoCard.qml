@@ -459,11 +459,11 @@ Rectangle {
                         Flow {
                             id: tagsFlow
                             spacing: DesignTokens.scaled(4)
-                            visible: root.tagIds && root.tagIds.length > 0
+                            visible: true
                             Layout.alignment: Qt.AlignVCenter
 
                             Repeater {
-                                model: todoModel.getTaskTags(root.tagIds)
+                                model: root.tagIds && root.tagIds.length > 0 ? todoModel.getTaskTags(root.tagIds) : []
                                 delegate: Rectangle {
                                     width: tagLabel.implicitWidth + DesignTokens.scaled(8)
                                     height: DesignTokens.scaled(12)
@@ -480,6 +480,24 @@ Rectangle {
                                     }
                                 }
                             }
+
+                            // Fallback tag if no tags are assigned
+                            Rectangle {
+                                visible: !root.tagIds || root.tagIds.length === 0
+                                width: fallbackLabel.implicitWidth + DesignTokens.scaled(8)
+                                height: DesignTokens.scaled(12)
+                                radius: DesignTokens.radiusNone
+                                color: "#64748B"
+
+                                Text {
+                                    id: fallbackLabel
+                                    anchors.centerIn: parent
+                                    text: qsTr("Genel")
+                                    color: "white"
+                                    font.pixelSize: DesignTokens.scaled(8)
+                                    font.bold: true
+                                }
+                            }
                         }
 
                         // Title to the right of tags
@@ -491,7 +509,7 @@ Rectangle {
                             font.bold: true
                             elide: Text.ElideRight
                             Layout.fillWidth: true
-                            Layout.maximumWidth: parent.width - (tagsFlow.visible ? tagsFlow.implicitWidth + DesignTokens.scaled(6) : 0)
+                            Layout.maximumWidth: parent.width - tagsFlow.implicitWidth - DesignTokens.scaled(6)
                         }
                     }
 
