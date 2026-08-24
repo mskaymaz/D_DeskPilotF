@@ -91,7 +91,7 @@ private:
     IBatteryService *m_service = nullptr;
     BatteryState m_state = BatteryState::unavailable();
     bool m_visible = true;
-    bool m_showIcon = false;
+    bool m_showIcon = true;
     QString m_fontFamily;
     QColor m_fontColor = QColor("#6B7280");
     bool m_bold = false;

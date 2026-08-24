@@ -1,5 +1,6 @@
 import QtQuick
 import QtQuick.Controls
+import QtQuick.Effects
 
 WidgetWindow {
     id: root
@@ -81,12 +82,12 @@ WidgetWindow {
                 
                 BatteryIcon {
                     id: batteryIcon
-                    visible: batteryModel.showIcon
+                    visible: true
                     width: DesignTokens.iconMedium * batteryModel.scale
                     height: DesignTokens.iconMedium * batteryModel.scale
                     anchors.verticalCenter: parent.verticalCenter
                     percentage: batteryModel.percentage
-                    charging: batteryModel.charging
+                    charging: batteryModel.charging || batteryModel.pluggedIn
                     iconColor: batteryModel.fontColor
                 }
                 
@@ -100,6 +101,31 @@ WidgetWindow {
                     font.bold: batteryModel.bold
                     color: batteryModel.fontColor
                     anchors.verticalCenter: parent.verticalCenter
+                }
+
+                // Yellow charging/lightning icon to the right of the percentage
+                Item {
+                    id: chargingIconContainer
+                    visible: batteryModel.charging || batteryModel.pluggedIn
+                    width: DesignTokens.iconMedium * 0.7 * batteryModel.scale
+                    height: width
+                    anchors.verticalCenter: parent.verticalCenter
+
+                    Image {
+                        id: chargingIconSource
+                        anchors.fill: parent
+                        visible: false
+                        source: "qrc:/qt/qml/DeskPilot/img/icons/lightning_icon.svg"
+                        fillMode: Image.PreserveAspectFit
+                        sourceSize: Qt.size(parent.width, parent.height)
+                    }
+
+                    MultiEffect {
+                        anchors.fill: parent
+                        source: chargingIconSource
+                        colorization: 1.0
+                        colorizationColor: "#F59E0B" // Sarı (Golden yellow)
+                    }
                 }
             }
         }

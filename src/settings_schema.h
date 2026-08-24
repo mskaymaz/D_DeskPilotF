@@ -36,7 +36,7 @@ struct DateSettings final
 struct BatterySettings final
 {
     bool visible = true;
-    bool showIcon = false;
+    bool showIcon = true;
     int lowBatteryThreshold = 20;
     int fullChargeThreshold = 100;
     int alertIntervalMinutes = 60;

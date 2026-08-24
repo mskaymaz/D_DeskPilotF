@@ -15,6 +15,13 @@ Item {
     implicitWidth: fontPixelSize * 0.9
     implicitHeight: fontPixelSize * 0.55
 
+    readonly property color stateColor: {
+        if (root.charging) return "#10B981" // Yeşil (Şarj / Prize takılı)
+        if (root.percentage >= 0 && root.percentage <= 20) return "#EF4444" // Kırmızı (Düşük pil)
+        if (root.percentage >= 0 && root.percentage <= 50) return "#F59E0B" // Turuncu (Orta pil)
+        return "#10B981" // Yeşil (Normal)
+    }
+
     Rectangle {
         id: chargeFill
         x: root.width * 0.12
@@ -22,7 +29,7 @@ Item {
         width: percentage >= 0
             ? Math.max(0, Math.min(100, percentage)) / 100 * root.width * 0.73 : 0
         height: root.height * 0.6
-        color: root.iconColor
+        color: root.stateColor
     }
 
     Image {
@@ -38,16 +45,7 @@ Item {
         anchors.fill: outlineSource
         source: outlineSource
         colorization: 1.0
-        colorizationColor: root.iconColor
+        colorizationColor: root.stateColor
     }
 
-    Image {
-        anchors.centerIn: parent
-        width: root.height * 0.5
-        height: width
-        visible: root.charging
-        source: "qrc:/qt/qml/DeskPilot/img/icons/lightning_icon.svg"
-        fillMode: Image.PreserveAspectFit
-        sourceSize: Qt.size(width, height)
-    }
 }
