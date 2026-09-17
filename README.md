@@ -1,46 +1,31 @@
 ﻿# D_DeskPilotC
 
-DeskPilotC is the next-generation desktop implementation of DeskPilot, rebuilt on a clean **C++ + Qt 6 + Qt Quick/QML** architecture.
+DeskPilotC is the next-generation desktop productivity environment, rebuilt on a clean **Flutter/Dart** architecture.
 
 The project is designed as the desktop foundation of a future multi-device DeskPilot ecosystem, with planned mobile, web, and optional synchronization layers.
 
 ## Current Status
 
-**Development stage:** Phase 0 — Project Foundation and Specification
+**Development stage:** Phase 0 — Flutter Project Foundation
 
-No production C++/QML implementation has started yet.
+The previous C++/Qt implementation has been removed and retained only as historical reference.
 
-The previous Python/PyQt DeskPilot implementation has been frozen and is retained only as a **behavioral and product reference**.
-
-Frozen reference tag:
-
-```text
-deskpilot-python-freeze
-```
-
-DeskPilotC must not mechanically translate the old Python codebase into C++.
-
-The objective is to preserve intended product behavior while rebuilding the architecture cleanly.
+All implementation is now built on Flutter/Dart with Riverpod state management and drift SQLite persistence.
 
 ---
 
 ## Primary Desktop Stack
 
-- C++
-- Qt 6
-- Qt Quick
-- QML
-- CMake
-- SQLite
+- **Flutter/Dart**
+- **Riverpod** (state management)
+- **drift** (SQLite)
+- **window_manager**, **tray_manager** (desktop integration)
+- **flutter_tts**, **audioplayers** (notifications)
+- **Hive** (lightweight settings)
 
-Initial desktop target:
+Initial desktop target: **Windows**
 
-- Windows
-
-Planned future desktop targets:
-
-- macOS
-- Linux
+Planned future desktop targets: macOS, Linux
 
 ---
 
@@ -72,7 +57,7 @@ Future sync, mobile, and web work must not block Desktop V1 development.
 DeskPilotC prioritizes:
 
 - Maximum practical visual quality
-- High UI flexibility
+- High UI flexibility via Flutter rendering engine
 - Smooth interaction and animation
 - Strong performance
 - Low idle resource usage
@@ -96,28 +81,17 @@ Before modifying the project, read these files in order:
 3. `TASK.md`
 4. `ROADMAP.md`
 5. `DESKPILOT_PRODUCT_SPEC.md`
-6. `ARCHITECTURE.md`
-7. `PRODUCT_ARCHITECTURE_PRINCIPLES_AI_EN.md`
+6. `PRODUCT_ARCHITECTURE_PRINCIPLES_AI_EN.md`
+7. `ARCHITECTURE.md`
 
 ### Document Roles
 
-- `STATE.md`  
-  Current project position, recent decisions, and immediate next steps.
-
-- `TASK.md`  
-  Active work items for the current development phase.
-
-- `ROADMAP.md`  
-  Full project roadmap from foundation to Desktop V1 and future platform phases.
-
-- `DESKPILOT_PRODUCT_SPEC.md`  
-  Canonical product behavior and functional requirements.
-
-- `ARCHITECTURE.md`  
-  Technical architecture for the new C++/Qt Quick/QML implementation.
-
-- `PRODUCT_ARCHITECTURE_PRINCIPLES_AI_EN.md`  
-  General technology and architecture selection principles used across current and future projects.
+- `STATE.md` — Current project position and immediate next steps
+- `TASK.md` — Active work items for the current development phase
+- `ROADMAP.md` — Full project roadmap from foundation to Desktop V1
+- `DESKPILOT_PRODUCT_SPEC.md` — Canonical product behavior and functional requirements
+- `ARCHITECTURE.md` — Technical architecture for Flutter/Dart implementation
+- `PRODUCT_ARCHITECTURE_PRINCIPLES_AI_EN.md` — General technology and architecture selection principles
 
 ---
 
@@ -131,21 +105,19 @@ DeskPilotC answers:
 
 > What is the cleanest, most scalable, highest-quality way to implement it now?
 
-Do not preserve accidental limitations or QWidget-specific workarounds from the legacy implementation.
-
 ---
 
 ## Development Workflow
 
 Use an incremental, verification-first workflow.
 
-1. Analyze before modifying.
-2. Work on one agreed task at a time.
-3. Keep changes focused.
-4. Avoid unrelated refactoring.
-5. Verify each step before continuing.
-6. Update `TASK.md` and `STATE.md` after meaningful milestones.
-7. Update `ROADMAP.md` when phase-level progress changes.
+1. Analyze before modifying
+2. Work on one agreed task at a time
+3. Keep changes focused
+4. Avoid unrelated refactoring
+5. Verify each step before continuing
+6. Update `TASK.md` and `STATE.md` after meaningful milestones
+7. Update `ROADMAP.md` when phase-level progress changes
 
 For interactive development with the user, use concise Turkish communication unless another language is explicitly requested.
 
@@ -155,14 +127,10 @@ For interactive development with the user, use concise Turkish communication unl
 
 Complete Phase 0:
 
-- Finalize project documentation.
-- Define Qt licensing baseline.
-- Verify Windows C++ / Qt 6 / CMake toolchain.
-- Select exact Qt and compiler baseline.
-- Create minimal repository structure.
-- Create root CMake configuration.
-- Build and run the first minimal Qt Quick/QML application.
-- Commit and push the verified project foundation.
+- Flutter project initialization (`flutter create .`)
+- Package configuration (`flutter pub get`)
+- Verify `flutter run` launches transparent window
+- Commit and push verified project foundation
 
 ---
 
@@ -171,7 +139,7 @@ Complete Phase 0:
 Private repository:
 
 ```text
-https://github.com/mskaymaz/D_DeskPilotC
+https://github.com/mskaymaz/D_DeskPilotF
 ```
 
 ---
@@ -180,5 +148,4 @@ https://github.com/mskaymaz/D_DeskPilotC
 
 Not yet finalized.
 
-Qt licensing and the project's own distribution/license strategy must be reviewed before Desktop V1 distribution decisions are made.
-
+Flutter licensing and the project's own distribution/license strategy must be reviewed before Desktop V1 distribution decisions are made.

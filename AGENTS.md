@@ -37,8 +37,8 @@ At the first meaningful error or unexpected result, stop. Do not continue with d
 ### 10. Commands
 Keep commands compact and easy to copy. For dependent operations, give one command/block and wait for its output before giving the next.
 
-### 11. Frozen Python Reference
-The frozen Python DeskPilot is a behavioral reference only. Do not mechanically port Python/PyQt code or legacy workarounds into DeskPilotC.
+### 11. Flutter Reference
+The Flutter/Dart DeskPilot is the active implementation. The removed C++/Qt implementation is historical reference only. Do not mechanically port Python/PyQt code or legacy workarounds into DeskPilotC.
 
 ### 12. No Image Generation
 Do not use image generation or image editing tools for DeskPilotC development.
@@ -48,11 +48,12 @@ Communicate with the user in Turkish unless explicitly requested otherwise. Defa
 
 ### 14. User-Executed Commands for Builds and Tests
 **CRITICAL AND MANDATORY:** For ANY builds, tests, or extensive local analyses, DO NOT RUN the commands in the background yourself. You MUST provide the exact PowerShell (PS) commands to the user. The user will execute them locally and paste the output/results back into the chat. You MUST STOP and wait for the user's report before proceeding. Any deviation from this rule is strictly prohibited.
+
 ### 15. Strict File Size Limit (Modularity)
 **CRITICAL AND MANDATORY:** No source code file shall normally exceed 400-450 lines. In cases of absolute technical necessity, the maximum hard limit is 700 lines. When a file approaches these limits, it MUST be refactored and split into smaller, single-responsibility components or modules. Do not create "God Objects".
 
 ### 16. Global Application and Localization (i18n)
-**CRITICAL AND MANDATORY:** The application architecture MUST natively support a global structure, including multi-language support (TR, EN, Arabic, etc.), Right-To-Left (RTL) layout capabilities, and regional formatting (date/time, currency). All user-facing text must be wrapped in translation functions (e.g., `qsTr()` in Qt/QML) from the beginning. Never hardcode UI text strings.
+**CRITICAL AND MANDATORY:** The application architecture MUST natively support a global structure, including multi-language support (TR, EN, Arabic, etc.), Right-To-Left (RTL) layout capabilities, and regional formatting (date/time, currency). All user-facing text must be wrapped in translation functions (`AppLocalizations.of(context)!.trString()` in Flutter) from the beginning. Never hardcode UI text strings.
 
 ## REQUIRED DOCUMENT READING ORDER
 
@@ -61,13 +62,56 @@ For every new development session:
 1. `AGENTS.md`
 2. `STATE.md`
 3. `TASK.md`
-
-Read additional documents only when required by the explicit task:
-
 4. `ROADMAP.md`
 5. `DESKPILOT_PRODUCT_SPEC.md`
-6. `ARCHITECTURE.md`
-7. `PRODUCT_ARCHITECTURE_PRINCIPLES_AI_EN.md`
+6. `PRODUCT_ARCHITECTURE_PRINCIPLES_AI_EN.md`
+7. `ARCHITECTURE.md`
+
+Read additional documents only when required by the explicit task.
 
 Do not automatically scan the entire repository or all documentation at the start of every task.
 
+## CURRENT PHASE
+
+**Phase 0 — Flutter Project Foundation**
+
+Next immediate task: Run `flutter create .` to initialize Flutter embedding.
+
+## Development Workflow
+
+Use the SPP-style workflow:
+1. Analyze and verify first.
+2. Work on one agreed task at a time.
+3. Keep changes focused.
+4. Avoid unrelated refactoring.
+5. Verify each implementation before continuing.
+6. Update `TASK.md` and `STATE.md` after meaningful milestones.
+7. Update `ROADMAP.md` when phase-level progress changes.
+
+Commands and patches should be concise and fail-fast. When working interactively with the user, provide one implementation step at a time and wait for the result when later steps depend on it.
+
+## Immediate Next Steps
+
+1. Run `flutter create .` to initialize Flutter project embedding
+2. Run `flutter pub get`
+3. Verify `flutter run` launches transparent window
+4. Proceed to Phase 1: Design System
+
+## AI Agent Continuation Instruction
+
+Before modifying this repository, read in this order:
+
+1. `AGENTS.md`
+2. `STATE.md`
+3. `TASK.md`
+4. `ROADMAP.md`
+5. `DESKPILOT_PRODUCT_SPEC.md`
+6. `PRODUCT_ARCHITECTURE_PRINCIPLES_AI_EN.md`
+7. `ARCHITECTURE.md`
+
+Continue from the current state. Do not restart architectural interpretation unless a real conflict or new requirement requires a decision.
+
+Communicate with the user in Turkish unless explicitly requested otherwise.
+
+## Last Updated
+2026-09-17 — Phase 0: Flutter/Dart project established, C++/Qt removed.

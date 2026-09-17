@@ -1,57 +1,47 @@
-﻿# Build output
-/build/
-/build-*/
-/out/
+﻿# Flutter/Dart build
+build/
+out/
+.app/
+*.iml
+*.ipr
+*.iws
 
-# CMake
-CMakeCache.txt
-CMakeFiles/
-cmake_install.cmake
-install_manifest.txt
-CTestTestfile.cmake
-*.cmake.user
+# Dependencies
+.packages
+.dart_tool/
+packages/
 
-# Qt Creator
-CMakeLists.txt.user
-*.pro.user
-*.qtc.user
-.qtc_clangd/
-.qtcreator/
+# Generated code
+generated/
+*.g.dart
 
-# QML / Qt generated
-.qmlcache/
-.qmlls.ini
-.qt/
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
 
-# Visual Studio / MSVC
-.vs/
-*.sln
-*.vcxproj
-*.vcxproj.filters
-*.vcxproj.user
-*.pdb
-*.ilk
-*.obj
-*.idb
-*.exp
-*.lib
+# OS
+.DS_Store
+Thumbs.db
+desktop.ini
 
-# Runtime artifacts
-*.dll
-*.exe
+# Environment
+.env
+.env.local
 
 # Logs
 *.log
 
-# OS / Editor
-.DS_Store
-Thumbs.db
-desktop.ini
-.vscode/
-.idea/
+# Secrets
+secrets/
+*.secret
 
-# Temporary files
-*.tmp
-*.temp
-*.bak
-*~
+# Assets (keep structure, track images)
+assets/fonts/.gitkeep
+
+# Windows
+windows/
+
+# Local
+.local/
