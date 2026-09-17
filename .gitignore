@@ -37,11 +37,9 @@ desktop.ini
 secrets/
 *.secret
 
-# Assets (keep structure, track images)
-assets/fonts/.gitkeep
-
-# Windows
-windows/
+# Windows build output
+windows/build/
+windows/runner/build/
 
 # Local
 .local/
