@@ -10,6 +10,7 @@ dependencies:
   flutter:
     sdk: flutter
   window_manager: ^0.5.2
+  desktop_multi_window: ^0.3.1
   flutter_localizations:
     sdk: flutter
   intl: ^0.20.2

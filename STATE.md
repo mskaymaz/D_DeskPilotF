@@ -104,5 +104,12 @@ Continue from the current state. Do not restart architectural interpretation unl
 
 Communicate with the user in Turkish unless explicitly requested otherwise.
 
+## Known Issues (2026-09-18, multi-window aşaması)
+1. Renk seçim diyaloğu küçük modül pencerelerine sığmıyor: diyalog 260px, modül pencereleri 280-440px olduğu için renkler kırpılıyor. Çözüm adayı: diyalogu ayrı pencere olarak açmak veya modül penceresini geçici büyütmek.
+2. Modül metinlerinin altında sarı çizgi artefaktı: kodda sarı çizgi çizen widget yok (grep ile doğrulandı), çoklu örnek ihtimali elendi (tek process ile test edildi). Nedeni bilinmiyor, evde incelenecek.
+3. Modül pencerelerinde ince kenarlık/gölge kalıyor: `setAsFrameless` + `setHasShadow(false)` + `setResizable(false)` etkisiz.
+4. `window_manager` boyutlandırma çağrıları (`setSize`, `maximize`) etkisiz: pencere Flutter varsayılanı 1280x720'de takılı kalıyor. Bu yüzden tek-pencereli düzenden vazgeçilip `desktop_multi_window` mimarisine geçildi (her modül kendi çerçevesiz penceresi + gizli kontrolcü pencere).
+5. Sağ tık menüsüne "Uygulamadan çık" (`exit_app`) eklendi.
+
 ## Last Updated
-2026-09-18 — Phase 0: Flutter/Dart project foundation verified. window_manager working. desk_pilot_f.exe builds and runs.
+2026-09-18 — Multi-window mimari + sağ tık renk ayarı + çıkış komutu. Bilinen hatalar yukarıda kayıtlı.

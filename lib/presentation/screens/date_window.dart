@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../../core/design_tokens/design_tokens.dart';
 import '../../domain/models/date_model.dart';
 import '../../application/providers/date_provider.dart';
+import '../../application/providers/module_settings_provider.dart';
+import '../widgets/color_settings_dialog.dart';
 
 class DateWindow extends ConsumerWidget {
   const DateWindow({super.key});
@@ -11,6 +12,7 @@ class DateWindow extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final dateState = ref.watch(dateNotifierProvider);
+    final fontColor = ref.watch(dateFontColorProvider);
     final settings = DateSettings();
 
     if (!settings.visible) {
@@ -19,27 +21,37 @@ class DateWindow extends ConsumerWidget {
 
     final isHijri = dateState.displayMode == DateDisplayMode.hijri;
 
-    return Center(
+    return GestureDetector(
+      onSecondaryTap: () {
+        showColorSettingsDialog(
+          context: context,
+          current: fontColor,
+          onSelected: (c) => ref.read(dateFontColorProvider.notifier).state = c,
+        );
+      },
       child: Row(
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [
           Text(
             dateState.displayText,
-            style: AppTypography.headlineMedium.copyWith(
-              color: Color(settings.fontColor),
-              fontWeight: settings.bold ? FontWeight.bold : FontWeight.normal,
-              fontSize: 48.0 * settings.scale,
-            ),
+            style: TextStyle(
+              color: fontColor,
+            shadows: const [
+              Shadow(blurRadius: 6, color: Colors.black54, offset: Offset(0, 2)),
+            ],
+            fontWeight: settings.bold ? FontWeight.bold : FontWeight.normal,
+            fontSize: 48.0 * settings.scale,
           ),
-          const SizedBox(width: 12),
-          _ToggleButton(
-            label: isHijri ? 'M' : 'H',
-            tooltip: isHijri ? 'Miladiye geç' : 'Hicri\'ye geç',
-            onTap: () {
-              ref.read(dateNotifierProvider.notifier).toggleDisplayMode();
-            },
-          ),
+        ),
+        const SizedBox(width: 12),
+        _ToggleButton(
+          label: isHijri ? 'M' : 'H',
+          tooltip: isHijri ? 'Miladiye geç' : 'Hicri\'ye geç',
+          onTap: () {
+            ref.read(dateNotifierProvider.notifier).toggleDisplayMode();
+          },
+        ),
         ],
       ),
     );
@@ -66,13 +78,9 @@ class _ToggleButton extends StatelessWidget {
         child: Container(
           width: 32,
           height: 32,
-          decoration: BoxDecoration(
+          decoration: const BoxDecoration(
             shape: BoxShape.circle,
-            color: AppColors.primary,
-            border: Border.all(
-              color: AppColors.primaryLight,
-              width: 1.5,
-            ),
+            color: Color(0xFF6C63FF),
           ),
           child: Center(
             child: Text(

@@ -2,9 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 
-import '../../core/design_tokens/design_tokens.dart';
 import '../../domain/models/battery_model.dart';
 import '../../application/providers/battery_provider.dart';
+import '../../application/providers/module_settings_provider.dart';
+import '../widgets/color_settings_dialog.dart';
 
 class BatteryWindow extends ConsumerWidget {
   const BatteryWindow({super.key});
@@ -12,62 +13,73 @@ class BatteryWindow extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final batteryState = ref.watch(batteryNotifierProvider);
+    final fontColor = ref.watch(batteryFontColorProvider);
     final settings = BatterySettings();
+
+    void openColorSettings() {
+      showColorSettingsDialog(
+        context: context,
+        current: fontColor,
+        onSelected: (c) => ref.read(batteryFontColorProvider.notifier).state = c,
+      );
+    }
 
     if (!settings.visible) {
       return const SizedBox.shrink();
     }
 
     if (batteryState.isDesktop) {
-      return Center(
+      return GestureDetector(
+        onSecondaryTap: openColorSettings,
         child: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Icon(
-              Icons.desktop_windows,
-              size: 36.0 * settings.scale,
-              color: AppColors.textSecondary,
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(
+            Icons.desktop_windows,
+            size: 36.0 * settings.scale,
+            color: Colors.white70,
+          ),
+          const SizedBox(width: 8),
+          Text(
+            'Masaüstü',
+            style: TextStyle(
+              color: Colors.white70,
+              shadows: const [
+                Shadow(blurRadius: 6, color: Colors.black54, offset: Offset(0, 2)),
+              ],
+              fontSize: 32.0 * settings.scale,
             ),
-            const SizedBox(width: 8),
-            Text(
-              'Masaüstü',
-              style: AppTypography.headlineMedium.copyWith(
-                color: AppColors.textSecondary,
-                fontSize: 32.0 * settings.scale,
-              ),
-            ),
+          ),
           ],
         ),
       );
     }
 
-    return Center(
+    return GestureDetector(
+      onSecondaryTap: openColorSettings,
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
           Text(
             '%${batteryState.percentage}',
-            style: AppTypography.headlineMedium.copyWith(
-              color: _getBatteryColor(batteryState),
-              fontWeight: settings.bold ? FontWeight.bold : FontWeight.normal,
-              fontSize: 48.0 * settings.scale,
-            ),
+            style: TextStyle(
+              color: fontColor,
+            shadows: const [
+              Shadow(blurRadius: 6, color: Colors.black54, offset: Offset(0, 2)),
+            ],
+            fontWeight: settings.bold ? FontWeight.bold : FontWeight.normal,
+            fontSize: 48.0 * settings.scale,
           ),
-          const SizedBox(width: 8),
-          if (settings.showIcon)
-            _BatteryIcon(
-              batteryState: batteryState,
-              settings: settings,
-            ),
+        ),
+        const SizedBox(width: 8),
+        if (settings.showIcon)
+          _BatteryIcon(
+            batteryState: batteryState,
+            settings: settings,
+          ),
         ],
       ),
     );
-  }
-
-  Color _getBatteryColor(BatteryState state) {
-    if (state.isLowBattery) return AppColors.error;
-    if (state.isFullCharge) return AppColors.success;
-    return AppColors.textPrimary;
   }
 }
 
@@ -97,8 +109,8 @@ class _BatteryIcon extends StatelessWidget {
         'assets/images/lightning_icon.svg',
         width: size,
         height: size,
-        colorFilter: ColorFilter.mode(
-          AppColors.warning,
+        colorFilter: const ColorFilter.mode(
+          Color(0xFFFFC107),
           BlendMode.srcIn,
         ),
       );
@@ -106,7 +118,7 @@ class _BatteryIcon extends StatelessWidget {
       return Icon(
         Icons.bolt,
         size: size,
-        color: AppColors.warning,
+        color: const Color(0xFFFFC107),
       );
     }
   }
@@ -118,19 +130,19 @@ class _BatteryIcon extends StatelessWidget {
 
     if (level >= 90) {
       icon = Icons.battery_full;
-      color = AppColors.success;
+      color = const Color(0xFF4CAF50);
     } else if (level >= 60) {
       icon = Icons.battery_5_bar;
-      color = AppColors.success;
+      color = const Color(0xFF4CAF50);
     } else if (level >= 40) {
       icon = Icons.battery_4_bar;
-      color = AppColors.warning;
+      color = const Color(0xFFFFC107);
     } else if (level >= 20) {
       icon = Icons.battery_2_bar;
-      color = AppColors.warning;
+      color = const Color(0xFFFFC107);
     } else {
       icon = Icons.battery_alert;
-      color = AppColors.error;
+      color = const Color(0xFFCF6679);
     }
 
     return Icon(icon, size: size, color: color);
