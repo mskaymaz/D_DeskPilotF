@@ -1,9 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:window_manager/window_manager.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
+import 'package:window_manager/window_manager.dart';
 import 'core/design_tokens/design_tokens.dart';
 import 'core/localization/app_localizations.dart';
+import 'application/providers/clock_provider.dart';
+import 'infrastructure/platform/clock_service_impl.dart';
+import 'presentation/screens/clock_window.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -20,14 +24,21 @@ void main() async {
     DeviceOrientation.landscapeRight,
   ]);
 
-  runApp(const DeskPilotApp());
+  runApp(
+    ProviderScope(
+      overrides: [
+        clockServiceProvider.overrideWithValue(ClockServiceImpl()),
+      ],
+      child: const DeskPilotApp(),
+    ),
+  );
 }
 
-class DeskPilotApp extends StatelessWidget {
+class DeskPilotApp extends ConsumerWidget {
   const DeskPilotApp({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
       title: 'DeskPilotF',
@@ -35,14 +46,13 @@ class DeskPilotApp extends StatelessWidget {
         brightness: Brightness.dark,
         scaffoldBackgroundColor: AppColors.background,
         useMaterial3: true,
-        colorScheme: ColorScheme.dark(
-          primary: AppColors.primary,
-          secondary: AppColors.secondary,
-          surface: AppColors.surface,
-          background: AppColors.background,
+        primaryColor: AppColors.primary,
+        colorScheme: ColorScheme.fromSeed(
+          seedColor: AppColors.primary,
+          brightness: Brightness.dark,
         ),
       ),
-      localizationsDelegates: const [
+      localizationsDelegates: [
         AppLocalizationsDelegate(),
         GlobalMaterialLocalizations.delegate,
         GlobalWidgetsLocalizations.delegate,
@@ -53,25 +63,31 @@ class DeskPilotApp extends StatelessWidget {
         Locale('en', ''),
       ],
       locale: const Locale('tr', ''),
-      home: const DesktopSurface(),
+      home: DesktopSurface(),
     );
   }
 }
 
-class DesktopSurface extends StatelessWidget {
-  const DesktopSurface({super.key});
+class DesktopSurface extends ConsumerStatefulWidget {
+  DesktopSurface({super.key});
+
+  @override
+  ConsumerState<DesktopSurface> createState() => _DesktopSurfaceState();
+}
+
+class _DesktopSurfaceState extends ConsumerState<DesktopSurface> {
+  @override
+  void initState() {
+    super.initState();
+    ref.read(clockNotifierProvider.notifier).start();
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: AppColors.background,
       body: Center(
-        child: Text(
-          'DeskPilotF',
-          style: AppTypography.headlineMedium.copyWith(
-            color: AppColors.textPrimary,
-          ),
-        ),
+        child: ClockWindow(),
       ),
     );
   }
