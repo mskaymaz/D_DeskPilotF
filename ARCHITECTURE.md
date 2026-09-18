@@ -2,7 +2,7 @@
 
 ## 1. Purpose
 
-This document defines the technical architecture of DeskPilotC rebuilt on **Flutter/Dart**.
+This document defines the technical architecture of DeskPilotF rebuilt on **Flutter/Dart**.
 
 It must be read together with:
 - `DESKPILOT_PRODUCT_SPEC.md`
@@ -12,7 +12,7 @@ It must be read together with:
 - `TASK.md`
 
 `DESKPILOT_PRODUCT_SPEC.md` defines **what the product should do**.
-This document defines **how DeskPilotC should be engineered**.
+This document defines **how DeskPilotF should be engineered**.
 
 ---
 
@@ -58,7 +58,7 @@ This document defines **how DeskPilotC should be engineered**.
 
 ## 3. Architectural Goals
 
-DeskPilotC must optimize for:
+DeskPilotF must optimize for:
 
 - **High visual quality** — Custom Design Tokens, rich animations
 - **UI freedom** — Flutter's rendering engine gives pixel-level control
@@ -136,7 +136,7 @@ The domain must not depend on Flutter.
 ## 5. Repository Structure
 
 ```
-D_DeskPilotC/
+D_DeskPilotF/
 │
 ├── pubspec.yaml
 ├── README.md
@@ -325,7 +325,7 @@ TodoPanel (ConsumerWidget)
 
 ## 9. Persistence
 
-DeskPilotC uses structured local persistence.
+DeskPilotF uses structured local persistence.
 
 ### SQLite (drift)
 - Todo, Reminder, and future sync metadata
@@ -412,7 +412,7 @@ Create reusable `ModuleWindow` widget with position/drag/visibility logic.
 
 ## 12. Design System
 
-DeskPilotC establishes a design system from day one.
+DeskPilotF establishes a design system from day one.
 
 `lib/core/design_tokens/` contains:
 - `colors.dart` — Primary, surface, background, accent colors (light/dark)

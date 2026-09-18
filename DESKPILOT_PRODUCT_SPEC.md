@@ -6,9 +6,9 @@ This document defines the product behavior and functional scope of DeskPilot as 
 
 The frozen Python application is a **behavioral and product reference**, not a source-code migration target.
 
-DeskPilotC must not mechanically translate Python/PyQt/PySide code into C++. Existing workarounds, widget-specific limitations, legacy structure, and accidental implementation details must not be carried forward unless they represent an intentional product requirement.
+DeskPilotF must not mechanically translate Python/PyQt/PySide code into C++. Existing workarounds, widget-specific limitations, legacy structure, and accidental implementation details must not be carried forward unless they represent an intentional product requirement.
 
-This specification is the primary reference for **what DeskPilot is expected to do**. The technical architecture of DeskPilotC must be defined separately.
+This specification is the primary reference for **what DeskPilot is expected to do**. The technical architecture of DeskPilotF must be defined separately.
 
 ---
 
@@ -52,7 +52,7 @@ The Python reference implementation was frozen when:
 - Turkish-first V1 stabilization was still in progress.
 - Mobile, sync, web, and global rollout were future work.
 
-The new DeskPilotC implementation starts from this known product state but may redesign internal architecture and UI implementation completely.
+The new DeskPilotF implementation starts from this known product state but may redesign internal architecture and UI implementation completely.
 
 ---
 
@@ -132,7 +132,7 @@ Known reference fonts include:
 - DS-Digital
 - Technology
 
-The previous seconds-width jitter issue was explicitly deferred and must not automatically dictate the new implementation. DeskPilotC should solve visual stability naturally if the new rendering architecture allows it.
+The previous seconds-width jitter issue was explicitly deferred and must not automatically dictate the new implementation. DeskPilotF should solve visual stability naturally if the new rendering architecture allows it.
 
 ---
 
@@ -204,7 +204,7 @@ The frozen reference established the following intended behavior:
 - Icon sizing should be visually proportional and independent from unrelated text font sizing.
 - The feature was considered stable/frozen in the Python reference and should be behaviorally preserved unless intentionally redesigned.
 
-DeskPilotC may redesign the visual presentation significantly while preserving fast contextual access.
+DeskPilotF may redesign the visual presentation significantly while preserving fast contextual access.
 
 ---
 
@@ -240,7 +240,7 @@ The reference product includes settings for:
 
 The old implementation used JSON persistence with safe loading and atomic settings writes.
 
-DeskPilotC does not have to preserve JSON as the permanent storage architecture if a superior architecture is selected, but it must:
+DeskPilotF does not have to preserve JSON as the permanent storage architecture if a superior architecture is selected, but it must:
 
 - Preserve user settings reliably.
 - Support migration/versioning.
@@ -315,7 +315,7 @@ The reference visual language included explicit overlays/status presentation suc
 - SÜRESİ GEÇTİ
 - İPTAL EDİLDİ
 
-The exact visual design may be improved in DeskPilotC.
+The exact visual design may be improved in DeskPilotF.
 
 ### 11.4 Todo Workflow
 
@@ -364,7 +364,7 @@ The Todo experience should:
 
 ## 12. Reminder System
 
-The reminder system existed at baseline level when the Python project was frozen and is the primary unfinished V1 product area to complete in DeskPilotC.
+The reminder system existed at baseline level when the Python project was frozen and is the primary unfinished V1 product area to complete in DeskPilotF.
 
 ### 12.1 Existing Baseline
 
@@ -389,7 +389,7 @@ The frozen reference already established:
 
 ### 12.2 Reminder V1 Completion Requirements
 
-DeskPilotC should complete the intended reminder design, including:
+DeskPilotF should complete the intended reminder design, including:
 
 - Reliable one-time reminders.
 - Daily recurrence.
@@ -421,7 +421,7 @@ The planned V1 direction includes:
 - Graceful failure when TTS is unavailable.
 - No mandatory cloud/API TTS dependency.
 
-The original Python-specific `pyttsx3` choice is not a requirement for DeskPilotC. Use the best native/offline solution for the new architecture.
+The original Python-specific `pyttsx3` choice is not a requirement for DeskPilotF. Use the best native/offline solution for the new architecture.
 
 ### 12.4 Reminder UI
 
@@ -443,7 +443,7 @@ The reminder UI should provide:
 
 Alarm foundations exist in the frozen reference.
 
-DeskPilotC should treat Alarm as a separate but related product capability.
+DeskPilotF should treat Alarm as a separate but related product capability.
 
 Expected direction includes:
 
@@ -455,7 +455,7 @@ Expected direction includes:
 - Daily alarm/recurrence behavior where defined.
 - Clear distinction between alarms and general reminders.
 
-The final V1 alarm scope should be confirmed during DeskPilotC roadmap planning rather than inferred solely from legacy implementation.
+The final V1 alarm scope should be confirmed during DeskPilotF roadmap planning rather than inferred solely from legacy implementation.
 
 ---
 
@@ -529,13 +529,13 @@ Product policy:
 
 The frozen reference already contains Turkish, English, and Arabic translation foundations.
 
-DeskPilotC should establish a clean localization architecture early, even while Turkish remains the primary V1 language.
+DeskPilotF should establish a clean localization architecture early, even while Turkish remains the primary V1 language.
 
 ---
 
 ## 18. Visual and UX Quality Standard
 
-DeskPilotC must not reproduce the visual limitations of the previous QWidget-based implementation.
+DeskPilotF must not reproduce the visual limitations of the previous QWidget-based implementation.
 
 The new product target is:
 
@@ -678,7 +678,7 @@ The web experience should use the same product account/sync contracts while rema
 
 The frozen Python V1 used JSON persistence.
 
-DeskPilotC should select storage based on long-term requirements.
+DeskPilotF should select storage based on long-term requirements.
 
 Likely candidates:
 
@@ -716,7 +716,7 @@ QML should primarily render state, bind properties, animate presentation, and se
 
 ---
 
-## 26. Explicit Non-Goals for Initial DeskPilotC Desktop V1
+## 26. Explicit Non-Goals for Initial DeskPilotF Desktop V1
 
 Unless deliberately reconsidered:
 
@@ -731,13 +731,13 @@ Unless deliberately reconsidered:
 
 ---
 
-## 27. DeskPilotC Implementation Principle
+## 27. DeskPilotF Implementation Principle
 
 The frozen Python project answers:
 
 > **What should the product do?**
 
-DeskPilotC architecture answers:
+DeskPilotF architecture answers:
 
 > **What is the cleanest, most scalable, highest-quality way to implement it now?**
 
@@ -745,7 +745,7 @@ When the two conflict because of legacy implementation limitations, preserve the
 
 ---
 
-## 28. Initial DeskPilotC Completion Target
+## 28. Initial DeskPilotF Completion Target
 
 The first major milestone is a professional Desktop V1 that reaches functional parity with the intended frozen Python V1 scope while substantially improving:
 

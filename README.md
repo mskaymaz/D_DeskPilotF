@@ -1,6 +1,6 @@
-﻿# D_DeskPilotC
+﻿# D_DeskPilotF
 
-DeskPilotC is the next-generation desktop productivity environment, rebuilt on a clean **Flutter/Dart** architecture.
+DeskPilotF is the next-generation desktop productivity environment, rebuilt on a clean **Flutter/Dart** architecture.
 
 The project is designed as the desktop foundation of a future multi-device DeskPilot ecosystem, with planned mobile, web, and optional synchronization layers.
 
@@ -54,7 +54,7 @@ Future sync, mobile, and web work must not block Desktop V1 development.
 
 ## Core Product Principles
 
-DeskPilotC prioritizes:
+DeskPilotF prioritizes:
 
 - Maximum practical visual quality
 - High UI flexibility via Flutter rendering engine
@@ -101,7 +101,7 @@ The frozen Python DeskPilot answers:
 
 > What should the product do?
 
-DeskPilotC answers:
+DeskPilotF answers:
 
 > What is the cleanest, most scalable, highest-quality way to implement it now?
 

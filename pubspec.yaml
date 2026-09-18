@@ -1,5 +1,5 @@
-name: desk_pilot_c
-description: DeskPilotC - Next-generation desktop productivity environment
+name: desk_pilot_f
+description: DeskPilotF - Next-generation desktop productivity environment
 publish_to: 'none'
 version: 0.1.0+1
 
@@ -10,48 +10,11 @@ dependencies:
   flutter:
     sdk: flutter
   window_manager: ^0.5.2
-  tray_manager: ^0.5.3
-  flutter_secure_storage: ^11.2.0
-  path_provider: ^2.1.0
-  url_launcher: ^6.2.0
-  flutter_tts: ^4.2.5
-  audioplayers: ^6.8.1
-  drift: ^2.14.0
-  sqlite3_flutter_libs: ^0.6.0+eol
-  hive: ^2.2.3
-  riverpod: ^3.4.3
-  riverpod_annotation: ^4.0.7
-  flutter_gen: ^5.0.0
-  intl: ^0.20.3
-  collection: ^1.18.0
-  uuid: ^4.3.0
 
 dev_dependencies:
   flutter_test:
     sdk: flutter
-  drift_dev: ^2.14.0
-  build_runner: ^2.4.0
-  mockito: ^5.4.0
   flutter_lints: ^6.0.0
 
 flutter:
   uses-material-design: true
-  assets:
-    - assets/images/
-    - assets/fonts/
-    - img/icons/
-    - img/logos/
-  fonts:
-    - family: Digital7
-      fonts:
-        - asset: assets/fonts/digital-7.regular.ttf
-    - family: Stencil
-      fonts:
-        - asset: assets/fonts/STENCIL.TTF
-    - family: Technology
-      fonts:
-        - asset: assets/fonts/Technology.ttf
-
-splash:
-  color: "#111827"
-  image: assets/images/splash.png

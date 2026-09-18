@@ -38,10 +38,10 @@ At the first meaningful error or unexpected result, stop. Do not continue with d
 Keep commands compact and easy to copy. For dependent operations, give one command/block and wait for its output before giving the next.
 
 ### 11. Flutter Reference
-The Flutter/Dart DeskPilot is the active implementation. The removed C++/Qt implementation is historical reference only. Do not mechanically port Python/PyQt code or legacy workarounds into DeskPilotC.
+The Flutter/Dart DeskPilot is the active implementation. The removed C++/Qt implementation is historical reference only. Do not mechanically port Python/PyQt code or legacy workarounds into DeskPilotF.
 
 ### 12. No Image Generation
-Do not use image generation or image editing tools for DeskPilotC development.
+Do not use image generation or image editing tools for DeskPilotF development.
 
 ### 13. Communication
 Communicate with the user in Turkish unless explicitly requested otherwise. Default status responses should be one line.

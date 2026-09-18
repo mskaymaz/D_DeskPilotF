@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:window_manager/window_manager.dart';
-import 'package:riverpod/riverpod.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -12,42 +11,42 @@ void main() async {
   await windowManager.setAlwaysOnTop(true);
   await windowManager.setTitleBarStyle(TitleBarStyle.hidden);
 
-  SystemChrome.setEnabledSystemUIMode(SystemUiMode.immersiveSticky);
-  SystemChrome.setPreferredOrientations([
-    DeviceOrientation.landscapeLeft,
-    DeviceOrientation.landscapeRight,
-  ]);
+  await windowManager.setMinimumSize(const Size(800, 600));
 
-  final app = ProviderScope(child: DeskPilotApp());
-  runApp(app);
+  runApp(const DeskPilotApp());
 }
 
-class DeskPilotApp extends ConsumerWidget {
+class DeskPilotApp extends StatelessWidget {
+  const DeskPilotApp({super.key});
+
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  Widget build(BuildContext context) {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
-      title: 'DeskPilotC',
+      title: 'DeskPilotF',
       theme: ThemeData(
         brightness: Brightness.dark,
         scaffoldBackgroundColor: Colors.transparent,
         useMaterial3: true,
       ),
-      home: DesktopSurface(),
+      home: const DesktopSurface(),
     );
   }
 }
 
 class DesktopSurface extends StatelessWidget {
+  const DesktopSurface({super.key});
+
   @override
   Widget build(BuildContext context) {
-    return Stack(
-      children: [
-        // Module windows will be positioned here
-        // ClockWindow, DateWindow, BatteryWindow
-        // TodoPanel, ReminderPanel
-        // QuickActionsBar
-      ],
+    return const Scaffold(
+      backgroundColor: Colors.transparent,
+      body: Center(
+        child: Text(
+          'DeskPilotF',
+          style: TextStyle(fontSize: 24, color: Colors.white),
+        ),
+      ),
     );
   }
 }

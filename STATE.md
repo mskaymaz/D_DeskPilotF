@@ -1,7 +1,7 @@
 # DESKPILOTC STATE
 
 ## Project
-**D_DeskPilotC**
+**D_DeskPilotF**
 
 ## Repository
 Remote: `https://github.com/mskaymaz/D_DeskPilotF`

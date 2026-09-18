@@ -6,7 +6,7 @@
 - `[ ]` Not started
 - `[!]` Blocked / decision required
 
-## Project: D_DeskPilotC
+## Project: D_DeskPilotF
 ## Technology Stack: Flutter/Dart + C++ (engine via FFI when needed)
 ## Platform: Windows (initial), macOS/Linux (future)
 

@@ -15,7 +15,7 @@
 
 ## [x] Phase 0 — Flutter Project Foundation
 
-**Goal:** Initialize the new DeskPilotC Flutter project on a clean foundation.
+**Goal:** Initialize the new DeskPilotF Flutter project on a clean foundation.
 
 ### Tasks
 
