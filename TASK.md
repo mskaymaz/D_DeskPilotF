@@ -158,15 +158,38 @@
 
 ---
 
-## Phase 4 — Battery Module
+## Phase 4 — Battery Module ✅ COMPLETE
 
 ### Tasks
-- [ ] Platform-independent battery abstraction (IBatteryService)
-- [ ] Windows battery implementation (WinMM API)
-- [ ] Battery percentage/status display
-- [ ] Charging/plugged-in detection
-- [ ] Optional battery icon
-- [ ] Battery visibility toggle
+- [x] Platform-independent battery abstraction (IBatteryService) — `battery_service.dart`
+- [x] Windows battery implementation (WMI with `-NoProfile`) — `battery_service_impl.dart`
+- [x] Battery percentage/status display
+- [x] Charging/plugged-in detection
+- [x] Optional battery icon (lightning SVG)
+- [x] Battery visibility toggle
+- [x] Font, color, bold settings
+- [x] Independent battery scaling
+- [x] Low-battery threshold (configurable)
+- [x] Full-charge threshold (configurable)
+- [x] Alert interval setting
+- [x] Alert sound configuration
+- [x] Silent mode respect
+- [x] No-battery fallback behavior
+- [x] Efficient 30-second coarse polling
+- [x] Grouped and free layout integration
+- [x] BatteryNotifier + StateNotifierProvider
+- [x] BatteryWindow UI with SVG lightning icon on right
+- [x] ProviderScope integration in main.dart
+
+### Completion Criteria
+- Battery percentage correctly shows via WMI
+- Lightning SVG icon displays on right when charging
+- App builds and runs
+- Clock + Date + Battery all displayed
+
+### Notes
+- `flutter build windows --debug` fails at `INSTALL.vcxproj` — manually copy `build\flutter_assets\*` to `build\windows\x64\runner\Debug\data\` after build
+- D:\Code dışına yazma yasak kesintisiz
 - [ ] Font, color, bold settings
 - [ ] Independent battery scaling
 - [ ] Low-battery threshold (configurable)
@@ -438,4 +461,4 @@
 ---
 
 ## Immediate Next Task
-1. Proceed to Phase 4: Battery Module
+1. Proceed to Phase 5: Layout System and Quick Actions

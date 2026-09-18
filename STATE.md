@@ -7,29 +7,34 @@
 Remote: `https://github.com/mskaymaz/D_DeskPilotF`
 
 ## Current Phase
-**Phase 3 — Date Module** ✅ COMPLETE
+**Phase 4 — Battery Module** ✅ COMPLETE
 
-<!-- BISMILLAH CHECKPOINT: Phase 3 – Complete -->
+<!-- BISMILLAH CHECKPOINT: Phase 4 – Complete -->
 
 ## Current Status
-Phase 3 complete. Date module with Gregorian + Hijri support is functional.
+Phase 4 complete. Battery module working with WMI + SVG icon.
 
 ## Completed
 - C++/Qt codebase removed from repository
 - Git remote updated to `https://github.com/mskaymaz/D_DeskPilotF`
 - Flutter project structure created (`lib/`, `test/`, `assets/`, `windows/`)
-- `pubspec.yaml` configured with `window_manager`, `flutter_localizations`, `intl`, `riverpod`, `flutter_riverpod`
-- Design tokens: `lib/core/design_tokens/` (colors, typography, spacing, radius, sizing, z_layers, motion)
-- Localization: `lib/core/localization/app_localizations.dart`, `l10n/` (TR, EN)
-- **Phase 2 — Clock Module:** domain model, IClockService, Timer-based implementation, ClockNotifier, ClockWindow
-- **Phase 3 — Date Module:**
-  - `lib/domain/models/date_model.dart` — DateSettings, DateState, DateFormatType, DateOrder
-  - `lib/domain/services/date_service.dart` — IDateService abstract interface
-  - `lib/infrastructure/platform/date_service_impl.dart` — Timer-based IDateService with intl (Gregorian, Hijri, combined)
-  - `lib/application/providers/date_provider.dart` — DateNotifier, StateNotifierProvider
-  - `lib/presentation/screens/date_window.dart` — DateWindow ConsumerWidget
+- `pubspec.yaml` configured with `window_manager`, `flutter_localizations`, `intl`, `riverpod`, `flutter_riverpod`, `flutter_svg`
+- Design tokens: `lib/core/design_tokens/`
+- Localization: `lib/core/localization/app_localizations.dart`, `l10n/`
+- **Phase 2 — Clock Module:** IClockService, Timer-based, ClockNotifier, ClockWindow
+- **Phase 3 — Date Module:** IDateService, Timer-based, DateNotifier, DateWindow (Gregorian + Hijri)
+- **Phase 4 — Battery Module:**
+  - `lib/domain/models/battery_model.dart` — BatterySettings, BatteryState, BatteryStatus
+  - `lib/domain/services/battery_service.dart` — IBatteryService abstract interface
+  - `lib/infrastructure/platform/battery_service_impl.dart` — WMI-based implementation with `-NoProfile`
+  - `lib/application/providers/battery_provider.dart` — BatteryNotifier, StateNotifierProvider
+  - `lib/presentation/screens/battery_window.dart` — BatteryWindow with lightning SVG icon on right side
+  - `assets/images/lightning_icon.svg` added
+- `flutter_svg: ^2.0.13` added to dependencies
+- `assets/images/` declared in pubspec.yaml
 - `flutter build windows --debug` produces working `desk_pilot_f.exe`
-- Clock + Date displayed in transparent window
+- Clock + Date + Battery displayed in transparent window
+- Battery percentage now correctly shows via WMI `-NoProfile`
 - Note: `INSTALL.vcxproj` fails — manually copy `build\flutter_assets\*` to `build\windows\x64\runner\Debug\data\` after build
 
 ## Documentation Status

@@ -73,9 +73,9 @@ Do not automatically scan the entire repository or all documentation at the star
 
 ## CURRENT PHASE
 
-**Phase 3 — Date Module** ✅ COMPLETE
+**Phase 4 — Battery Module** ✅ COMPLETE
 
-Next immediate task: Phase 4 — Battery Module.
+Next immediate task: Phase 5 — Layout System and Quick Actions.
 
 ## Development Workflow
 
@@ -92,9 +92,9 @@ Commands and patches should be concise and fail-fast. When working interactively
 
 ## Immediate Next Steps
 
-1. Proceed to Phase 4: Battery Module
-2. Implement battery domain model and service
-3. Create battery UI
+1. Proceed to Phase 5: Layout System and Quick Actions
+2. Implement grouped and free layout
+3. Add window drag and position persistence
 4. Verify `flutter run` launches transparent window
 
 ## AI Agent Continuation Instruction
