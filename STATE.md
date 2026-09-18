@@ -7,29 +7,29 @@
 Remote: `https://github.com/mskaymaz/D_DeskPilotF`
 
 ## Current Phase
-**Phase 2 — Clock Module** ✅ COMPLETE
+**Phase 3 — Date Module** ✅ COMPLETE
 
-<!-- BISMILLAH CHECKPOINT: Phase 2 – Complete -->
+<!-- BISMILLAH CHECKPOINT: Phase 3 – Complete -->
 
 ## Current Status
-Phase 2 complete. Clock module is functional with real-time time display.
+Phase 3 complete. Date module with Gregorian + Hijri support is functional.
 
 ## Completed
 - C++/Qt codebase removed from repository
 - Git remote updated to `https://github.com/mskaymaz/D_DeskPilotF`
 - Flutter project structure created (`lib/`, `test/`, `assets/`, `windows/`)
 - `pubspec.yaml` configured with `window_manager`, `flutter_localizations`, `intl`, `riverpod`, `flutter_riverpod`
-- `lib/main.dart` created (entry point with ProviderScope, window_manager, localization)
-- Design tokens created: `lib/core/design_tokens/` (colors, typography, spacing, radius, sizing, z_layers, motion)
-- Localization infrastructure created: `lib/core/localization/app_localizations.dart`, `l10n/` (TR, EN)
-- **Phase 2 — Clock Module:**
-  - `lib/domain/models/clock_model.dart` — ClockSettings, ClockState, ClockFormat, ClockFontFamily (pure Dart)
-  - `lib/domain/services/clock_service.dart` — IClockService abstract interface
-  - `lib/infrastructure/platform/clock_service_impl.dart` — Timer-based IClockService implementation
-  - `lib/application/providers/clock_provider.dart` — ClockNotifier, StateNotifierProvider
-  - `lib/presentation/screens/clock_window.dart` — ClockWindow ConsumerWidget
-- `window_manager` verified: transparent background, hidden title bar, always-on-top
-- `flutter build windows --debug` produces working `desk_pilot_f.exe` with live clock display
+- Design tokens: `lib/core/design_tokens/` (colors, typography, spacing, radius, sizing, z_layers, motion)
+- Localization: `lib/core/localization/app_localizations.dart`, `l10n/` (TR, EN)
+- **Phase 2 — Clock Module:** domain model, IClockService, Timer-based implementation, ClockNotifier, ClockWindow
+- **Phase 3 — Date Module:**
+  - `lib/domain/models/date_model.dart` — DateSettings, DateState, DateFormatType, DateOrder
+  - `lib/domain/services/date_service.dart` — IDateService abstract interface
+  - `lib/infrastructure/platform/date_service_impl.dart` — Timer-based IDateService with intl (Gregorian, Hijri, combined)
+  - `lib/application/providers/date_provider.dart` — DateNotifier, StateNotifierProvider
+  - `lib/presentation/screens/date_window.dart` — DateWindow ConsumerWidget
+- `flutter build windows --debug` produces working `desk_pilot_f.exe`
+- Clock + Date displayed in transparent window
 - Note: `INSTALL.vcxproj` fails — manually copy `build\flutter_assets\*` to `build\windows\x64\runner\Debug\data\` after build
 
 ## Documentation Status

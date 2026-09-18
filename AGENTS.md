@@ -73,9 +73,9 @@ Do not automatically scan the entire repository or all documentation at the star
 
 ## CURRENT PHASE
 
-**Phase 2 — Clock Module** ✅ COMPLETE
+**Phase 3 — Date Module** ✅ COMPLETE
 
-Next immediate task: Phase 3 — Date Module.
+Next immediate task: Phase 4 — Battery Module.
 
 ## Development Workflow
 
@@ -92,9 +92,9 @@ Commands and patches should be concise and fail-fast. When working interactively
 
 ## Immediate Next Steps
 
-1. Proceed to Phase 3: Date Module
-2. Implement date domain model and service
-3. Create Gregorian/Hijri date display
+1. Proceed to Phase 4: Battery Module
+2. Implement battery domain model and service
+3. Create battery UI
 4. Verify `flutter run` launches transparent window
 
 ## AI Agent Continuation Instruction

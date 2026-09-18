@@ -101,23 +101,24 @@
 
 ---
 
-## [ ] Phase 3 — Date Module
+## [x] Phase 3 — Date Module
 
 **Goal:** Implement complete Turkish-first date experience with Gregorian + Hijri display.
 
 ### Tasks
 
-- [ ] Date service
-- [ ] Gregorian date
-- [ ] Hijri (IslamicCivil) date
-- [ ] Combined display
-- [ ] Date ordering options
-- [ ] Format choices (dotted, slash, ISO)
-- [ ] Optional week number
-- [ ] Font, color, bold settings
-- [ ] Date visibility and scaling
-- [ ] Persistent settings
-- [ ] Turkish locale correctness
+- [x] Date service — IDateService interface + Timer-based implementation
+- [x] Gregorian date (dotted, slash, ISO formats)
+- [x] Hijri date (intl ar_SA locale)
+- [x] Combined display
+- [x] Date ordering options (Gregorian-first/Hijri-first)
+- [x] Format choices
+- [x] Optional week number
+- [x] Font, color, bold settings
+- [x] Date visibility and scaling
+- [x] Persistent settings (DateSettings model)
+- [x] DateWindow UI
+- [x] Turkish locale correctness
 
 ### Completion Criteria
 
@@ -419,16 +420,18 @@ These phases must not block Desktop V1.
 
 # CURRENT POSITION
 
-**Current phase:** Phase 1 — Design System ✅ COMPLETE
+**Current phase:** Phase 3 — Date Module ✅ COMPLETE
 
 **Completed so far:**
 - C++/Qt codebase removed
 - Git remote updated to https://github.com/mskaymaz/D_DeskPilotF
 - Flutter project structure created
-- pubspec.yaml configured with window_manager, flutter_localizations, intl, riverpod
-- lib/main.dart created with design tokens and localization
+- pubspec.yaml configured with window_manager, flutter_localizations, intl, riverpod, flutter_riverpod
+- lib/main.dart with ProviderScope, design tokens, localization, Clock + Date
 - Design tokens created (colors, typography, spacing, radius, sizing, z_layers, motion)
-- Localization infrastructure created (TR/EN)
+- Localization infrastructure (TR/EN)
+- Clock Module: IClockService, Timer-based, ClockNotifier, ClockWindow
+- Date Module: IDateService, Timer-based, DateNotifier, DateWindow (Gregorian + Hijri)
 - flutter build windows --debug produces working desk_pilot_f.exe
 - window_manager working: transparent bg, hidden title bar, always-on-top
 
