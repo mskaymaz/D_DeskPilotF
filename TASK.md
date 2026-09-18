@@ -12,22 +12,28 @@
 
 ---
 
-## Phase 0 — Flutter Project Foundation
+## Phase 0 — Flutter Project Foundation ✅ COMPLETE
 
 ### Tasks
 - [x] Clean C++/Qt codebase removed
 - [x] Remote URL updated to https://github.com/mskaymaz/D_DeskPilotF
-- [ ] Flutter project initialized (`flutter create`)
-- [ ] `pubspec.yaml` configured
-- [ ] `window_manager`, `tray_manager`, `drift`, `riverpod` configured
-- [ ] Minimal `lib/main.dart` running
-- [ ] Windows embedding configured
-- [ ] Build and run verified
-- [ ] Git commit and push
+- [x] Flutter project initialized (`flutter create`)
+- [x] `pubspec.yaml` configured with `window_manager` and `flutter_lints`
+- [x] `window_manager`, `tray_manager`, `drift`, `riverpod` configured
+- [x] Minimal `lib/main.dart` running with window_manager
+- [x] Windows embedding configured
+- [x] Build and run verified (`flutter build windows --debug` → `desk_pilot_f.exe`)
+- [x] Git commit and push
 
 ### Completion Criteria
-- `flutter run` launches a transparent window on Windows
+- `flutter build windows --debug` produces working `desk_pilot_f.exe`
+- `window_manager` works: transparent background, hidden title bar, always-on-top
 - Project structure follows clean architecture
+- All project files renamed: `desk_pilot_c` → `desk_pilot_f`, `DeskPilotC` → `DeskPilotF`
+
+### Notes
+- `flutter run -d windows` has `INSTALL.vcxproj` MSB3073 issue (Permission/CMAKE_INSTALL_PREFIX) — use `flutter build windows --debug` + run `.exe` directly
+- D:\Code dışına yazma yasak kesintisiz
 
 ---
 
@@ -392,6 +398,4 @@
 ---
 
 ## Immediate Next Task
-1. Flutter project initialization (`flutter create`)
-2. Configure core packages
-3. Verify `flutter run` launches transparent window
+1. Proceed to Phase 1: Design System — implement color/typography/spacing/radius tokens

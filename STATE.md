@@ -1,4 +1,4 @@
-# DESKPILOTC STATE
+# DESKPILOTF STATE
 
 ## Project
 **D_DeskPilotF**
@@ -7,31 +7,32 @@
 Remote: `https://github.com/mskaymaz/D_DeskPilotF`
 
 ## Current Phase
-**Phase 0 — Flutter Project Foundation**
+**Phase 0 — Flutter Project Foundation** ✅ COMPLETE
 
-<!-- BISMILLAH CHECKPOINT: Phase 0 – Project initialization in progress -->
+<!-- BISMILLAH CHECKPOINT: Phase 0 – Complete -->
 
 ## Current Status
-Fresh Flutter/Dart project setup. All C++/Qt code has been removed. Repository structure rebuilt from scratch.
-
-Previous C++/Qt codebase was frozen as historical reference.
+Phase 0 complete. Flutter/Dart project is fully initialized and verified. Window_manager working with transparent always-on-top desktop window.
 
 ## Completed
 - C++/Qt codebase removed from repository
 - Git remote updated to `https://github.com/mskaymaz/D_DeskPilotF`
 - Flutter project structure created (`lib/`, `test/`, `assets/`, `windows/`)
-- `pubspec.yaml` configured with core dependencies
+- `pubspec.yaml` configured with `window_manager` and `flutter_lints`
 - `lib/main.dart` created (entry point with window_manager initialization)
-- `.gitignore` updated for Flutter
-- Documentation files marked for Flutter rewrite
+- `window_manager` verified: transparent background, hidden title bar, always-on-top
+- `flutter build windows --debug` produces working `desk_pilot_f.exe`
+- Windows embedding configured and verified
+- Documentation updated for Flutter/Dart and renamed to DeskPilotF
+- D:\Code dışına yazma yasak — tüm değişikler D:\Code\mskaymaz\D_DeskPilotF içinde
 
 ## Documentation Status
-- `DESKPILOT_PRODUCT_SPEC.md` — Retained (product behavior reference)
-- `PRODUCT_ARCHITECTURE_PRINCIPLES_AI_EN.md` — Retained (architecture principles)
-- `ARCHITECTURE.md` — Pending rewrite for Flutter/Dart
-- `ROADMAP.md` — Pending rewrite for Flutter phases
-- `README.md` — Pending rewrite for Flutter
-- `AGENTS.md` — Pending update for Flutter workflow
+- `DESKPILOT_PRODUCT_SPEC.md` — Updated for Flutter/Dart
+- `PRODUCT_ARCHITECTURE_PRINCIPLES_AI_EN.md` — Retained
+- `ARCHITECTURE.md` — Updated for Flutter/Dart
+- `ROADMAP.md` — Updated for Flutter phases
+- `README.md` — Updated for Flutter
+- `AGENTS.md` — Updated for Flutter workflow
 
 ## Technology Stack
 - **UI:** Flutter/Dart + Material 3 + Custom Design Tokens
@@ -61,6 +62,7 @@ Flutter UI (Presentation Layer)
 - All user-facing text must be localization-ready
 - Design Tokens must be consumed by all widgets
 - File size limit: 400-450 lines soft, 700 hard
+- D:\Code dışına yazma yok — bu kural kesin
 
 ## Development Workflow
 SPP-style workflow:
@@ -73,10 +75,9 @@ SPP-style workflow:
 7. Update `ROADMAP.md` when phase-level progress changes
 
 ## Immediate Next Steps
-1. Run `flutter create .` to initialize Flutter embedding
-2. Run `flutter pub get`
-3. Verify `flutter run` launches transparent window
-4. Proceed to Phase 1: Design System
+1. Proceed to Phase 1: Design System
+2. Implement color/typography/spacing/radius design tokens
+3. Create reusable base widgets
 
 ## AI Agent Continuation Instruction
 Before modifying this repository, read in this order:
@@ -93,4 +94,4 @@ Continue from the current state. Do not restart architectural interpretation unl
 Communicate with the user in Turkish unless explicitly requested otherwise.
 
 ## Last Updated
-2026-09-17 — Phase 0: Flutter project structure established, C++/Qt codebase removed.
+2026-09-18 — Phase 0: Flutter/Dart project foundation verified. window_manager working. desk_pilot_f.exe builds and runs.
