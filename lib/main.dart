@@ -6,8 +6,11 @@ import 'package:window_manager/window_manager.dart';
 import 'core/design_tokens/design_tokens.dart';
 import 'core/localization/app_localizations.dart';
 import 'application/providers/clock_provider.dart';
+import 'application/providers/date_provider.dart';
 import 'infrastructure/platform/clock_service_impl.dart';
+import 'infrastructure/platform/date_service_impl.dart';
 import 'presentation/screens/clock_window.dart';
+import 'presentation/screens/date_window.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -28,6 +31,7 @@ void main() async {
     ProviderScope(
       overrides: [
         clockServiceProvider.overrideWithValue(ClockServiceImpl()),
+        dateServiceProvider.overrideWithValue(DateServiceImpl()),
       ],
       child: const DeskPilotApp(),
     ),
@@ -87,7 +91,14 @@ class _DesktopSurfaceState extends ConsumerState<DesktopSurface> {
     return Scaffold(
       backgroundColor: AppColors.background,
       body: Center(
-        child: ClockWindow(),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            ClockWindow(),
+            SizedBox(height: 16),
+            DateWindow(),
+          ],
+        ),
       ),
     );
   }
