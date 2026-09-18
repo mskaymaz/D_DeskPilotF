@@ -7,10 +7,13 @@ import 'core/design_tokens/design_tokens.dart';
 import 'core/localization/app_localizations.dart';
 import 'application/providers/clock_provider.dart';
 import 'application/providers/date_provider.dart';
+import 'application/providers/battery_provider.dart';
 import 'infrastructure/platform/clock_service_impl.dart';
 import 'infrastructure/platform/date_service_impl.dart';
+import 'infrastructure/platform/battery_service_impl.dart';
 import 'presentation/screens/clock_window.dart';
 import 'presentation/screens/date_window.dart';
+import 'presentation/screens/battery_window.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -32,6 +35,7 @@ void main() async {
       overrides: [
         clockServiceProvider.overrideWithValue(ClockServiceImpl()),
         dateServiceProvider.overrideWithValue(DateServiceImpl()),
+        batteryServiceProvider.overrideWithValue(BatteryServiceImpl()),
       ],
       child: const DeskPilotApp(),
     ),
@@ -97,6 +101,8 @@ class _DesktopSurfaceState extends ConsumerState<DesktopSurface> {
             ClockWindow(),
             SizedBox(height: 16),
             DateWindow(),
+            SizedBox(height: 16),
+            BatteryWindow(),
           ],
         ),
       ),
