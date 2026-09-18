@@ -7,24 +7,30 @@
 Remote: `https://github.com/mskaymaz/D_DeskPilotF`
 
 ## Current Phase
-**Phase 1 — Design System & Localization** ✅ COMPLETE
+**Phase 2 — Clock Module** ✅ COMPLETE
 
-<!-- BISMILLAH CHECKPOINT: Phase 1 – Complete -->
+<!-- BISMILLAH CHECKPOINT: Phase 2 – Complete -->
 
 ## Current Status
-Phase 1 complete. Design tokens and localization infrastructure established.
+Phase 2 complete. Clock module is functional with real-time time display.
 
 ## Completed
 - C++/Qt codebase removed from repository
 - Git remote updated to `https://github.com/mskaymaz/D_DeskPilotF`
 - Flutter project structure created (`lib/`, `test/`, `assets/`, `windows/`)
-- `pubspec.yaml` configured with `window_manager`, `flutter_localizations`, `intl`, `riverpod`
-- `lib/main.dart` created (entry point with window_manager + localization + design tokens)
-- `window_manager` verified: transparent background, hidden title bar, always-on-top
+- `pubspec.yaml` configured with `window_manager`, `flutter_localizations`, `intl`, `riverpod`, `flutter_riverpod`
+- `lib/main.dart` created (entry point with ProviderScope, window_manager, localization)
 - Design tokens created: `lib/core/design_tokens/` (colors, typography, spacing, radius, sizing, z_layers, motion)
-- Localization infrastructure created: `lib/core/localization/app_localizations.dart`, `l10n/` (TR, EN ARB files)
-- `flutter build windows --debug` produces working `desk_pilot_f.exe`
-- Note: `INSTALL.vcxproj` fails — use `flutter build windows --debug` then manually copy `build\flutter_assets\*` to `build\windows\x64\runner\Debug\data\`
+- Localization infrastructure created: `lib/core/localization/app_localizations.dart`, `l10n/` (TR, EN)
+- **Phase 2 — Clock Module:**
+  - `lib/domain/models/clock_model.dart` — ClockSettings, ClockState, ClockFormat, ClockFontFamily (pure Dart)
+  - `lib/domain/services/clock_service.dart` — IClockService abstract interface
+  - `lib/infrastructure/platform/clock_service_impl.dart` — Timer-based IClockService implementation
+  - `lib/application/providers/clock_provider.dart` — ClockNotifier, StateNotifierProvider
+  - `lib/presentation/screens/clock_window.dart` — ClockWindow ConsumerWidget
+- `window_manager` verified: transparent background, hidden title bar, always-on-top
+- `flutter build windows --debug` produces working `desk_pilot_f.exe` with live clock display
+- Note: `INSTALL.vcxproj` fails — manually copy `build\flutter_assets\*` to `build\windows\x64\runner\Debug\data\` after build
 
 ## Documentation Status
 - `DESKPILOT_PRODUCT_SPEC.md` — Updated for Flutter/Dart

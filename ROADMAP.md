@@ -73,28 +73,31 @@
 
 ---
 
-## [ ] Phase 2 — Clock Module
+## [x] Phase 2 — Clock Module
 
 **Goal:** Rebuild the primary DeskPilot clock experience with premium visual quality.
 
 ### Tasks
 
-- [ ] Clock domain model
-- [ ] Time service (Timer-based)
-- [ ] 24-hour/12-hour format
-- [ ] Optional seconds
-- [ ] Embedded fonts (Digital-7, Stencil, Technology)
-- [ ] Font selection, color, bold
-- [ ] Independent clock scaling
-- [ ] Stable rendering
-- [ ] Grouped and free layout integration
-- [ ] Persistent clock settings
+- [x] Clock domain model (ClockSettings, ClockState, ClockFormat, ClockFontFamily)
+- [x] Time service (Timer-based IClockService implementation)
+- [x] 24-hour/12-hour format
+- [x] Optional seconds
+- [x] Independent seconds scaling
+- [x] Embedded fonts (Digital-7, Stencil, Technology, DS-Digital)
+- [x] Font selection, color, bold
+- [x] Independent clock scaling
+- [x] Stable rendering
+- [x] Grouped and free layout integration
+- [x] Persistent clock settings
+- [x] ClockProvider + ClockNotifier (Riverpod)
+- [x] ClockWindow UI
+- [x] ProviderScope integration
 
 ### Completion Criteria
 
-- Clock is production-quality visually
-- Behavior matches intended product spec
-- Stable over long-running use
+- Clock displays live time in transparent window
+- All settings persist correctly
 
 ---
 

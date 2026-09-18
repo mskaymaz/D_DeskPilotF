@@ -73,9 +73,9 @@ Do not automatically scan the entire repository or all documentation at the star
 
 ## CURRENT PHASE
 
-**Phase 1 — Design System & Localization** ✅ COMPLETE
+**Phase 2 — Clock Module** ✅ COMPLETE
 
-Next immediate task: Phase 2 — Clock Module.
+Next immediate task: Phase 3 — Date Module.
 
 ## Development Workflow
 
@@ -92,9 +92,9 @@ Commands and patches should be concise and fail-fast. When working interactively
 
 ## Immediate Next Steps
 
-1. Proceed to Phase 2: Clock Module
-2. Implement clock domain model and time service
-3. Create clock UI with design tokens
+1. Proceed to Phase 3: Date Module
+2. Implement date domain model and service
+3. Create Gregorian/Hijri date display
 4. Verify `flutter run` launches transparent window
 
 ## AI Agent Continuation Instruction
