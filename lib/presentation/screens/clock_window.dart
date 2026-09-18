@@ -6,21 +6,59 @@ import '../../domain/models/clock_model.dart';
 import '../../application/providers/clock_provider.dart';
 
 class ClockWindow extends ConsumerWidget {
-  ClockWindow({super.key});
+  const ClockWindow({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final clockState = ref.watch(clockNotifierProvider);
     final settings = ClockSettings();
+    final is24 = settings.format == ClockFormat.h24;
+    final baseFontSize = 48.0 * settings.scale;
+    final periodFontSize = baseFontSize * 0.3;
 
     return Center(
-      child: Text(
-        clockState.timeString,
-        style: AppTypography.headlineMedium.copyWith(
-          color: Color(settings.fontColor),
-          fontWeight: settings.bold ? FontWeight.bold : FontWeight.normal,
-          fontFamily: _fontFamily(settings.fontFamily),
-          fontSize: 48.0 * settings.scale,
+      child: GestureDetector(
+        onTap: () {
+          ref.read(clockNotifierProvider.notifier).toggleFormat();
+        },
+        child: Tooltip(
+          message: is24 ? '12 saat formatına geç' : '24 saat formatına geç',
+          child: clockState.period.isEmpty
+              ? Text(
+                  clockState.timeString,
+                  style: AppTypography.headlineMedium.copyWith(
+                    color: Color(settings.fontColor),
+                    fontWeight: settings.bold ? FontWeight.bold : FontWeight.normal,
+                    fontFamily: _fontFamily(settings.fontFamily),
+                    fontSize: baseFontSize,
+                  ),
+                )
+              : Row(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.baseline,
+                  textBaseline: TextBaseline.alphabetic,
+                  children: [
+                    Text(
+                      clockState.timeString,
+                      style: AppTypography.headlineMedium.copyWith(
+                        color: Color(settings.fontColor),
+                        fontWeight: settings.bold ? FontWeight.bold : FontWeight.normal,
+                        fontFamily: _fontFamily(settings.fontFamily),
+                        fontSize: baseFontSize,
+                      ),
+                    ),
+                    const SizedBox(width: 4),
+                    Text(
+                      clockState.period,
+                      style: AppTypography.headlineMedium.copyWith(
+                        color: AppColors.textSecondary,
+                        fontWeight: settings.bold ? FontWeight.bold : FontWeight.normal,
+                        fontFamily: _fontFamily(settings.fontFamily),
+                        fontSize: periodFontSize,
+                      ),
+                    ),
+                  ],
+                ),
         ),
       ),
     );

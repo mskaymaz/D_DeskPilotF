@@ -105,6 +105,8 @@ class BatteryState {
     this.silentMode = false,
   });
 
+  bool get isDesktop => !isAvailable || percentage < 0;
+
   BatteryState copyWith({
     int? percentage,
     BatteryStatus? status,

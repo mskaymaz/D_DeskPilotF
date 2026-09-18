@@ -2,9 +2,10 @@ enum DateFormatType { dotted, slash, iso }
 
 enum DateOrder { gregorianFirst, hijriFirst }
 
+enum DateDisplayMode { gregorian, hijri, combined }
+
 class DateSettings {
   final DateFormatType format;
-  final bool showHijri;
   final DateOrder order;
   final bool showWeekNumber;
   final bool showGregorian;
@@ -17,7 +18,6 @@ class DateSettings {
 
   const DateSettings({
     this.format = DateFormatType.dotted,
-    this.showHijri = true,
     this.order = DateOrder.gregorianFirst,
     this.showWeekNumber = false,
     this.showGregorian = true,
@@ -31,7 +31,6 @@ class DateSettings {
 
   DateSettings copyWith({
     DateFormatType? format,
-    bool? showHijri,
     DateOrder? order,
     bool? showWeekNumber,
     bool? showGregorian,
@@ -44,7 +43,6 @@ class DateSettings {
   }) {
     return DateSettings(
       format: format ?? this.format,
-      showHijri: showHijri ?? this.showHijri,
       order: order ?? this.order,
       showWeekNumber: showWeekNumber ?? this.showWeekNumber,
       showGregorian: showGregorian ?? this.showGregorian,
@@ -59,7 +57,6 @@ class DateSettings {
 
   Map<String, dynamic> toJson() => {
         'format': format.index,
-        'showHijri': showHijri,
         'order': order.index,
         'showWeekNumber': showWeekNumber,
         'showGregorian': showGregorian,
@@ -73,7 +70,6 @@ class DateSettings {
 
   static DateSettings fromJson(Map<String, dynamic> json) => DateSettings(
         format: DateFormatType.values[json['format'] as int? ?? 0],
-        showHijri: json['showHijri'] as bool? ?? true,
         order: DateOrder.values[json['order'] as int? ?? 0],
         showWeekNumber: json['showWeekNumber'] as bool? ?? false,
         showGregorian: json['showGregorian'] as bool? ?? true,
@@ -91,6 +87,7 @@ class DateState {
   final String hijriDate;
   final String combinedDate;
   final String weekNumber;
+  final DateDisplayMode displayMode;
   final bool isLoading;
 
   const DateState({
@@ -98,6 +95,7 @@ class DateState {
     this.hijriDate = '',
     this.combinedDate = '',
     this.weekNumber = '',
+    this.displayMode = DateDisplayMode.gregorian,
     this.isLoading = false,
   });
 
@@ -106,6 +104,7 @@ class DateState {
     String? hijriDate,
     String? combinedDate,
     String? weekNumber,
+    DateDisplayMode? displayMode,
     bool? isLoading,
   }) {
     return DateState(
@@ -113,7 +112,19 @@ class DateState {
       hijriDate: hijriDate ?? this.hijriDate,
       combinedDate: combinedDate ?? this.combinedDate,
       weekNumber: weekNumber ?? this.weekNumber,
+      displayMode: displayMode ?? this.displayMode,
       isLoading: isLoading ?? this.isLoading,
     );
+  }
+
+  String get displayText {
+    switch (displayMode) {
+      case DateDisplayMode.gregorian:
+        return gregorianDate;
+      case DateDisplayMode.hijri:
+        return hijriDate;
+      case DateDisplayMode.combined:
+        return combinedDate;
+    }
   }
 }

@@ -4,6 +4,7 @@ import 'package:intl/intl.dart';
 
 import '../../domain/models/date_model.dart';
 import '../../domain/services/date_service.dart';
+import 'hijri_date.dart';
 
 class DateServiceImpl implements IDateService {
   Timer? _timer;
@@ -35,14 +36,23 @@ class DateServiceImpl implements IDateService {
   }
 
   DateState _buildState() {
-    final now = DateTime.now();
-    final settings = DateSettings();
-    return DateState(
-      gregorianDate: _formatGregorian(now, settings),
-      hijriDate: _formatHijri(now, settings),
-      combinedDate: _formatCombined(now, settings),
-      weekNumber: _getWeekNumber(now),
-    );
+    try {
+      final now = DateTime.now();
+      final settings = DateSettings();
+      return DateState(
+        gregorianDate: _formatGregorian(now, settings),
+        hijriDate: _formatHijri(now),
+        combinedDate: _formatCombined(now, settings),
+        weekNumber: _getWeekNumber(now),
+      );
+    } catch (_) {
+      return const DateState(
+        gregorianDate: '--',
+        hijriDate: '--',
+        combinedDate: '--',
+        weekNumber: '--',
+      );
+    }
   }
 
   String _formatGregorian(DateTime date, DateSettings settings) {
@@ -61,22 +71,23 @@ class DateServiceImpl implements IDateService {
     return DateFormat(pattern, 'tr_TR').format(date);
   }
 
-  String _formatHijri(DateTime date, DateSettings settings) {
+  String _formatHijri(DateTime date) {
     try {
-      return DateFormat.yMMMMd('ar_SA').format(date);
+      final hijri = HijriDate.fromGregorian(date);
+      return hijri.format();
     } catch (_) {
-      return DateFormat.yMMMMd().format(date);
+      return '--';
     }
   }
 
   String _formatCombined(DateTime date, DateSettings settings) {
     final gregorian = _formatGregorian(date, settings);
-    final hijri = _formatHijri(date, settings);
+    final hijri = _formatHijri(date);
 
     if (settings.order == DateOrder.gregorianFirst) {
-      return '${gregorian} — ${hijri}';
+      return '$gregorian — $hijri';
     }
-    return '${hijri} — ${gregorian}';
+    return '$hijri — $gregorian';
   }
 
   String _getWeekNumber(DateTime date) {

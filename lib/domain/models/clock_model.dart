@@ -64,22 +64,26 @@ class ClockSettings {
 
 class ClockState {
   final String timeString;
+  final String period;
   final String dateString;
   final bool isLoading;
 
   const ClockState({
     this.timeString = '00:00:00',
+    this.period = '',
     this.dateString = '',
     this.isLoading = false,
   });
 
   ClockState copyWith({
     String? timeString,
+    String? period,
     String? dateString,
     bool? isLoading,
   }) {
     return ClockState(
       timeString: timeString ?? this.timeString,
+      period: period ?? this.period,
       dateString: dateString ?? this.dateString,
       isLoading: isLoading ?? this.isLoading,
     );

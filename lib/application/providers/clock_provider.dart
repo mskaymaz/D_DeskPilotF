@@ -1,13 +1,13 @@
 import 'dart:async';
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:riverpod/riverpod.dart';
 
 import '../../domain/models/clock_model.dart';
 import '../../domain/services/clock_service.dart';
+import '../../infrastructure/platform/clock_service_impl.dart';
 
 class ClockNotifier extends StateNotifier<ClockState> {
-  final IClockService _clockService;
+  final ClockServiceImpl _clockService;
   StreamSubscription<ClockState>? _subscription;
 
   ClockNotifier(this._clockService) : super(const ClockState()) {
@@ -16,7 +16,7 @@ class ClockNotifier extends StateNotifier<ClockState> {
 
   void _subscribe() {
     _subscription = _clockService.onStateChanged.listen((newState) {
-      state = newState as ClockState;
+      state = newState;
     });
   }
 
@@ -30,6 +30,13 @@ class ClockNotifier extends StateNotifier<ClockState> {
     await _clockService.stop();
   }
 
+  void toggleFormat() {
+    final newFormat = _clockService.format == ClockFormat.h24
+        ? ClockFormat.h12
+        : ClockFormat.h24;
+    _clockService.setFormat(newFormat);
+  }
+
   @override
   void dispose() {
     _subscription?.cancel();
@@ -38,7 +45,7 @@ class ClockNotifier extends StateNotifier<ClockState> {
   }
 }
 
-final clockServiceProvider = Provider<IClockService>((ref) {
+final clockServiceProvider = Provider<ClockServiceImpl>((ref) {
   throw UnimplementedError('IClockService must be provided');
 });
 

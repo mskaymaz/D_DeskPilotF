@@ -16,6 +16,7 @@ dependencies:
   riverpod: ^2.5.1
   flutter_riverpod: ^2.5.1
   flutter_svg: ^2.0.13
+  hijri: ^3.0.1
 
 dev_dependencies:
   flutter_test:

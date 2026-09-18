@@ -7,6 +7,7 @@ import '../../domain/services/battery_service.dart';
 class BatteryServiceImpl implements IBatteryService {
   Timer? _timer;
   final _controller = StreamController<BatteryState>.broadcast();
+  bool _isDesktop = false;
 
   @override
   Stream<BatteryState> get onStateChanged => _controller.stream;
@@ -14,8 +15,8 @@ class BatteryServiceImpl implements IBatteryService {
   @override
   Future<void> start() async {
     _timer?.cancel();
-    _timer = Timer.periodic(const Duration(seconds: 30), (_) => _tick());
-    _tick();
+    await _tick();
+    _timer = Timer.periodic(const Duration(seconds: 1), (_) => _tick());
   }
 
   @override
@@ -29,24 +30,55 @@ class BatteryServiceImpl implements IBatteryService {
     return _queryBattery();
   }
 
-  void _tick() {
-    _controller.add(_queryBattery());
+  Future<void> _tick() async {
+    final state = await _queryBattery();
+    _controller.add(state);
   }
 
-  BatteryState _queryBattery() {
-    try {
-      final result = Process.runSync(
-        'powershell',
-        ['-NoProfile', '-Command', 'Get-WmiObject Win32_Battery | Select-Object EstimatedChargeRemaining, BatteryStatus, PowerOnline'],
-        runInShell: true,
+  Future<BatteryState> _queryBattery() async {
+    if (_isDesktop) {
+      return const BatteryState(
+        percentage: -1,
+        status: BatteryStatus.unknown,
+        isCharging: false,
+        isPluggedIn: true,
+        isLowBattery: false,
+        isFullCharge: false,
+        isAvailable: false,
       );
+    }
 
-      if (result.exitCode == 0 && result.stdout.isNotEmpty) {
-        return _parseOutput(result.stdout.toString());
+    try {
+      final result = await Process.run(
+        'powershell',
+        [
+          '-NoProfile',
+          '-Command',
+          r'Get-WmiObject Win32_Battery | Select-Object EstimatedChargeRemaining, BatteryStatus, PowerOnline | Format-List',
+        ],
+      ).timeout(const Duration(seconds: 10));
+
+      if (result.exitCode == 0 && result.stdout.toString().isNotEmpty) {
+        final output = result.stdout.toString();
+        if (output.contains('EstimatedChargeRemaining')) {
+          return _parseOutput(output);
+        }
       }
-    } catch (_) {}
+    } on TimeoutException {
+      _isDesktop = true;
+    } catch (_) {
+      _isDesktop = true;
+    }
 
-    return BatteryState();
+    return const BatteryState(
+      percentage: -1,
+      status: BatteryStatus.unknown,
+      isCharging: false,
+      isPluggedIn: true,
+      isLowBattery: false,
+      isFullCharge: false,
+      isAvailable: false,
+    );
   }
 
   BatteryState _parseOutput(String output) {
@@ -56,31 +88,31 @@ class BatteryServiceImpl implements IBatteryService {
       bool powerOnline = false;
 
       for (var line in output.split('\n')) {
-        if (line.contains('EstimatedChargeRemaining')) {
-          final match = RegExp(r':\s*(\d+)').firstMatch(line);
+        final trimmed = line.trim();
+        if (trimmed.startsWith('EstimatedChargeRemaining')) {
+          final match = RegExp(r':\s*(\d+)').firstMatch(trimmed);
           if (match != null) percentage = int.parse(match.group(1)!);
         }
-        if (line.contains('BatteryStatus')) {
-          final match = RegExp(r':\s*(\d+)').firstMatch(line);
+        if (trimmed.startsWith('BatteryStatus')) {
+          final match = RegExp(r':\s*(\d+)').firstMatch(trimmed);
           if (match != null) batteryStatus = int.parse(match.group(1)!);
         }
-        if (line.contains('PowerOnline')) {
-          final match = RegExp(r':\s*(true|True|TRUE|false|False|FALSE)').firstMatch(line);
+        if (trimmed.startsWith('PowerOnline')) {
+          final match = RegExp(r':\s*(True|False|true|false)').firstMatch(trimmed);
           if (match != null) {
             powerOnline = match.group(1)!.toLowerCase() == 'true';
           }
         }
       }
 
-      final status = _getStatus(batteryStatus);
-      final isCharging = status == BatteryStatus.charging;
+      final isCharging = batteryStatus >= 2 && batteryStatus <= 9;
       final isPluggedIn = powerOnline || isCharging;
       final isLowBattery = percentage < 20;
       final isFullCharge = percentage >= 90;
 
       return BatteryState(
         percentage: percentage,
-        status: status,
+        status: _getStatus(batteryStatus),
         isCharging: isCharging,
         isPluggedIn: isPluggedIn,
         isLowBattery: isLowBattery,
@@ -88,28 +120,30 @@ class BatteryServiceImpl implements IBatteryService {
         isAvailable: true,
       );
     } catch (_) {
-      return BatteryState();
+      return const BatteryState(
+        percentage: -1,
+        isAvailable: false,
+      );
     }
   }
 
   BatteryStatus _getStatus(int status) {
     switch (status) {
-      case 1:
-        return BatteryStatus.full;
-      case 2:
-        return BatteryStatus.low;
       case 3:
-        return BatteryStatus.critical;
-      case 4:
-      case 7:
-        return BatteryStatus.charging;
-      case 5:
         return BatteryStatus.full;
-      case 6:
+      case 4:
+      case 5:
+      case 9:
         return BatteryStatus.low;
+      case 6:
+      case 7:
       case 8:
+        return BatteryStatus.charging;
+      case 2:
+        return BatteryStatus.charging;
+      case 1:
       default:
-        return BatteryStatus.unknown;
+        return BatteryStatus.discharging;
     }
   }
 }

@@ -88,6 +88,8 @@ class _DesktopSurfaceState extends ConsumerState<DesktopSurface> {
   void initState() {
     super.initState();
     ref.read(clockNotifierProvider.notifier).start();
+    ref.read(dateNotifierProvider.notifier).start();
+    ref.read(batteryNotifierProvider.notifier).start();
   }
 
   @override

@@ -16,7 +16,7 @@ class DateNotifier extends StateNotifier<DateState> {
 
   void _subscribe() {
     _subscription = _dateService.onStateChanged.listen((newState) {
-      state = newState as DateState;
+      state = newState.copyWith(displayMode: state.displayMode);
     });
   }
 
@@ -28,6 +28,24 @@ class DateNotifier extends StateNotifier<DateState> {
   Future<void> stop() async {
     await _subscription?.cancel();
     await _dateService.stop();
+  }
+
+  void toggleDisplayMode() {
+    switch (state.displayMode) {
+      case DateDisplayMode.gregorian:
+        state = state.copyWith(displayMode: DateDisplayMode.hijri);
+        break;
+      case DateDisplayMode.hijri:
+        state = state.copyWith(displayMode: DateDisplayMode.gregorian);
+        break;
+      case DateDisplayMode.combined:
+        state = state.copyWith(displayMode: DateDisplayMode.gregorian);
+        break;
+    }
+  }
+
+  void setDisplayMode(DateDisplayMode mode) {
+    state = state.copyWith(displayMode: mode);
   }
 
   @override
