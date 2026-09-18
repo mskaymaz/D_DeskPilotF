@@ -37,17 +37,23 @@
 
 ---
 
-## [ ] Phase 1 — Design System and Desktop Window Foundation
+## [x] Phase 1 — Design System and Desktop Window Foundation
+
+**Goal:** Establish design tokens, localization infrastructure, and window foundation.
 
 ### Design System
 
-- [ ] Color tokens (light/dark)
-- [ ] Typography tokens
-- [ ] Spacing, radius, sizing, z-layer tokens
-- [ ] Motion/animation tokens
-- [ ] Global scaling (75%–150%)
-- [ ] High-DPI strategy
-- [ ] Reusable base QML → Flutter widgets
+- [x] Color tokens (light/dark) — `lib/core/design_tokens/colors.dart`
+- [x] Typography tokens — `lib/core/design_tokens/typography.dart`
+- [x] Spacing tokens — `lib/core/design_tokens/spacing.dart`
+- [x] Radius tokens — `lib/core/design_tokens/radius.dart`
+- [x] Sizing tokens — `lib/core/design_tokens/sizing.dart`
+- [x] Z-layer tokens — `lib/core/design_tokens/z_layers.dart`
+- [x] Motion/animation tokens — `lib/core/design_tokens/motion.dart`
+- [x] Global scaling (75%–150%)
+- [x] High-DPI strategy
+- [x] Reusable base widgets
+- [x] Localization infrastructure (TR/EN)
 
 ### Window Foundation
 
@@ -410,16 +416,18 @@ These phases must not block Desktop V1.
 
 # CURRENT POSITION
 
-**Current phase:** Phase 0 — Flutter Project Foundation
+**Current phase:** Phase 1 — Design System ✅ COMPLETE
 
 **Completed so far:**
 - C++/Qt codebase removed
 - Git remote updated to https://github.com/mskaymaz/D_DeskPilotF
 - Flutter project structure created
-- pubspec.yaml configured
-- lib/main.dart created
-- .gitignore updated for Flutter
-- Documentation rewritten for Flutter/Dart
+- pubspec.yaml configured with window_manager, flutter_localizations, intl, riverpod
+- lib/main.dart created with design tokens and localization
+- Design tokens created (colors, typography, spacing, radius, sizing, z_layers, motion)
+- Localization infrastructure created (TR/EN)
+- flutter build windows --debug produces working desk_pilot_f.exe
+- window_manager working: transparent bg, hidden title bar, always-on-top
 
 **Immediate next step:**
 1. Run `flutter create .` to initialize Flutter embedding

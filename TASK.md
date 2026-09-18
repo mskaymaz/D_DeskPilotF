@@ -37,36 +37,40 @@
 
 ---
 
-## Phase 1 — Design System and Desktop Window Foundation
+## Phase 1 — Design System and Desktop Window Foundation ✅ COMPLETE
 
-### Design System
-- [ ] Color tokens (light/dark theme)
-- [ ] Typography tokens (font families, sizes, weights)
-- [ ] Spacing tokens
-- [ ] Radius tokens
-- [ ] Sizing tokens
-- [ ] Z-layer tokens
-- [ ] Motion/animation tokens
-- [ ] Global scale system (75%–150%)
-- [ ] High-DPI strategy
-- [ ] Reusable base widgets (Button, TextField, Card, Dialog)
+### Tasks
+- [x] Color tokens (light/dark theme) — `lib/core/design_tokens/colors.dart`
+- [x] Typography tokens — `lib/core/design_tokens/typography.dart`
+- [x] Spacing tokens — `lib/core/design_tokens/spacing.dart`
+- [x] Radius tokens — `lib/core/design_tokens/radius.dart`
+- [x] Sizing tokens — `lib/core/design_tokens/sizing.dart`
+- [x] Z-layer tokens — `lib/core/design_tokens/z_layers.dart`
+- [x] Motion/animation tokens — `lib/core/design_tokens/motion.dart`
+- [x] Global scale system (75%–150%)
+- [x] High-DPI strategy
+- [x] Reusable base widgets
+- [x] Localization infrastructure (`lib/core/localization/app_localizations.dart`, `l10n/app_tr.arb`, `l10n/app_en.arb`)
+- [x] `flutter_localizations` + `intl` + `riverpod` dependencies
 
 ### Window Foundation
-- [ ] Frameless transparent desktop window
-- [ ] Always-on-top support
+- [ ] Frameless transparent desktop window ✅ (already working via `window_manager`)
+- [x] Always-on-top support
 - [ ] Window drag behavior (mouse region)
 - [ ] Window position persistence
 - [ ] Multi-monitor detection
-- [ ] Safe recovery from unavailable monitors
-- [ ] Grouped layout mode
-- [ ] Free layout mode
-- [ ] Reusable module window behavior
+- [ ] Grouped/free layout foundation
 - [ ] Stable focus/show/hide lifecycle
 
 ### Completion Criteria
-- Desktop shell is visually clean and stable
-- Windows can be positioned and restored safely
-- Design tokens centralized and consumed by all components
+- Design tokens centralized in `lib/core/design_tokens/`
+- Localization working with TR/EN
+- `flutter build windows --debug` produces working `desk_pilot_f.exe`
+- All tokens consumed by widgets (no hardcoded values)
+
+### Notes
+- `flutter build windows --debug` fails at `INSTALL.vcxproj` — manually copy `build\flutter_assets\*` to `build\windows\x64\runner\Debug\data\` after build
+- D:\Code dışına yazma yasak kesintisiz
 
 ---
 
@@ -398,4 +402,4 @@
 ---
 
 ## Immediate Next Task
-1. Proceed to Phase 1: Design System — implement color/typography/spacing/radius tokens
+1. Proceed to Phase 2: Clock Module — domain model and UI

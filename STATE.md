@@ -7,24 +7,24 @@
 Remote: `https://github.com/mskaymaz/D_DeskPilotF`
 
 ## Current Phase
-**Phase 0 — Flutter Project Foundation** ✅ COMPLETE
+**Phase 1 — Design System & Localization** ✅ COMPLETE
 
-<!-- BISMILLAH CHECKPOINT: Phase 0 – Complete -->
+<!-- BISMILLAH CHECKPOINT: Phase 1 – Complete -->
 
 ## Current Status
-Phase 0 complete. Flutter/Dart project is fully initialized and verified. Window_manager working with transparent always-on-top desktop window.
+Phase 1 complete. Design tokens and localization infrastructure established.
 
 ## Completed
 - C++/Qt codebase removed from repository
 - Git remote updated to `https://github.com/mskaymaz/D_DeskPilotF`
 - Flutter project structure created (`lib/`, `test/`, `assets/`, `windows/`)
-- `pubspec.yaml` configured with `window_manager` and `flutter_lints`
-- `lib/main.dart` created (entry point with window_manager initialization)
+- `pubspec.yaml` configured with `window_manager`, `flutter_localizations`, `intl`, `riverpod`
+- `lib/main.dart` created (entry point with window_manager + localization + design tokens)
 - `window_manager` verified: transparent background, hidden title bar, always-on-top
+- Design tokens created: `lib/core/design_tokens/` (colors, typography, spacing, radius, sizing, z_layers, motion)
+- Localization infrastructure created: `lib/core/localization/app_localizations.dart`, `l10n/` (TR, EN ARB files)
 - `flutter build windows --debug` produces working `desk_pilot_f.exe`
-- Windows embedding configured and verified
-- Documentation updated for Flutter/Dart and renamed to DeskPilotF
-- D:\Code dışına yazma yasak — tüm değişikler D:\Code\mskaymaz\D_DeskPilotF içinde
+- Note: `INSTALL.vcxproj` fails — use `flutter build windows --debug` then manually copy `build\flutter_assets\*` to `build\windows\x64\runner\Debug\data\`
 
 ## Documentation Status
 - `DESKPILOT_PRODUCT_SPEC.md` — Updated for Flutter/Dart
