@@ -1,17 +1,24 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:window_manager/window_manager.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
+import 'core/design_tokens/design_tokens.dart';
+import 'core/localization/app_localizations.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await windowManager.ensureInitialized();
 
-  await windowManager.setBackgroundColor(Colors.transparent);
+  await windowManager.setBackgroundColor(AppColors.windowBackground);
   await windowManager.setOpacity(1.0);
   await windowManager.setAlwaysOnTop(true);
   await windowManager.setTitleBarStyle(TitleBarStyle.hidden);
+  await windowManager.setMinimumSize(AppSizing.windowMinSize);
 
-  await windowManager.setMinimumSize(const Size(800, 600));
+  SystemChrome.setPreferredOrientations([
+    DeviceOrientation.landscapeLeft,
+    DeviceOrientation.landscapeRight,
+  ]);
 
   runApp(const DeskPilotApp());
 }
@@ -26,9 +33,26 @@ class DeskPilotApp extends StatelessWidget {
       title: 'DeskPilotF',
       theme: ThemeData(
         brightness: Brightness.dark,
-        scaffoldBackgroundColor: Colors.transparent,
+        scaffoldBackgroundColor: AppColors.background,
         useMaterial3: true,
+        colorScheme: ColorScheme.dark(
+          primary: AppColors.primary,
+          secondary: AppColors.secondary,
+          surface: AppColors.surface,
+          background: AppColors.background,
+        ),
       ),
+      localizationsDelegates: const [
+        AppLocalizationsDelegate(),
+        GlobalMaterialLocalizations.delegate,
+        GlobalWidgetsLocalizations.delegate,
+        GlobalCupertinoLocalizations.delegate,
+      ],
+      supportedLocales: const [
+        Locale('tr', ''),
+        Locale('en', ''),
+      ],
+      locale: const Locale('tr', ''),
       home: const DesktopSurface(),
     );
   }
@@ -39,12 +63,14 @@ class DesktopSurface extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const Scaffold(
-      backgroundColor: Colors.transparent,
+    return Scaffold(
+      backgroundColor: AppColors.background,
       body: Center(
         child: Text(
           'DeskPilotF',
-          style: TextStyle(fontSize: 24, color: Colors.white),
+          style: AppTypography.headlineMedium.copyWith(
+            color: AppColors.textPrimary,
+          ),
         ),
       ),
     );
